@@ -141,7 +141,7 @@ all: Debug Release
 #   Building Debug... 
 #   ----------------------------------------------------------------------------
 .PHONY: Debug
-Debug: $(BINDIR_D)/$(BIN)
+Debug: DebugDir $(BINDIR_D)/$(BIN)
 
 $(BINDIR_D)/$(BIN): $(OBJS_D)
 	@echo Compiling Debug...
@@ -154,7 +154,7 @@ $(OBJDIR_D)/%.o : %.c
 #   Building Release... 
 #   ----------------------------------------------------------------------------
 .PHONY: Release
-Release: $(BINDIR_R)/$(BIN)
+Release: ReleaseDir $(BINDIR_R)/$(BIN)
 
 $(BINDIR_R)/$(BIN): $(OBJS_R)
 	@echo Compiling Release...
@@ -182,10 +182,11 @@ rebuildDebug: cleanDebug Debug
 
 rebuildRelease: cleanRelease Release
 
-directories: $(OBJDIR_R) $(OBJDIR_D)
+.PHONY: directories
+directories: ReleaseDir DebugDir
 
-$(OBJDIR_D):
+DebugDir:
 	${MKDIR_P} $(OBJDIR_D)
 
-$(OBJDIR_R):
+ReleaseDir:
 	${MKDIR_P} $(OBJDIR_R)
