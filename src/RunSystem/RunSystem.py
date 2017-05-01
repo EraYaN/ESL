@@ -48,7 +48,7 @@ class RunSystem(object):
         dest_addr = ('192.168.0.202', 22)
         local_addr = ('127.0.0.1', 1234)
         channel = self.transport.open_channel("direct-tcpip", dest_addr, local_addr)
-
+        
         # Create a NEW client and pass this channel to it as the `sock` (along with
         # whatever credentials you need to auth into your REMOTE box
         self.beagle_board = paramiko.SSHClient()
@@ -68,21 +68,28 @@ class RunSystem(object):
         if not self.build_server or not self.beagle_board:
             raise NotConnectedError('Please make sure the class made a successfull connection to the build server and the development board.')
         
-        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/matrix-gpp")
-        print(ssh_stdout.read())
-        print(ssh_stderr.read())
-
-        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/matrix-dsp")
-        print(ssh_stdout.read())
-        print(ssh_stderr.read())
-
+        print("Sending compiled {}-gpp to BeagleBoard.".format(projectname))
+        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/{}-gpp".format(projectname))
+        self.PrintCommandOutput(ssh_stdout,ssh_stderr)
+        print("Sending compiled {}-dsp to BeagleBoard.".format(projectname))
+        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/{}-dsp".format(projectname))
+        self.PrintCommandOutput(ssh_stdout,ssh_stderr)
+        print("Powercycling DSP on BeagleBoard.")
         ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("~/powercycle.sh")        
-        print(ssh_stdout.read())
-        print(ssh_stderr.read())
-
+        self.PrintCommandOutput(ssh_stdout,ssh_stderr)
+        print("Executing project {} on BeagleBoard.".format(projectname))
         ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("~/esLAB/{0}gpp ~/esLAB/{0}.out {1}".format(projectname,arguments))        
-        print(ssh_stdout.read())
-        print(ssh_stderr.read())
+        self.PrintCommandOutput(ssh_stdout,ssh_stderr)
+
+    def PrintCommandOutput(self, stdout, stderr):
+        out = stdout.readlines()
+        err = stderr.readlines()
+        for l in out:
+            sys.stdout.write(l)
+        for l in err:
+            sys.stderr.write(l)
+        sys.stdout.flush()
+        sys.stderr.flush()
 
 if __name__ == '__main__':
     parser = ap.ArgumentParser(prog='ESLab RunSystem',description='ESLab RunSystem')
