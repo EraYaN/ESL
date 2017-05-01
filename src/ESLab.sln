@@ -10,24 +10,32 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "matrix-gpp", "matrix-gpp\ma
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF} = {97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}
 	EndProjectSection
 EndProject
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "BuildSystem", "BuildSystem\BuildSystem.pyproj", "{EE892B42-5EA8-45F1-8490-B6E9CAC40599}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "RunSystem", "RunSystem\RunSystem.pyproj", "{B5910841-D356-479B-ACE6-F1676F8A4252}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug|Beagle = Debug|Beagle
+		Release|Any CPU = Release|Any CPU
 		Release|Beagle = Release|Beagle
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Debug|Beagle.ActiveCfg = Debug|x64
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Debug|Beagle.Build.0 = Debug|x64
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Release|Any CPU.ActiveCfg = Release|x64
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Release|Beagle.ActiveCfg = Release|x64
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Release|Beagle.Build.0 = Release|x64
+		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Debug|Beagle.ActiveCfg = Debug|x64
 		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Debug|Beagle.Build.0 = Debug|x64
+		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Release|Any CPU.ActiveCfg = Release|x64
 		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Release|Beagle.ActiveCfg = Release|x64
 		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Release|Beagle.Build.0 = Release|x64
-		{EE892B42-5EA8-45F1-8490-B6E9CAC40599}.Debug|Beagle.ActiveCfg = Debug|Any CPU
-		{EE892B42-5EA8-45F1-8490-B6E9CAC40599}.Release|Beagle.ActiveCfg = Release|Any CPU
+		{B5910841-D356-479B-ACE6-F1676F8A4252}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5910841-D356-479B-ACE6-F1676F8A4252}.Debug|Beagle.ActiveCfg = Debug|Any CPU
+		{B5910841-D356-479B-ACE6-F1676F8A4252}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5910841-D356-479B-ACE6-F1676F8A4252}.Release|Beagle.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
