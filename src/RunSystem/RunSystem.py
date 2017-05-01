@@ -76,6 +76,10 @@ class RunSystem(object):
         print(ssh_stdout.read())
         print(ssh_stderr.read())
 
+        ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("~/powercycle.sh")        
+        print(ssh_stdout.read())
+        print(ssh_stderr.read())
+
         ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("~/esLAB/{0}gpp ~/esLAB/{0}.out {1}".format(projectname,arguments))        
         print(ssh_stdout.read())
         print(ssh_stderr.read())
