@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{628c23f5-a48e-49f6-89af-28a5ba0a8507}</UniqueIdentifier>
+      <Extensions>.c;.cpp</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{54e33d8f-b200-4e24-a77e-980d2f509566}</UniqueIdentifier>
+      <Extensions>.h;.hpp</Extensions>
+    </Filter>
+    <Filter Include="Config Files">
+      <UniqueIdentifier>{9319eca3-446b-4a5d-8e6f-a304f526e7b0}</UniqueIdentifier>
+      <Extensions>.cmd;.tcf;.tci</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tskMessage.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="matrix_config.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="matrixcfg_c.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tskMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="matrixcfg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="matrix.cmd">
+      <Filter>Config Files</Filter>
+    </None>
+    <None Include="matrix.tcf">
+      <Filter>Config Files</Filter>
+    </None>
+    <None Include="matrix.tci">
+      <Filter>Config Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
