@@ -12,7 +12,8 @@
 #  Use of this software is controlled by the terms and conditions found in the
 #  license agreement under which this software has been supplied or provided.
 #   ----------------------------------------------------------------------------
-SHELL = /bin/sh
+SHELL = /bin/bash
+MKDIR_P = mkdir -p
 
 #   ----------------------------------------------------------------------------
 #   Base for toolchain
@@ -166,7 +167,25 @@ send:
 	scp $(BINDIR_R)/$(BIN) root@192.168.0.202:/home/root/esLAB/matrix/.
 
 .PHONY: clean
-clean:
+clean: cleanDebug cleanRelease
+
+cleanDebug:
 	@rm -f $(OBJDIR_D)/*
+
+cleanRelease:
 	@rm -f $(OBJDIR_R)/*
 
+.PHONY: rebuild
+rebuild: rebuildDebug rebuildRelease
+
+rebuildDebug: cleanDebug Debug
+
+rebuildRelease: cleanRelease Release
+
+directories: $(OBJDIR_R) $(OBJDIR_D)
+
+$(OBJDIR_D):
+	${MKDIR_P} $(OBJDIR_D)
+
+$(OBJDIR_R):
+	${MKDIR_P} $(OBJDIR_R)

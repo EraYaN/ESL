@@ -49,5 +49,6 @@
     <None Include="matrix.tci">
       <Filter>Config Files</Filter>
     </None>
+    <None Include="makefile" />
   </ItemGroup>
 </Project>

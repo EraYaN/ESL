@@ -48,21 +48,31 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeIncludeSearchPath>$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\usr;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux\2.6.18;$(SolutionDir)includes\codesourcery\arm-none-linux-gnueabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
-    <RemoteBuildCommandLine>cd $(RemoteProjectDir) &amp;&amp; make Debug</RemoteBuildCommandLine>
-    <RemoteReBuildCommandLine>cd $(RemoteProjectDir) &amp;&amp; make clean &amp;&amp; make Debug</RemoteReBuildCommandLine>
-    <RemoteCleanCommandLine>cd $(RemoteProjectDir) &amp;&amp; make clean</RemoteCleanCommandLine>
+    <RemoteBuildCommandLine>make Debug -C $(RemoteProjectDir)</RemoteBuildCommandLine>
+    <RemoteReBuildCommandLine>make rebuildDebug -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
+    <RemoteCleanCommandLine>make cleanDebug -C $(RemoteProjectDir)</RemoteCleanCommandLine>
     <RemoteBuildOutputs>
     </RemoteBuildOutputs>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeIncludeSearchPath>$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\usr;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux\2.6.18;$(SolutionDir)includes\codesourcery\arm-none-linux-gnueabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
-    <RemoteBuildCommandLine>cd $(RemoteProjectDir) &amp;&amp; make Release</RemoteBuildCommandLine>
-    <RemoteReBuildCommandLine>cd $(RemoteProjectDir) &amp;&amp; make clean &amp;&amp; make Release</RemoteReBuildCommandLine>
-    <RemoteCleanCommandLine>cd $(RemoteProjectDir) &amp;&amp; make clean</RemoteCleanCommandLine>
-    <RemoteBuildOutputs>
-    </RemoteBuildOutputs>
+    <RemoteBuildCommandLine>make Release -C $(RemoteProjectDir)</RemoteBuildCommandLine>
+    <RemoteReBuildCommandLine>make rebuildRelease -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
+    <RemoteCleanCommandLine>make cleanRelease -C $(RemoteProjectDir)</RemoteCleanCommandLine>
+    <RemoteBuildOutputs>$(RemoteProjectDir)/Release/matrixgpp</RemoteBuildOutputs>
   </PropertyGroup>
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <RemotePreBuildEvent>
+      <Command>
+      </Command>
+    </RemotePreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <RemotePreBuildEvent>
+      <Command>
+      </Command>
+    </RemotePreBuildEvent>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

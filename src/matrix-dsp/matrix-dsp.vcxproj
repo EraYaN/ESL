@@ -36,17 +36,17 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeIncludeSearchPath>$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\dsp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\dsp\inc\DspBios;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\dsp\inc\DspBios\5.XX;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\dsp\inc\C64XX;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\dsp\inc\DspBios\5.XX\OMAP3530;$(SolutionDir)includes\tidspbios\bios_5_41_00_06\packages\ti\bios\include;$(SolutionDir)includes\c6000\include;$(SolutionDir)includes\tidspbios\bios_5_41_00_06\packages\ti\rtdx\include\c6000;$(SolutionDir)includes\tidspbios\bios_5_41_00_06\packages\ti\psl\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
-    <RemoteBuildCommandLine>cd $(RemoteProjectDir) &amp;&amp; make Debug</RemoteBuildCommandLine>
-    <RemoteReBuildCommandLine>cd $(RemoteProjectDir) &amp;&amp; make clean &amp;&amp; make Debug</RemoteReBuildCommandLine>
-    <RemoteCleanCommandLine>cd $(RemoteProjectDir) &amp;&amp; make clean</RemoteCleanCommandLine>
+    <RemoteBuildCommandLine>make Debug -C $(RemoteProjectDir)</RemoteBuildCommandLine>
+    <RemoteReBuildCommandLine>make rebuildDebug -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
+    <RemoteCleanCommandLine>make cleanDebug -C $(RemoteProjectDir)</RemoteCleanCommandLine>
     <RemoteBuildOutputs>
     </RemoteBuildOutputs>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeIncludeSearchPath>$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\dsp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\dsp\inc\DspBios;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\dsp\inc\DspBios\5.XX;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\dsp\inc\C64XX;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\dsp\inc\DspBios\5.XX\OMAP3530;$(SolutionDir)includes\tidspbios\bios_5_41_00_06\packages\ti\bios\include;$(SolutionDir)includes\c6000\include;$(SolutionDir)includes\tidspbios\bios_5_41_00_06\packages\ti\rtdx\include\c6000;$(SolutionDir)includes\tidspbios\bios_5_41_00_06\packages\ti\psl\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
-    <RemoteBuildCommandLine>cd $(RemoteProjectDir) &amp;&amp; make Release</RemoteBuildCommandLine>
-    <RemoteReBuildCommandLine>cd $(RemoteProjectDir) &amp;&amp; make clean &amp;&amp; make Release</RemoteReBuildCommandLine>
-    <RemoteCleanCommandLine>cd $(RemoteProjectDir) &amp;&amp; make clean</RemoteCleanCommandLine>
+    <RemoteBuildCommandLine>make Release -C $(RemoteProjectDir)</RemoteBuildCommandLine>
+    <RemoteReBuildCommandLine>make rebuildRelease -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
+    <RemoteCleanCommandLine>make cleanRelease -C $(RemoteProjectDir)</RemoteCleanCommandLine>
     <RemoteBuildOutputs>
     </RemoteBuildOutputs>
   </PropertyGroup>
@@ -67,7 +67,18 @@
     <ClInclude Include="matrix_config.h" />
     <ClInclude Include="tskMessage.h" />
   </ItemGroup>
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <RemotePreBuildEvent>
+      <Command>
+      </Command>
+    </RemotePreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <RemotePreBuildEvent>
+      <Command>
+      </Command>
+    </RemotePreBuildEvent>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>
