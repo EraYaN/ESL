@@ -14,10 +14,10 @@
 extern "C" {
 #endif
 
-extern far SWI_Obj KNL_swi;
-extern far TSK_Obj TSK_idle;
-extern far LOG_Obj LOG_system;
-extern far LOG_Obj trace;
+	extern far SWI_Obj KNL_swi;
+	extern far TSK_Obj TSK_idle;
+	extern far LOG_Obj LOG_system;
+	extern far LOG_Obj trace;
 
 
 #ifdef __cplusplus
