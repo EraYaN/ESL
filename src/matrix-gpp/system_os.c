@@ -12,7 +12,7 @@
 #include <dsplink.h>
 
 /*  ----------------------------------- Application Header            */
-#include <system_os.h>
+#include "system_os.h"
 
 #if defined (__cplusplus)
 extern "C"

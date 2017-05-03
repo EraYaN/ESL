@@ -11,12 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="matrix.c" />
+    <ClCompile Include="message_handler.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="system_os.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="matrix.h" />
+    <ClInclude Include="message_handler.h" />
     <ClInclude Include="system_os.h" />
   </ItemGroup>
   <ItemGroup>

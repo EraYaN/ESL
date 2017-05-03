@@ -1,5 +1,5 @@
 /** ============================================================================
- *  @file   matrix.h
+ *  @file   message_handler.h
  *
  *  @path
  *
@@ -18,8 +18,8 @@
  */
 
 
-#if !defined (matrix_H)
-#define matrix_H
+#if !defined (messagehandler_H)
+#define messagehandler_H
 
 
 #if defined (__cplusplus)
@@ -29,7 +29,7 @@ extern "C"
 
 
 	/** ============================================================================
-	 *  @func   matrix_Create
+	 *  @func   messagehandler_Create
 	 *
 	 *  @desc   This function allocates and initializes resources used by
 	 *          this application.
@@ -51,14 +51,14 @@ extern "C"
 	 *
 	 *  @leave  None
 	 *
-	 *  @see    matrix_Delete
+	 *  @see    messagehandler_Delete
 	 *  ============================================================================
 	 */
-	NORMAL_API DSP_STATUS matrix_Create(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Uint8 processorId);
+	NORMAL_API DSP_STATUS messagehandler_Create(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Uint8 processorId);
 
 
 	/** ============================================================================
-	 *  @func   matrix_Execute
+	 *  @func   messagehandler_Execute
 	 *
 	 *  @desc   This function implements the execute phase for this application.
 	 *
@@ -71,23 +71,23 @@ extern "C"
 	 *  @ret    DSP_SOK
 	 *              Operation successfully completed.
 	 *          DSP_EFAIL
-	 *              matrix execution failed.
+	 *              messagehandler execution failed.
 	 *
 	 *  @enter  None
 	 *
 	 *  @leave  None
 	 *
-	 *  @see    matrix_Delete , matrix_Create
+	 *  @see    messagehandler_Delete , messagehandler_Create
 	 *  ============================================================================
 	 */
-	NORMAL_API DSP_STATUS matrix_Execute(IN Uint32 numIterations, IN Uint8 processorId);
+	NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, IN Uint8 processorId);
 
 
 	/** ============================================================================
-	 *  @func   matrix_Delete
+	 *  @func   messagehandler_Delete
 	 *
 	 *  @desc   This function releases resources allocated earlier by call to
-	 *          matrix_Create ().
+	 *          messagehandler_Create ().
 	 *          During cleanup, the allocated resources are being freed
 	 *          unconditionally. Actual applications may require stricter check
 	 *          against return values for robustness.
@@ -104,14 +104,14 @@ extern "C"
 	 *
 	 *  @leave  None
 	 *
-	 *  @see    matrix_Create
+	 *  @see    messagehandler_Create
 	 *  ============================================================================
 	 */
-	NORMAL_API Void matrix_Delete(IN Uint8 processorId);
+	NORMAL_API Void messagehandler_Delete(IN Uint8 processorId);
 
 
 	/** ============================================================================
-	 *  @func   matrix_Main
+	 *  @func   messagehandler_Main
 	 *
 	 *  @desc   The OS independent driver function for the matrix sample
 	 *          application.
@@ -131,15 +131,15 @@ extern "C"
 	 *
 	 *  @leave  None
 	 *
-	 *  @see    matrix_Create, matrix_Execute, matrix_Delete
+	 *  @see    messagehandler_Create, messagehandler_Execute, messagehandler_Delete
 	 *  ============================================================================
 	 */
-	NORMAL_API Void matrix_Main(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Char8* strProcessorId);
+	NORMAL_API Void messagehandler_Main(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Char8* strProcessorId);
 
 
 #if defined (DA8XXGEM)
 	/** ============================================================================
-	 *  @func   matrix_Main_DA8XX
+	 *  @func   messagehandler_Main_DA8XX
 	 *
 	 *  @desc   The OS independent driver function for the matrix sample
 	 *          application.
@@ -164,10 +164,10 @@ extern "C"
 	 *
 	 *  @leave  None
 	 *
-	 *  @see    matrix_Create, matrix_Execute, matrix_Delete
+	 *  @see    messagehandler_Create, messagehandler_Execute, messagehandler_Delete
 	 *  ============================================================================
 	 */
-	NORMAL_API Void matrix_Main_DA8XX(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Char8* strProcessorId, IN Char8* strDspAddr, IN Char8* strShmAddr, IN Char8* strArgsAddr);
+	NORMAL_API Void messagehandler_Main_DA8XX(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Char8* strProcessorId, IN Char8* strDspAddr, IN Char8* strShmAddr, IN Char8* strArgsAddr);
 #endif
 
 #if defined (__cplusplus)
@@ -175,4 +175,4 @@ extern "C"
 #endif /* defined (__cplusplus) */
 
 
-#endif /* !defined (matrix_H) */
+#endif /* !defined (messagehandler_H) */

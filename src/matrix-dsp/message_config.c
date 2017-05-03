@@ -1,5 +1,5 @@
 /*  ----------------------------------- Sample Headers              */
-#include <matrix_config.h>
+#include "message_config.h"
 
 #if defined (__cplusplus)
 extern "C" {
@@ -35,7 +35,7 @@ extern "C" {
 	MSGQ_TransportObj transports[MAX_PROCESSORS] =
 	{
 	#if (MAX_PROCESSORS == 2 ) /* In case of one DSP and one GPP processor */
-		 MSGQ_NOTRANSPORT,    /* Represents the local processor */
+		 MSGQ_NOTRANSPORT,     /* Represents the local processor */
 	#endif
 		 {
 			&SAMPLEMQT_init,  /* Init Function                 */
@@ -64,7 +64,7 @@ extern "C" {
 	{
 		{
 			&SAMPLEPOOL_init,               /* Init Function                      */
-			(POOL_Fxns *)&SAMPLEPOOL_FXNS, /* Pool interface functions           */
+			(POOL_Fxns *)&SAMPLEPOOL_FXNS,  /* Pool interface functions           */
 			SAMPLEPOOL_PARAMS,              /* Pool params                        */
 			NULL                            /* Pool object: Set within pool impl. */
 		}

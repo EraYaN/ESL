@@ -18,7 +18,7 @@
     <ClCompile Include="system_os.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="matrix.c">
+    <ClCompile Include="message_handler.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -26,7 +26,7 @@
     <ClInclude Include="system_os.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="matrix.h">
+    <ClInclude Include="message_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

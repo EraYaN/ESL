@@ -1,5 +1,5 @@
 /** ============================================================================
- *  @file   matrix.c
+ *  @file   message_handler.c
  *
  *  @path
  *
@@ -18,8 +18,8 @@
 #include <pool.h>
 
 /*  ----------------------------------- Application Header              */
-#include <matrix.h>
-#include <system_os.h>
+#include "message_handler.h"
+#include "system_os.h"
 
 #include <stdio.h>
 
@@ -113,32 +113,32 @@ extern "C"
 
 #if defined (VERIFY_DATA)
 	/** ============================================================================
-	 *  @func   matrix_VerifyData
+	 *  @func   messagehandler_VerifyData
 	 *
 	 *  @desc   This function verifies the data-integrity of given message.
 	 *  ============================================================================
 	 */
-	STATIC NORMAL_API DSP_STATUS matrix_VerifyData(IN MSGQ_Msg msg, IN Uint16 sequenceNumber);
+	STATIC NORMAL_API DSP_STATUS messagehandler_VerifyData(IN MSGQ_Msg msg, IN Uint16 sequenceNumber);
 #endif
 
 
 	/** ============================================================================
-	 *  @func   matrix_Create
+	 *  @func   messagehandler_Create
 	 *
 	 *  @desc   This function allocates and initializes resources used by
 	 *          this application.
 	 *
-	 *  @modif  matrix_InpBufs , matrix_OutBufs
+	 *  @modif  messagehandler_InpBufs , messagehandler_OutBufs
 	 *  ============================================================================
 	 */
-	NORMAL_API DSP_STATUS matrix_Create(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Uint8 processorId)
+	NORMAL_API DSP_STATUS messagehandler_Create(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Uint8 processorId)
 	{
 		DSP_STATUS status = DSP_SOK;
 		Uint32 numArgs = NUM_ARGS;
 		MSGQ_LocateAttrs syncLocateAttrs;
 		Char8* args[NUM_ARGS];
 
-		SYSTEM_0Print("Entered matrix_Create ()\n");
+		SYSTEM_0Print("Entered messagehandler_Create ()\n");
 
 		/* Create and initialize the proc object. */
 		status = PROC_setup(NULL);
@@ -242,20 +242,20 @@ extern "C"
 			}
 		}
 
-		SYSTEM_0Print("Leaving matrix_Create ()\n");
+		SYSTEM_0Print("Leaving messagehandler_Create ()\n");
 		return status;
 	}
 
 
 	/** ============================================================================
-	 *  @func   matrix_Execute
+	 *  @func   messagehandler_Execute
 	 *
 	 *  @desc   This function implements the execute phase for this application.
 	 *
 	 *  @modif  None
 	 *  ============================================================================
 	 */
-	NORMAL_API DSP_STATUS matrix_Execute(IN Uint32 numIterations, Uint8 processorId)
+	NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 processorId)
 	{
 		DSP_STATUS  status = DSP_SOK;
 		Uint16 sequenceNumber = 0;
@@ -263,7 +263,7 @@ extern "C"
 		Uint32 i;
 		ControlMsg *msg;
 
-		SYSTEM_0Print("Entered matrix_Execute ()\n");
+		SYSTEM_0Print("Entered messagehandler_Execute ()\n");
 
 #if defined (PROFILE)
 		SYSTEM_GetStartTime();
@@ -281,7 +281,7 @@ extern "C"
 			/* Verify correctness of data received. */
 			if (DSP_SUCCEEDED(status))
 			{
-				status = matrix_VerifyData(msg, sequenceNumber);
+				status = messagehandler_VerifyData(msg, sequenceNumber);
 				if (DSP_FAILED(status))
 				{
 					MSGQ_free((MsgqMsg)msg);
@@ -339,17 +339,17 @@ extern "C"
 		}
 #endif
 
-		SYSTEM_0Print("Leaving matrix_Execute ()\n");
+		SYSTEM_0Print("Leaving messagehandler_Execute ()\n");
 
 		return status;
 	}
 
 
 	/** ============================================================================
-	 *  @func   matrix_Delete
+	 *  @func   messagehandler_Delete
 	 *
 	 *  @desc   This function releases resources allocated earlier by call to
-	 *          matrix_Create ().
+	 *          messagehandler_Create ().
 	 *          During cleanup, the allocated resources are being freed
 	 *          unconditionally. Actual applications may require stricter check
 	 *          against return values for robustness.
@@ -357,12 +357,12 @@ extern "C"
 	 *  @modif  None
 	 *  ============================================================================
 	 */
-	NORMAL_API Void matrix_Delete(Uint8 processorId)
+	NORMAL_API Void messagehandler_Delete(Uint8 processorId)
 	{
 		DSP_STATUS status = DSP_SOK;
 		DSP_STATUS tmpStatus = DSP_SOK;
 
-		SYSTEM_0Print("Entered matrix_Delete ()\n");
+		SYSTEM_0Print("Entered messagehandler_Delete ()\n");
 
 		/* Release the remote message queue */
 		status = MSGQ_release(SampleDspMsgq);
@@ -429,19 +429,19 @@ extern "C"
 			SYSTEM_1Print("PROC_destroy () failed. Status = [0x%x]\n", status);
 		}
 
-		SYSTEM_0Print("Leaving matrix_Delete ()\n");
+		SYSTEM_0Print("Leaving messagehandler_Delete ()\n");
 	}
 
 
 	/** ============================================================================
-	 *  @func   matrix_Main
+	 *  @func   messagehandler_Main
 	 *
 	 *  @desc   Entry point for the application
 	 *
 	 *  @modif  None
 	 *  ============================================================================
 	 */
-	NORMAL_API Void matrix_Main(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Char8* strProcessorId)
+	NORMAL_API Void messagehandler_Main(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Char8* strProcessorId)
 	{
 		DSP_STATUS status = DSP_SOK;
 		Uint32 numIterations = 0;
@@ -470,16 +470,16 @@ extern "C"
 				/* Specify the dsp executable file name for message creation phase. */
 				if (DSP_SUCCEEDED(status))
 				{
-					status = matrix_Create(dspExecutable, strNumIterations, processorId);
+					status = messagehandler_Create(dspExecutable, strNumIterations, processorId);
 
 					/* Execute the message execute phase. */
 					if (DSP_SUCCEEDED(status))
 					{
-						status = matrix_Execute(numIterations, processorId);
+						status = messagehandler_Execute(numIterations, processorId);
 					}
 
 					/* Perform cleanup operation. */
-					matrix_Delete(processorId);
+					messagehandler_Delete(processorId);
 				}
 			}
 		}
@@ -493,14 +493,14 @@ extern "C"
 
 #if defined (VERIFY_DATA)
 	/** ============================================================================
-	 *  @func   matrix_VerifyData
+	 *  @func   messagehandler_VerifyData
 	 *
 	 *  @desc   This function verifies the data-integrity of given buffer.
 	 *
 	 *  @modif  None
 	 *  ============================================================================
 	 */
-	STATIC NORMAL_API DSP_STATUS matrix_VerifyData(IN MSGQ_Msg msg, IN Uint16 sequenceNumber)
+	STATIC NORMAL_API DSP_STATUS messagehandler_VerifyData(IN MSGQ_Msg msg, IN Uint16 sequenceNumber)
 	{
 		DSP_STATUS status = DSP_SOK;
 		Uint16 msgId;

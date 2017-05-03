@@ -21,10 +21,10 @@
     <ClCompile Include="tskMessage.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="matrix_config.c">
+    <ClCompile Include="matrixcfg_c.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="matrixcfg_c.c">
+    <ClCompile Include="message_config.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,10 +32,10 @@
     <ClInclude Include="tskMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="matrix_config.h">
+    <ClInclude Include="matrixcfg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="matrixcfg.h">
+    <ClInclude Include="message_config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

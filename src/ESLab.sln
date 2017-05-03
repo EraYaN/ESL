@@ -1,7 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
+<<<<<<< Updated upstream
 VisualStudioVersion = 15.0.26401.1
+=======
+VisualStudioVersion = 15.0.26403.7
+>>>>>>> Stashed changes
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "matrix-dsp", "matrix-dsp\matrix-dsp.vcxproj", "{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}"
 EndProject
@@ -12,9 +16,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "matrix-gpp", "matrix-gpp\ma
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "RunSystem", "RunSystem\RunSystem.pyproj", "{B5910841-D356-479B-ACE6-F1676F8A4252}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dsp", "dsp", "{4593D8E5-833B-45CE-8F94-B845881B3E70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+<<<<<<< Updated upstream
 		Debug|Beagle = Debug|Beagle
 		Release|Any CPU = Release|Any CPU
 		Release|Beagle = Release|Beagle
@@ -36,8 +43,35 @@ Global
 		{B5910841-D356-479B-ACE6-F1676F8A4252}.Debug|Beagle.ActiveCfg = Debug|Any CPU
 		{B5910841-D356-479B-ACE6-F1676F8A4252}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5910841-D356-479B-ACE6-F1676F8A4252}.Release|Beagle.ActiveCfg = Release|Any CPU
+=======
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Debug|x64.ActiveCfg = Debug|x64
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Debug|x64.Build.0 = Debug|x64
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Release|Any CPU.ActiveCfg = Release|x64
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Release|x64.ActiveCfg = Release|x64
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}.Release|x64.Build.0 = Release|x64
+		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Debug|x64.ActiveCfg = Debug|x64
+		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Debug|x64.Build.0 = Debug|x64
+		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Release|Any CPU.ActiveCfg = Release|x64
+		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Release|x64.ActiveCfg = Release|x64
+		{7606AB89-428C-4938-82D6-5442AB15AFBB}.Release|x64.Build.0 = Release|x64
+		{EE892B42-5EA8-45F1-8490-B6E9CAC40599}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE892B42-5EA8-45F1-8490-B6E9CAC40599}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EE892B42-5EA8-45F1-8490-B6E9CAC40599}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE892B42-5EA8-45F1-8490-B6E9CAC40599}.Release|x64.ActiveCfg = Release|Any CPU
+>>>>>>> Stashed changes
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF} = {4593D8E5-833B-45CE-8F94-B845881B3E70}
+		{7606AB89-428C-4938-82D6-5442AB15AFBB} = {4593D8E5-833B-45CE-8F94-B845881B3E70}
 	EndGlobalSection
 EndGlobal

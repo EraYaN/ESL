@@ -25,8 +25,8 @@
 #include <failure.h>
 
 /*  ----------------------------------- Sample Headers              */
-#include <matrix_config.h>
-#include <tskMessage.h>
+#include "message_config.h"
+#include "tskMessage.h"
 
 #ifdef __cplusplus
 extern "C" {

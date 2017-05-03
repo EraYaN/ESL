@@ -58,13 +58,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="matrixcfg_c.c" />
-    <ClCompile Include="matrix_config.c" />
+    <ClCompile Include="message_config.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="tskMessage.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="matrixcfg.h" />
-    <ClInclude Include="matrix_config.h" />
+    <ClInclude Include="message_config.h" />
     <ClInclude Include="tskMessage.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

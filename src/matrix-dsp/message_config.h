@@ -15,8 +15,8 @@
  */
 
 
-#if !defined (matrix_CONFIG_)
-#define matrix_CONFIG_
+#if !defined (message_CONFIG_)
+#define message_CONFIG_
 
 #if defined (__cplusplus)
 extern "C" {
@@ -78,4 +78,4 @@ extern "C" {
 #if defined (__cplusplus)
 }
 #endif /* defined (__cplusplus) */
-#endif /* !defined (matrix_CONFIG_) */
+#endif /* !defined (message_CONFIG_) */

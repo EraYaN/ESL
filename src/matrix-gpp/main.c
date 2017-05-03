@@ -9,7 +9,7 @@
 
 /*  ----------------------------------- Application Header            */
 #include "system_os.h"
-#include "matrix.h"
+#include "message_handler.h"
 
 
 #if defined (__cplusplus)
@@ -65,7 +65,7 @@ extern "C"
 
 			if (processorId < MAX_PROCESSORS)
 			{
-				matrix_Main(dspExecutable, strNumIterations, strProcessorId);
+				messagehandler_Main(dspExecutable, strNumIterations, strProcessorId);
 			}
 		}
 
