@@ -22,6 +22,7 @@
 #include "system_os.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 
 #if defined (__cplusplus)
@@ -147,6 +148,50 @@ void MatrixPrint(Uint32 matrix[MATRIX_SIZE][MATRIX_SIZE]) {
             // SYSTEM_1Print(" %d",matrix[i][j]);
         }
         SYSTEM_0Print("\n");
+    }
+}
+
+int **mat1, **mat2, **prod;
+
+// Dynamically Allocated Matrix Init
+void MatrixInit(int **matrix, int size, int salt) {
+    int i,j;
+
+    for(i = 0; i < size; i++)
+    {
+        for (j = 0; j < size; j++)
+        {
+            matrix[i][j] = i+j*salt;
+        }
+    }
+}
+
+// Dynamically Allocated Matrix print
+void MatrixPrint_new(int **matrix, int size) {
+    int i,j;
+    for(i = 0; i < size; i++)
+    {
+        for (j = 0; j < size; j++)
+        {
+            // SYSTEM_1Print(" %d",8);
+            SYSTEM_1Print(" %d", matrix[i][j]);
+            // SYSTEM_1Print(" %d",matrix[i][j]);
+        }
+        SYSTEM_0Print("\n");
+    }
+}
+
+// Dynamically Allocated Matrix Multiply
+void MatrixMultiply(int **a, int **b, int **c, int size) {
+    int i, j, k;
+    for (i = 0;i < size; i++)
+    {
+        for (j = 0; j < size; j++)
+        {
+            c[i][j]=0;
+            for(k=0;k<size;k++)
+                c[i][j] = c[i][j]+a[i][k] * b[k][j];
+        }
     }
 }
 
@@ -510,6 +555,7 @@ NORMAL_API Void messagehandler_Main(IN Char8* dspExecutable, IN Char8* strNumIte
     DSP_STATUS status = DSP_SOK;
     Uint32 numIterations = 0;
     Uint8 processorId = 0;
+    Uint32 i;
 
     SYSTEM_0Print("========== Sample Application : matrix ==========\n");
 
@@ -524,6 +570,36 @@ NORMAL_API Void messagehandler_Main(IN Char8* dspExecutable, IN Char8* strNumIte
         }
         else
         {
+
+                mat1 = malloc(MATRIX_SIZE * sizeof *mat1);
+                for (i = 0; i < MATRIX_SIZE; i++)
+                {
+                    mat1[i] = malloc(MATRIX_SIZE * sizeof *mat1[i]);
+                }
+                mat2 = malloc(MATRIX_SIZE * sizeof *mat2);
+                for (i = 0; i < MATRIX_SIZE; i++)
+                {
+                    mat2[i] = malloc(MATRIX_SIZE * sizeof *mat2[i]);
+                }
+                prod = malloc(MATRIX_SIZE * sizeof *prod);
+                for (i = 0; i < MATRIX_SIZE; i++)
+                {
+                    prod[i] = malloc(MATRIX_SIZE * sizeof *prod[i]);
+                }
+
+                MatrixInit(mat1,MATRIX_SIZE,2);
+                MatrixInit(mat2,MATRIX_SIZE,3);
+
+                MatrixMultiply(mat1,mat2,prod,MATRIX_SIZE);
+
+                SYSTEM_0Print("mat1:\n");
+                MatrixPrint_new(mat1,MATRIX_SIZE);
+                SYSTEM_0Print("mat2:\n");
+                MatrixPrint_new(mat2,MATRIX_SIZE);
+                SYSTEM_0Print("prod:\n");
+                MatrixPrint_new(prod,MATRIX_SIZE);
+
+
             processorId = SYSTEM_Atoi(strProcessorId);
 
             if (processorId >= MAX_DSPS)
