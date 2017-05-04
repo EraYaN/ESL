@@ -42,6 +42,18 @@ Uint8 dspMsgQName[DSP_MAX_STRLEN];
 /* Number of iterations message transfers to be done by the application. */
 extern Uint16 numTransfers;
 
+void MatrixMultiply(Uint32 a[MATRIX_SIZE][MATRIX_SIZE],Uint32 b[MATRIX_SIZE][MATRIX_SIZE],Uint32 c[MATRIX_SIZE][MATRIX_SIZE]) {
+    int i, j, k;
+    for (i = 0;i < MATRIX_SIZE; i++)
+    {
+        for (j = 0; j < MATRIX_SIZE; j++)
+        {
+            c[i][j]=0;
+            for(k=0;k<MATRIX_SIZE;k++)
+                c[i][j] = c[i][j]+a[i][k] * b[k][j];
+        }
+    }
+}
 
 /** ============================================================================
  *  @func   TSKMESSAGE_create
@@ -139,7 +151,7 @@ Int TSKMESSAGE_execute(TSKMESSAGE_TransferInfo* info)
 {
     Int status = SYS_OK;
     ControlMsg* msg;
-    Uint32 i;
+    Uint16 communicating = 1;
 
     /* Allocate and send the message */
     status = MSGQ_alloc(SAMPLE_POOL_ID, (MSGQ_Msg*)&msg, APP_BUFFER_SIZE);
@@ -148,8 +160,8 @@ Int TSKMESSAGE_execute(TSKMESSAGE_TransferInfo* info)
     {
         MSGQ_setMsgId((MSGQ_Msg)msg, info->sequenceNumber);
         MSGQ_setSrcQueue((MSGQ_Msg)msg, info->localMsgq);
-        msg->command = 0x01;
-        SYS_sprintf(msg->arg1, "DSP is awake!");
+        msg->command = INIT_FROM_DSP;
+        // SYS_sprintf(msg->arg1, "DSP is awake!");
 
         status = MSGQ_put(info->locatedMsgq, (MSGQ_Msg)msg);
         if (status != SYS_OK)
@@ -164,10 +176,7 @@ Int TSKMESSAGE_execute(TSKMESSAGE_TransferInfo* info)
         SET_FAILURE_REASON(status);
     }
 
-    /* Execute the loop for the configured number of transfers  */
-    /* A value of 0 in numTransfers implies infinite iterations */
-    for (i = 0; (((info->numTransfers == 0) || (i < info->numTransfers)) && (status == SYS_OK)); i++)
-    {
+    while (communicating){
         /* Receive a message from the GPP */
         status = MSGQ_get(info->localMsgq, (MSGQ_Msg*)&msg, SYS_FOREVER);
         if (status == SYS_OK)
@@ -196,8 +205,43 @@ Int TSKMESSAGE_execute(TSKMESSAGE_TransferInfo* info)
             else
             {
                 /* Include your control flag or processing code here */
-                msg->command = 0x02;
-                SYS_sprintf(msg->arg1, "Iteration %d is complete.", i);
+                switch(msg->command) {
+                    default: { 
+                        break; 
+                    }
+                    case ERROR: {
+                        msg->command = ERROR;
+                        communicating =0; // no response expected, #LEAVING!
+                        break;
+                    }
+                    case INIT_FROM_DSP: {
+                        msg->command = ERROR;
+                        communicating =0; // no response expected, #LEAVING!
+                        break;
+                    }
+                    case MATRIX_A: {
+                        MatrixMultiply(msg->arg1,msg->arg2,msg->prod);
+                        msg->command = MATRIX_PROD;
+                        communicating =0; // no response expected, #LEAVING!
+                        break;
+                    }
+                    case MATRIX_B: {
+                        MatrixMultiply(msg->arg1,msg->arg2,msg->prod);
+                        msg->command = MATRIX_PROD;
+                        communicating =0; // no response expected, #LEAVING!
+                        break;
+                    }
+                    case MATRIX_PROD: {
+                        msg->command = ERROR;
+                        communicating =0; // no response expected, #LEAVING!
+                        break;
+                    }
+                    case SHDN: {
+                        msg->command = ERROR;
+                        communicating =0; // no response expected, #LEAVING!
+                        break;
+                    }
+                }
 
                 /* Increment the sequenceNumber for next received message */
                 info->sequenceNumber++;

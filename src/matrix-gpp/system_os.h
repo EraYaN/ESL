@@ -274,7 +274,7 @@ NORMAL_API Void SYSTEM_Sleep(Uint32 uSec);
      *  @see    None
      *  ============================================================================
      */
-    NORMAL_API Void SYSTEM_GetProfileInfo(Uint32 numIterations);
+    NORMAL_API Void SYSTEM_GetProfileInfo(void);
 
 #endif /* if defined (PROFILE) */
 

@@ -44,6 +44,19 @@ extern "C" {
 
 /* Argument size passed to the control message queue */
 #define ARG_SIZE 256
+#define MATRIX_SIZE 3
+
+// Message Commands
+// NOTE: has te be consistent across both gpp and dsp projects
+typedef enum {
+    ERROR         = 0x00,
+    INIT_FROM_DSP = 0x01,
+    MATRIX_A      = 0x02,
+    MATRIX_B      = 0x03,
+    MATRIX_PROD   = 0x04,
+    SHDN          = 0xFF
+} CMD_t;
+
 
 /* Control message data structure. */
 /* Must contain a reserved space for the header */
@@ -51,7 +64,9 @@ extern "C" {
     {
         MSGQ_MsgHeader header;
         Uint16 command;
-        Char arg1[ARG_SIZE];
+        Uint32 arg1[MATRIX_SIZE][MATRIX_SIZE];
+        Uint32 arg2[MATRIX_SIZE][MATRIX_SIZE];
+        Uint32 prod[MATRIX_SIZE][MATRIX_SIZE];
     } ControlMsg;
 
     /* Messaging buffer used by the application.

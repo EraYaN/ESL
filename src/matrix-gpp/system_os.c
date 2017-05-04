@@ -262,28 +262,18 @@ NORMAL_API Uint32 SYSTEM_Atoll(Char8* str)
      *  @modif  None
      *  ============================================================================
      */
-    NORMAL_API
-        Void
-        SYSTEM_GetProfileInfo(Uint32 numIterations)
+    NORMAL_API Void SYSTEM_GetProfileInfo(void)
     {
-        Real32 roundTripTime = 0;
         Uint32 usecTimeTaken = 0;
         Real32 numSeconds = 0;
 
         usecTimeTaken = (endUsecTime - startUsecTime);
-        if (usecTimeTaken != 0)
-        {
-            roundTripTime = (Real32)((Real32)(usecTimeTaken) / (Real32)(numIterations));
-        }
 
         /* To calculate number of seconds in usecTimeTaken */
         numSeconds = (Real32)((Real32)usecTimeTaken / 1000000.0);
 
-        SYSTEM_1Print("Transferring %d iterations took ", numIterations);
-        SYSTEM_1Print("%d seconds ", numSeconds);
+        SYSTEM_1Print("Transferring took %d seconds ", numSeconds);
         SYSTEM_1Print("%d microseconds.\n", (Real32)(usecTimeTaken % 1000000));
-
-        SYSTEM_1Print("RoundTrip Time for 1 message is %d microseconds.\n", roundTripTime);
 
         return;
     }

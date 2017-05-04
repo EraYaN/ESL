@@ -34,6 +34,7 @@ extern "C"
 
     /* Argument size passed to the control message queue */
 #define ARG_SIZE 256
+#define MATRIX_SIZE 3
 
     /* ID of the POOL used by matrix. */
 #define SAMPLE_POOL_ID  0
@@ -47,13 +48,26 @@ extern "C"
 #define NUMMSGINPOOL2   2
 #define NUMMSGINPOOL3   4
 
+// Message Commands
+// NOTE: has te be consistent across both gpp and dsp projects
+typedef enum {
+    ERROR         = 0x00,
+    INIT_FROM_DSP = 0x01,
+    MATRIX_A      = 0x02,
+    MATRIX_B      = 0x03,
+    MATRIX_PROD   = 0x04,
+    SHDN          = 0xFF
+} CMD_t;
+
 // Control message data structure.
 // Must contain a reserved space for the header
 typedef struct ControlMsg
 {
     MSGQ_MsgHeader header;
     Uint16 command;
-    Char8 arg1[ARG_SIZE];
+    Uint32 arg1[MATRIX_SIZE][MATRIX_SIZE];
+    Uint32 arg2[MATRIX_SIZE][MATRIX_SIZE];
+    Uint32 prod[MATRIX_SIZE][MATRIX_SIZE];
 } ControlMsg;
 
     /* Messaging buffer used by the application.
@@ -121,6 +135,20 @@ STATIC Uint32 SampleNumBuffers[NUMMSGPOOLS] =
     STATIC NORMAL_API DSP_STATUS messagehandler_VerifyData(IN MSGQ_Msg msg, IN Uint16 sequenceNumber);
 #endif
 
+//TODO[c]: no dynamic allocation
+void MatrixPrint(Uint32 matrix[MATRIX_SIZE][MATRIX_SIZE]) {
+    int i,j;
+    for(i = 0; i < MATRIX_SIZE; i++)
+    {
+        for (j = 0; j < MATRIX_SIZE; j++)
+        {
+            // SYSTEM_1Print(" %d",8);
+            SYSTEM_1Print(" %d", matrix[i][j]);
+            // SYSTEM_1Print(" %d",matrix[i][j]);
+        }
+        SYSTEM_0Print("\n");
+    }
+}
 
 /** ============================================================================
  *  @func   messagehandler_Create
@@ -260,7 +288,8 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
     DSP_STATUS  status = DSP_SOK;
     Uint16 sequenceNumber = 0;
     Uint16 msgId = 0;
-    Uint32 i;
+    Uint16 communicating = 1;
+    Uint16 i,j;
     ControlMsg *msg;
 
     SYSTEM_0Print("Entered messagehandler_Execute ()\n");
@@ -269,9 +298,8 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
         SYSTEM_GetStartTime();
     #endif
 
-    for (i = 1; ((numIterations == 0) || (i <= (numIterations + 1))) && (DSP_SUCCEEDED(status)); i++)
-    {
-        /* Receive the message. */
+    while (communicating){
+        // Receive the message.
         status = MSGQ_get(SampleGppMsgq, WAIT_FOREVER, (MsgqMsg *)&msg);
         if (DSP_FAILED(status))
         {
@@ -289,53 +317,89 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
             }
         #endif
 
-        if (msg->command == 0x01)
-            SYSTEM_1Print("Message received: %s\n", (Uint32)msg->arg1);
-        else if (msg->command == 0x02)
-            SYSTEM_1Print("Message received: %s\n", (Uint32)msg->arg1);
+        switch(msg->command) {
+            default: { 
+                break; 
+            }
+            case ERROR: {
+                SYSTEM_0Print("ERROR msg received\n");
+                communicating =0; // no response expected, #LEAVING!
+                break;
+            }
+            case INIT_FROM_DSP: {
+                SYSTEM_0Print("DSP awake!\n");
+                // Now fill message with matrix A and B
+                msg->command = MATRIX_A;
+                for (i = 0; i < MATRIX_SIZE; i++) {
+                    for (j = 0; j < MATRIX_SIZE; j++) {
+                        msg->arg1[i][j] = i+j*2;
+                        msg->arg2[i][j] = i+j*3;
+                    }
+                }
+                break;
+            }
+            case MATRIX_A: {
+                SYSTEM_0Print("ERROR! matrix A received, should be send only\n");
+                msg->command = SHDN; // ERROR, so shutdown
+                break;
+            }
+            case MATRIX_B: {
+                SYSTEM_0Print("ERROR! matrix B received, should be send only\n");
+                msg->command = SHDN; // ERROR, so shutdown
+                break;
+            }
+            case MATRIX_PROD: {
+                SYSTEM_0Print("product received:\n");
+                MatrixPrint(msg->prod);
+                communicating = 0; // done sending, #LEAVING!
+                break;
+            }
+            case SHDN: {
+                msg->command = SHDN; // ERROR, so shutdown
+                break;
+            }
+        }
 
-        /* If the message received is the final one, free it. */
-        if ((numIterations != 0) && (i == (numIterations + 1)))
-        {
+        // stop communicating, so do not send any more messages
+        if (!communicating){
             MSGQ_free((MsgqMsg)msg);
+            break;
         }
-        else
+
+        // Send the same message received in earlier MSGQ_get() call.
+        //TODO[c]: checking status here is a bit weird right?
+        if (DSP_SUCCEEDED(status))
         {
-            /* Send the same message received in earlier MSGQ_get () call. */
-            if (DSP_SUCCEEDED(status))
+            msgId = MSGQ_getMsgId(msg);
+            MSGQ_setMsgId(msg, msgId);
+            status = MSGQ_put(SampleDspMsgq, (MsgqMsg)msg);
+            if (DSP_FAILED(status))
             {
-                msgId = MSGQ_getMsgId(msg);
-                MSGQ_setMsgId(msg, msgId);
-                status = MSGQ_put(SampleDspMsgq, (MsgqMsg)msg);
-                if (DSP_FAILED(status))
-                {
-                    MSGQ_free((MsgqMsg)msg);
-                    SYSTEM_1Print("MSGQ_put () failed. Status = [0x%x]\n", status);
-                }
+                MSGQ_free((MsgqMsg)msg);
+                SYSTEM_1Print("MSGQ_put () failed. Status = [0x%x]\n", status);
             }
-
-            sequenceNumber++;
-            /* Make sure that the sequenceNumber stays within the permitted
-             * range for applications. */
-            if (sequenceNumber == MSGQ_INTERNALIDSSTART)
-            {
-                sequenceNumber = 0;
-            }
-
-            #if !defined (PROFILE)
-                if (DSP_SUCCEEDED(status) && ((i % 100) == 0))
-                {
-                    SYSTEM_1Print("Transferred %ld messages\n", i);
-                }
-            #endif
         }
+
+        sequenceNumber++;
+        // Make sure that the sequenceNumber stays within the permitted range for applications.
+        if (sequenceNumber == MSGQ_INTERNALIDSSTART)
+        {
+            sequenceNumber = 0;
+        }
+
+        #if !defined (PROFILE)
+            if (DSP_SUCCEEDED(status) && ((i % 100) == 0))
+            {
+                SYSTEM_1Print("Transferred %ld messages\n", i);
+            }
+        #endif
     }
 
     #if defined (PROFILE)
         if (DSP_SUCCEEDED(status))
         {
             SYSTEM_GetEndTime();
-            SYSTEM_GetProfileInfo(numIterations);
+            SYSTEM_GetProfileInfo();
         }
     #endif
 
