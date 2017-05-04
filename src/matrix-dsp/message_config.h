@@ -22,7 +22,7 @@
 extern "C" {
 #endif /* defined (__cplusplus) */
 
-	/*  ----------------------------------- DSP/BIOS Headers            */
+    /*  ----------------------------------- DSP/BIOS Headers            */
 #include "matrixcfg.h"
 #include <msgq.h>
 #include <pool.h>
@@ -47,19 +47,19 @@ extern "C" {
 
 /* Control message data structure. */
 /* Must contain a reserved space for the header */
-	typedef struct ControlMsg
-	{
-		MSGQ_MsgHeader header;
-		Uint16 command;
-		Char arg1[ARG_SIZE];
-	} ControlMsg;
+    typedef struct ControlMsg
+    {
+        MSGQ_MsgHeader header;
+        Uint16 command;
+        Char arg1[ARG_SIZE];
+    } ControlMsg;
 
-	/* Messaging buffer used by the application.
-	 * Note: This buffer must be aligned according to the alignment expected
-	 * by the device/platform. */
+    /* Messaging buffer used by the application.
+     * Note: This buffer must be aligned according to the alignment expected
+     * by the device/platform. */
 #define APP_BUFFER_SIZE DSPLINK_ALIGN (sizeof (ControlMsg), DSPLINK_BUF_ALIGN)
 
-	 /* Number of pools configured in the system. */
+     /* Number of pools configured in the system. */
 #define NUM_POOLS          1
 
 /* Number of local message queues */
