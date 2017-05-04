@@ -339,10 +339,6 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
 
     SYSTEM_0Print("Entered messagehandler_Execute ()\n");
 
-    #if defined (PROFILE)
-        SYSTEM_GetStartTime();
-    #endif
-
     while (communicating){
         // Receive the message.
         status = MSGQ_get(SampleGppMsgq, WAIT_FOREVER, (MsgqMsg *)&msg);
@@ -381,6 +377,9 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
                         msg->arg2[i][j] = i+j*3;
                     }
                 }
+                #if defined (PROFILE)
+                    SYSTEM_GetStartTime();
+                #endif
                 break;
             }
             case MATRIX_A: {
@@ -394,6 +393,9 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
                 break;
             }
             case MATRIX_PROD: {
+                #if defined (PROFILE)
+                    SYSTEM_GetEndTime();
+                #endif
                 SYSTEM_0Print("product received:\n");
                 MatrixPrint(msg->prod);
                 communicating = 0; // done sending, #LEAVING!
@@ -443,7 +445,6 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
     #if defined (PROFILE)
         if (DSP_SUCCEEDED(status))
         {
-            SYSTEM_GetEndTime();
             SYSTEM_GetProfileInfo();
         }
     #endif
