@@ -7,20 +7,20 @@ void matMult(uint32_t *mat1, uint32_t *mat2, uint32_t *prod);
 
 int main()
 {
-	int i, j;
+    int i, j;
     Timer totalTime;
     initTimer(&totalTime, "Total Time");
 
     uint32_t mat1[SIZE*SIZE], mat2[SIZE*SIZE], prod[SIZE*SIZE];
 
-	for (i = 0; i < SIZE; i++)
-	{
-		for (j = 0; j < SIZE; j += 4)
-		{
-			mat1[INDEX(i, j)] = i + j * 2;
-			mat2[INDEX(i, j)] = i + j * 3;
-		}	
-	}
+    for (i = 0; i < SIZE; i++)
+    {
+        for (j = 0; j < SIZE; j++)
+        {
+            mat1[INDEX(i, j)] = i + j * 2;
+            mat2[INDEX(i, j)] = i + j * 3;
+        }
+    }
 
     startTimer(&totalTime);
     matMult(mat1,mat2,prod);
