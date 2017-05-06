@@ -6,12 +6,12 @@
 \addbibresource{../../../.library/bibliography.bib}
 \begin{document}
 \section{Analysis}
-Analysis of the application's characteristics, using \texttt{gprof} and \texttt{MCProf}.
-
-\subimport{./}{erwin.tex}
-\subimport{./}{robin.tex}
-\subimport{./}{lars.tex}
-\subimport{./}{casper.tex}
-\subimport{./}{five.tex}
-\subimport{./}{six.tex}
+As part of the code improvement process the profiling programs gprof and MCprof were used to investigate the importance of the different functions in the application. Of course, because of the simplicity of the matrix multiplication application the results of the profiling efforts are not incredibly informative. This simple analysis therefore serves more as a step up to the more complicated analysis of the mean shift tracking application. In \cref{fig:callgraphall} the resulting call graph of the MCprof profiling can be found for a matrix size of 16. As can be expected for such a small matrix, the functions for measuring execution time take a significant part of the total execution time.
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7]{callgraphAll.pdf}
+\caption{Call graph produced by MCprof profiling \cite{pdfthesisAshraf}}
+\label{fig:callgraphall}
+\end{figure}
+The makefile of the matrix multiplication was also edited to allow for runtime profiling with gprof. Gprof would only output profiling information once the matrix size was large enough (once there was actually something to measure) so the only relevant function in the gprof result was the now significantly more important matrix multiplication function.
 \end{document}
