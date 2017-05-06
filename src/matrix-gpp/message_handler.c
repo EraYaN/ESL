@@ -588,7 +588,7 @@ NORMAL_API Void messagehandler_Main(IN Char8* dspExecutable, IN Char8* strNumIte
                     prod[i] = malloc(MATRIX_SIZE * sizeof *prod[i]);
                 }
 
-                MatrixInit(mat1,MATRIX_SIZE,2);
+                matrixInit(mat1,MATRIX_SIZE,2);
                 MatrixInit(mat2,MATRIX_SIZE,3);
 
                 MatrixMultiply(mat1,mat2,prod,MATRIX_SIZE);
