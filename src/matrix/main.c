@@ -1,43 +1,48 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <Timer.h>
 #include <util.h>
 
-void matMult(int *mat1, int *mat2, int *prod);
 
-int main()
-{
-    int i, j;
+int main(int argc, char *argv[]) {
+    int size;
     Timer totalTime;
     initTimer(&totalTime, "Total Time");
 
-    int mat1[SIZE*SIZE], mat2[SIZE*SIZE], prod[SIZE*SIZE];
-    for (i = 0; i < SIZE; i++)
-    {
-        for (j = 0; j < SIZE; j++)
-        {
-            mat1[INDEX(i, j)] = i + j * 2;
-            mat2[INDEX(i, j)] = i + j * 3;
-            prod[INDEX(i, j)] = 0;
+    if (argc != 2 ) {
+        printf("Wrong arguments supplied!\n Taking size = SIZE_DEFAULT = %d", SIZE_DEFAULT);
+        size = SIZE_DEFAULT;
+    } else {
+        size = atoi(argv[1]);
+        if (size == 0) {
+            size = SIZE_DEFAULT;
         }
+        printf("size  = %d\n", size);
     }
 
+    uint32_t **mat1, **mat2, **prod;
+
+    MatrixInit(&mat1, size, 2);
+    MatrixInit(&mat2,size,3);
+    MatrixInit(&prod,size,0);
+
+    #if defined (OUTPUT)
+        printf("mat1 =\n");
+        MatrixPrint(&mat1, size);
+        printf("mat2 =\n");
+        MatrixPrint(&mat2, size);
+    #endif
+
     startTimer(&totalTime);
-    matMult(mat1,mat2,prod);
+    MatrixMultiply(&mat1,&mat2,&prod,size);
     stopTimer(&totalTime);
     printTimer(&totalTime);
 
-    printf("\nDone !!! \n");
-    return 0;
-}
+    #if defined (OUTPUT)
+        printf("prod =\n");
+        MatrixPrint(&prod, size);
+        printf("\nDone !!! \n");
+    #endif
 
-void matMult(int *mat1, int *mat2, int *prod)
-{
-    int i, j, k;
-    for (i = 0; i < SIZE; i++) {
-        for (j = 0; j < SIZE; j++) {
-            for(k = 0; k < SIZE; k++) {
-                prod[INDEX(i, j)] = prod[INDEX(i, j)]+mat1[INDEX(i, k)] * mat2[INDEX(k, j)];
-            }
-        }
-    }
+    return 0;
 }
