@@ -44,11 +44,13 @@
     <RemoteBuildCommandLine>make -C $(RemoteProjectDir)</RemoteBuildCommandLine>
     <RemoteReBuildCommandLine>make rebuild -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
     <RemoteCleanCommandLine>make clean -C $(RemoteProjectDir)</RemoteCleanCommandLine>
+    <NMakeIncludeSearchPath>..\matrix-include</NMakeIncludeSearchPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <RemoteBuildCommandLine>make -C $(RemoteProjectDir)</RemoteBuildCommandLine>
     <RemoteReBuildCommandLine>make rebuild -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
     <RemoteCleanCommandLine>make clean -C $(RemoteProjectDir)</RemoteCleanCommandLine>
+    <NMakeIncludeSearchPath>..\matrix-include</NMakeIncludeSearchPath>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

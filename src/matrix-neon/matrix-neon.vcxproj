@@ -38,11 +38,13 @@
     <RemoteBuildCommandLine>make -C $(RemoteProjectDir)</RemoteBuildCommandLine>
     <RemoteReBuildCommandLine>make all -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
     <RemoteCleanCommandLine>make clean -C $(RemoteProjectDir)</RemoteCleanCommandLine>
+    <NMakeIncludeSearchPath>..\matrix-include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <RemoteBuildCommandLine>make -C $(RemoteProjectDir)</RemoteBuildCommandLine>
     <RemoteReBuildCommandLine>make all -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
     <RemoteCleanCommandLine>make clean -C $(RemoteProjectDir)</RemoteCleanCommandLine>
+    <NMakeIncludeSearchPath>..\matrix-include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="main.c" />
