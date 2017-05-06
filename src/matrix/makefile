@@ -1,25 +1,56 @@
 BASE_TOOLCHAIN = /data/bbToolChain/usr/local/share/codesourcery
 CC = arm-none-linux-gnueabi-gcc
-CFLAGS = -Wall -O3 -mcpu=cortex-a8
-INC = -I../matrix-include
+CFLAGS = -DPROFILE
+LDFLAGS := -lpthread
 LIBS = -lm
 EXEC = matrix-mult
 CSRCS = main.c
 OBJS = $(CSRCS:.c=.o)
-REMOTE_DIR = ~/ESL/$(EXEC)
+
+#   ----------------------------------------------------------------------------
+#   Compiler include directories 
+#   ----------------------------------------------------------------------------
+INCLUDES := -I../matrix-include \
+			-I$(BASE_TOOLCHAIN)/include \
+			-I./
+
+#   ----------------------------------------------------------------------------
+#   All compiler options to be passed to the command line
+#   ----------------------------------------------------------------------------
+ALL_CFLAGS := $(INCLUDES)				  \
+			-mlittle-endian               \
+            -march=armv5t                 \
+            -mtune=arm9tdmi               \
+            -mfloat-abi=softfp            \
+            -Uarm                         \
+            -Wdeclaration-after-statement \
+            -marm -Wall					  \
+            -Wstrict-prototypes           \
+            -Wno-trigraphs                \
+            -fno-strict-aliasing          \
+            -fno-common                   \
+            -fno-omit-frame-pointer       \
+            -mapcs                        \
+            -c                            \
+            -mabi=aapcs-linux             \
+			-O3							  \
+			$(CFLAGS)
 
 all: $(EXEC)
 
 $(EXEC): $(OBJS)
-	@$(BASE_TOOLCHAIN)/bin/$(CC) $(CFLAGS) -o $@ $? $(LIBS) $(LDFLAGS)
+	@echo Compiling for ARM...
+	@$(BASE_TOOLCHAIN)/bin/$(CC) -o $@ $? $(LIBS) $(LDFLAGS)
 
 %.o: %.c
-	@$(BASE_TOOLCHAIN)/bin/$(CC) $(CFLAGS) $(INC) -c $< -o $@
+	@$(BASE_TOOLCHAIN)/bin/$(CC) $(ALL_CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
 	@-rm -rf $(EXEC) $(OBJS) *~
 
 send: $(EXEC)
-	scp $(REMOTE_DIR)/$(EXEC) root@192.168.0.202:/home/root/esLAB/.
+	scp $(EXEC) root@192.168.0.202:/home/root/esLAB/.
 
-.PHONY: all clean send
+rebuild: clean all
+
+.PHONY: all clean send rebuild
