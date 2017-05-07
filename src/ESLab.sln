@@ -58,6 +58,7 @@ Global
 		{3E4A7413-60EC-4194-8965-5A7AF71FC922}.Release|Beagle.ActiveCfg = Release|x64
 		{3E4A7413-60EC-4194-8965-5A7AF71FC922}.Release|Beagle.Build.0 = Release|x64
 		{A16E348B-FE4D-4B89-A9F3-2911CDF4947F}.Debug|Beagle.ActiveCfg = Debug|x64
+		{A16E348B-FE4D-4B89-A9F3-2911CDF4947F}.Debug|Beagle.Build.0 = Debug|x64
 		{A16E348B-FE4D-4B89-A9F3-2911CDF4947F}.Release|Beagle.ActiveCfg = Release|x64
 		{A16E348B-FE4D-4B89-A9F3-2911CDF4947F}.Release|Beagle.Build.0 = Release|x64
 		{0471082D-C65E-41E4-B2AB-D9AB110DAFAC}.Debug|Beagle.ActiveCfg = Debug|x64
