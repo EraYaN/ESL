@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="makefile" />
+    <None Include="makefile-pynq" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
