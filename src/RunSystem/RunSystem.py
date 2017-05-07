@@ -343,6 +343,7 @@ if __name__ == '__main__':
     parser.add_argument('--build', action="store_true", help='Should we build the executable for the BeagleBoard')
     parser.add_argument('--run', action="store_true", help='Should we run the executable on the BeagleBoard')
     parser.add_argument('--size', action="store", type=int, help='The matrix size, if the benchmark supports the size argument', default=64)
+    parser.add_argument('--number-of-runs', action="store", type=int, help='The number of runs to do.', default=1)
     parser.add_argument('--benchmark', action="store", help='Benchmark to run',choices=list(benchmarks.keys()),default='vanilla')
     parser.add_argument('--variant', action="store", help='Variant name, used to save the results',default='default')
 
@@ -357,7 +358,7 @@ if __name__ == '__main__':
                 rs.Build()
                 rs.SendExec()
             if opts.run:
-                rs.RunN(opts.size)
+                rs.RunN(opts.size,opts.number_of_runs)
                 rs.SaveResults("{0}-{2}-{1}.pickle".format(opts.benchmark,opts.size,opts.variant))
                 rs.PrintResults()
         finally:
