@@ -24,6 +24,9 @@
 #include <platform.h>
 #include <failure.h>
 
+//malloc()
+#include <stdlib.h>
+
 /*  ----------------------------------- Sample Headers              */
 #include "message_config.h"
 #include "tskMessage.h"
@@ -42,15 +45,30 @@ Uint8 dspMsgQName[DSP_MAX_STRLEN];
 /* Number of iterations message transfers to be done by the application. */
 extern Uint16 numTransfers;
 
-void MatrixMultiply(Uint32 a[MATRIX_SIZE][MATRIX_SIZE],Uint32 b[MATRIX_SIZE][MATRIX_SIZE],Uint32 c[MATRIX_SIZE][MATRIX_SIZE]) {
+// Dynamically Allocated Matrix
+void matrixAlloc(uint32_t ***matrix, uint32_t size) {
+    uint32_t i;
+    *matrix = malloc(size * sizeof(**matrix));
+    if (*matrix == NULL) {
+        SET_FAILURE_REASON(888); //TODO[c]: wat is deze?! werkt dit goed (genoeg)
+    }
+    for (i = 0; i < size; i++) {
+        (*matrix)[i] = malloc(size * sizeof(*(*matrix)[i]));
+        if ((*matrix)[i] == NULL) {
+            SET_FAILURE_REASON(888); //TODO[c]: wat is deze?! werkt dit goed (genoeg)
+        }
+    }
+}
+
+void matrixMultiplyDSP(uint32_t ***mat1, uint32_t ***mat2, Uint32 prod[SIZE_MAXIMUM][SIZE_MAXIMUM], Uint32 size) {
     int i, j, k;
-    for (i = 0;i < MATRIX_SIZE; i++)
+    for (i = 0;i < size; i++)
     {
-        for (j = 0; j < MATRIX_SIZE; j++)
+        for (j = 0; j < size; j++)
         {
-            c[i][j]=0;
-            for(k=0;k<MATRIX_SIZE;k++)
-                c[i][j] = c[i][j]+a[i][k] * b[k][j];
+            // prod[i][j]=0; //Already empty :) (cleared my GPP, out of timed section)
+            for(k = 0; k < size; k++)
+                prod[i][j] = prod[i][j] + (*mat1)[i][k] * (*mat2)[k][j];
         }
     }
 }
@@ -153,6 +171,10 @@ Int TSKMESSAGE_execute(TSKMESSAGE_TransferInfo* info)
     ControlMsg* msg;
     Uint16 communicating = 1;
 
+    uint32_t **mat1, **mat2;
+    uint32_t size;
+    uint32_t i, j;
+
     /* Allocate and send the message */
     status = MSGQ_alloc(SAMPLE_POOL_ID, (MSGQ_Msg*)&msg, APP_BUFFER_SIZE);
 
@@ -220,19 +242,33 @@ Int TSKMESSAGE_execute(TSKMESSAGE_TransferInfo* info)
                         break;
                     }
                     case MATRIX_A: {
-                        MatrixMultiply(msg->arg1,msg->arg2,msg->prod);
-                        msg->command = MATRIX_PROD;
-                        communicating =0; // no response expected, #LEAVING!
+                        //TODO[c]: maybe do a consistency check (for size) for all messages received would be nice?
+                        size = msg->size;
+                        matrixAlloc(&mat1, size);
+                        for (i = 0; i < size; i++) {
+                            for (j = 0; j < size; j++) {
+                                //TODO[c]: implement using memcpy or something
+                                mat1[i][j] = msg->matrix[i][j];
+                            }
+                        }
+                        //memcpy matrix A
+                        msg->command = MATRIX_A; //ACK matrix A, (request B)
                         break;
                     }
                     case MATRIX_B: {
-                        MatrixMultiply(msg->arg1,msg->arg2,msg->prod);
-                        msg->command = MATRIX_PROD;
-                        communicating =0; // no response expected, #LEAVING!
+                        matrixAlloc(&mat2, msg->size);
+                        for (i = 0; i < size; i++) {
+                            for (j = 0; j < size; j++) {
+                                //TODO[c]: implement using memcpy or something
+                                mat2[i][j] = msg->matrix[i][j];
+                            }
+                        }
+                        msg->command = MATRIX_B; //ACK matrix B, (request go for calculation)
                         break;
                     }
                     case MATRIX_PROD: {
-                        msg->command = ERROR;
+                        msg->command = MATRIX_PROD;
+                        matrixMultiplyDSP(&mat1,&mat2,(msg->matrix),msg->size);
                         communicating =0; // no response expected, #LEAVING!
                         break;
                     }

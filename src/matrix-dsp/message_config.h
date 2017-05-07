@@ -35,6 +35,9 @@ extern "C" {
 #include <sma_pool.h>
 #endif /* if defined (MSGQ_ZCPY_LINK) */
 
+#include <stdint.h>
+#include "util.h"
+
 /* Name of the MSGQ on the GPP and on the DSP. */
 #define GPP_MSGQNAME        "GPPMSGQ1"
 #define DSP_MSGQNAME        "DSPMSGQ"
@@ -42,10 +45,7 @@ extern "C" {
 /* ID of the POOL used by matrix. */
 #define SAMPLE_POOL_ID      0
 
-/* Argument size passed to the control message queue */
-#define ARG_SIZE 256
-#define MATRIX_SIZE 3
-
+//TODO[c]: can be moved to a general *.c & *.h file, to use for both gpp and dsp project
 // Message Commands
 // NOTE: has te be consistent across both gpp and dsp projects
 typedef enum {
@@ -57,17 +57,16 @@ typedef enum {
     SHDN          = 0xFF
 } CMD_t;
 
-
+//TODO[c]: can be moved to a general *.c & *.h file, to use for both gpp and dsp project
 /* Control message data structure. */
 /* Must contain a reserved space for the header */
-    typedef struct ControlMsg
-    {
-        MSGQ_MsgHeader header;
-        Uint16 command;
-        Uint32 arg1[MATRIX_SIZE][MATRIX_SIZE];
-        Uint32 arg2[MATRIX_SIZE][MATRIX_SIZE];
-        Uint32 prod[MATRIX_SIZE][MATRIX_SIZE];
-    } ControlMsg;
+typedef struct ControlMsg
+{
+    MSGQ_MsgHeader header;
+    Uint16         command;
+    uint32_t       size;
+    uint32_t       matrix[SIZE_MAXIMUM][SIZE_MAXIMUM];
+} ControlMsg;
 
     /* Messaging buffer used by the application.
      * Note: This buffer must be aligned according to the alignment expected

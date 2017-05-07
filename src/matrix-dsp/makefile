@@ -137,7 +137,8 @@ CINCLUDES := -I$(DSPLINK)/dsp/inc                             \
              -I$(BASE_COMPILER)/include                       \
              -I$(BASE_SABIOS)/packages/ti/rtdx/include/c6000  \
              -I$(BASE_SABIOS)/packages/ti/psl/include         \
-              -I./
+             -I../matrix-include\
+             -I./
 
 #             -I$(DSPLINK)/dsp/export/INCLUDE/DspBios/OMAPL1XX \
 #             -I$(DSPLINK)/dsp/inc/DspBios/6.XX/OMAPL1XXGEM    \

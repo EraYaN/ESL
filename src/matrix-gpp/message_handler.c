@@ -23,6 +23,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "util.h"
+#include "matrix.h"
 
 
 #if defined (__cplusplus)
@@ -32,10 +34,6 @@ extern "C"
 
     /* Number of arguments specified to the DSP application. */
 #define NUM_ARGS 1
-
-    /* Argument size passed to the control message queue */
-#define ARG_SIZE 256
-#define MATRIX_SIZE 3
 
     /* ID of the POOL used by matrix. */
 #define SAMPLE_POOL_ID  0
@@ -60,16 +58,18 @@ typedef enum {
     SHDN          = 0xFF
 } CMD_t;
 
+//TODO[c]: can be moved to a general *.c & *.h file, to use for both gpp and dsp project
 // Control message data structure.
 // Must contain a reserved space for the header
 typedef struct ControlMsg
 {
     MSGQ_MsgHeader header;
-    Uint16 command;
-    Uint32 arg1[MATRIX_SIZE][MATRIX_SIZE];
-    Uint32 arg2[MATRIX_SIZE][MATRIX_SIZE];
-    Uint32 prod[MATRIX_SIZE][MATRIX_SIZE];
+    Uint16         command;
+    uint32_t       size;
+    uint32_t       matrix[SIZE_MAXIMUM][SIZE_MAXIMUM];
 } ControlMsg;
+
+uint32_t **mat1, **mat2, **prod;
 
     /* Messaging buffer used by the application.
      * Note: This buffer must be aligned according to the alignment expected
@@ -136,63 +136,21 @@ STATIC Uint32 SampleNumBuffers[NUMMSGPOOLS] =
     STATIC NORMAL_API DSP_STATUS messagehandler_VerifyData(IN MSGQ_Msg msg, IN Uint16 sequenceNumber);
 #endif
 
-//TODO[c]: no dynamic allocation
-void MatrixPrint(Uint32 matrix[MATRIX_SIZE][MATRIX_SIZE]) {
-    int i,j;
-    for(i = 0; i < MATRIX_SIZE; i++)
-    {
-        for (j = 0; j < MATRIX_SIZE; j++)
-        {
-            // SYSTEM_1Print(" %d",8);
-            SYSTEM_1Print(" %d", matrix[i][j]);
-            // SYSTEM_1Print(" %d",matrix[i][j]);
+void matrixPrintStatic(uint32_t matrix[SIZE_MAXIMUM][SIZE_MAXIMUM], uint32_t size) {
+    uint32_t i,j;
+    for(i = 0; i < size; i++) {
+        for (j = 0; j < size; j++) {
+            SYSTEM_1Print("\t%d", matrix[i][j]);
         }
         SYSTEM_0Print("\n");
     }
 }
 
-int **mat1, **mat2, **prod;
-
-// Dynamically Allocated Matrix Init
-void MatrixInit(int **matrix, int size, int salt) {
-    int i,j;
-
-    for(i = 0; i < size; i++)
-    {
-        for (j = 0; j < size; j++)
-        {
-            matrix[i][j] = i+j*salt;
-        }
-    }
-}
-
-// Dynamically Allocated Matrix print
-void MatrixPrint_new(int **matrix, int size) {
-    int i,j;
-    for(i = 0; i < size; i++)
-    {
-        for (j = 0; j < size; j++)
-        {
-            // SYSTEM_1Print(" %d",8);
-            SYSTEM_1Print(" %d", matrix[i][j]);
-            // SYSTEM_1Print(" %d",matrix[i][j]);
-        }
-        SYSTEM_0Print("\n");
-    }
-}
-
-// Dynamically Allocated Matrix Multiply
-void MatrixMultiply(int **a, int **b, int **c, int size) {
-    int i, j, k;
-    for (i = 0;i < size; i++)
-    {
-        for (j = 0; j < size; j++)
-        {
-            c[i][j]=0;
-            for(k=0;k<size;k++)
-                c[i][j] = c[i][j]+a[i][k] * b[k][j];
-        }
-    }
+NORMAL_API Void SYSTEM_0PrintDEBUG(Char8* str)
+{
+    #if defined (DEBUG)
+        SYSTEM_0Print(str);
+    #endif
 }
 
 /** ============================================================================
@@ -211,7 +169,7 @@ NORMAL_API DSP_STATUS messagehandler_Create(IN Char8* dspExecutable, IN Char8* s
     MSGQ_LocateAttrs syncLocateAttrs;
     Char8* args[NUM_ARGS];
 
-    SYSTEM_0Print("Entered messagehandler_Create ()\n");
+    SYSTEM_0PrintDEBUG("Entered messagehandler_Create ()\n");
 
     /* Create and initialize the proc object. */
     status = PROC_setup(NULL);
@@ -315,7 +273,7 @@ NORMAL_API DSP_STATUS messagehandler_Create(IN Char8* dspExecutable, IN Char8* s
         }
     }
 
-    SYSTEM_0Print("Leaving messagehandler_Create ()\n");
+    SYSTEM_0PrintDEBUG("Leaving messagehandler_Create ()\n");
     return status;
 }
 
@@ -328,7 +286,7 @@ NORMAL_API DSP_STATUS messagehandler_Create(IN Char8* dspExecutable, IN Char8* s
  *  @modif  None
  *  ============================================================================
  */
-NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 processorId)
+NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 size, Uint8 processorId)
 {
     DSP_STATUS  status = DSP_SOK;
     Uint16 sequenceNumber = 0;
@@ -337,7 +295,7 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
     Uint16 i,j;
     ControlMsg *msg;
 
-    SYSTEM_0Print("Entered messagehandler_Execute ()\n");
+    SYSTEM_0PrintDEBUG("Entered messagehandler_Execute ()\n");
 
     while (communicating){
         // Receive the message.
@@ -363,18 +321,19 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
                 break; 
             }
             case ERROR: {
-                SYSTEM_0Print("ERROR msg received\n");
+                SYSTEM_0PrintDEBUG("ERROR msg received\n");
                 communicating =0; // no response expected, #LEAVING!
                 break;
             }
             case INIT_FROM_DSP: {
-                SYSTEM_0Print("DSP awake!\n");
-                // Now fill message with matrix A and B
+                SYSTEM_0PrintDEBUG("DSP awake!\n");
+                // Now fill message with matrix A
                 msg->command = MATRIX_A;
-                for (i = 0; i < MATRIX_SIZE; i++) {
-                    for (j = 0; j < MATRIX_SIZE; j++) {
-                        msg->arg1[i][j] = i+j*2;
-                        msg->arg2[i][j] = i+j*3;
+                msg->size = size;
+                for (i = 0; i < size; i++) {
+                    for (j = 0; j < size; j++) {
+                        //TODO[c]: implement using memcpy or something
+                        msg->matrix[i][j] = mat1[i][j];
                     }
                 }
                 #if defined (PROFILE)
@@ -383,21 +342,47 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
                 break;
             }
             case MATRIX_A: {
-                SYSTEM_0Print("ERROR! matrix A received, should be send only\n");
-                msg->command = SHDN; // ERROR, so shutdown
+                SYSTEM_0PrintDEBUG("Matrix A send!\n");
+                // Now fill message with matrix B
+                msg->command = MATRIX_B;
+                msg->size = size;
+                for (i = 0; i < size; i++) {
+                    for (j = 0; j < size; j++) {
+                        //TODO[c]: implement using memcpy or something
+                        msg->matrix[i][j] = mat2[i][j];
+                    }
+                }
                 break;
             }
             case MATRIX_B: {
-                SYSTEM_0Print("ERROR! matrix B received, should be send only\n");
-                msg->command = SHDN; // ERROR, so shutdown
+                SYSTEM_0PrintDEBUG("Matrix B received!\n");
+                msg->command = MATRIX_PROD; // Go and calculate product
+                for (i = 0; i < size; i++) {
+                    for (j = 0; j < size; j++) {
+                        //TODO[c]: implement using memcpy or something
+                        msg->matrix[i][j] =0;
+                    }
+                }
                 break;
             }
             case MATRIX_PROD: {
                 #if defined (PROFILE)
                     SYSTEM_GetEndTime();
                 #endif
-                SYSTEM_0Print("product received:\n");
-                MatrixPrint(msg->prod);
+                SYSTEM_0PrintDEBUG("product received:\n");
+                #if defined (OUTPUT)
+                    printf("prod =\n");
+                    matrixPrintStatic(msg->matrix, msg->size);
+                #endif
+                #if defined (VERIFY_MATRIX)
+                    for (i = 0; i < size; i++) {
+                        for (j = 0; j < size; j++) {
+                            //TODO[c]: implement using memcpy or something
+                            mat1[i][j] = msg->matrix[i][j];
+                        }
+                    }
+                    matrixIsEqual(&prod, &mat1, size);
+                #endif
                 communicating = 0; // done sending, #LEAVING!
                 break;
             }
@@ -449,7 +434,7 @@ NORMAL_API DSP_STATUS messagehandler_Execute(IN Uint32 numIterations, Uint8 proc
         }
     #endif
 
-    SYSTEM_0Print("Leaving messagehandler_Execute ()\n");
+    SYSTEM_0PrintDEBUG("Leaving messagehandler_Execute ()\n");
 
     return status;
 }
@@ -472,7 +457,7 @@ NORMAL_API Void messagehandler_Delete(Uint8 processorId)
     DSP_STATUS status = DSP_SOK;
     DSP_STATUS tmpStatus = DSP_SOK;
 
-    SYSTEM_0Print("Entered messagehandler_Delete ()\n");
+    SYSTEM_0PrintDEBUG("Entered messagehandler_Delete ()\n");
 
     /* Release the remote message queue */
     status = MSGQ_release(SampleDspMsgq);
@@ -539,7 +524,7 @@ NORMAL_API Void messagehandler_Delete(Uint8 processorId)
         SYSTEM_1Print("PROC_destroy () failed. Status = [0x%x]\n", status);
     }
 
-    SYSTEM_0Print("Leaving messagehandler_Delete ()\n");
+    SYSTEM_0PrintDEBUG("Leaving messagehandler_Delete ()\n");
 }
 
 
@@ -551,77 +536,59 @@ NORMAL_API Void messagehandler_Delete(Uint8 processorId)
  *  @modif  None
  *  ============================================================================
  */
-NORMAL_API Void messagehandler_Main(IN Char8* dspExecutable, IN Char8* strNumIterations, IN Char8* strProcessorId)
+NORMAL_API Void messagehandler_Main(IN Char8* dspExecutable, IN Char8* strMatrixSize, IN Char8* strProcessorId)
 {
     DSP_STATUS status = DSP_SOK;
-    Uint32 numIterations = 0;
+    Uint32 size = 0;
     Uint8 processorId = 0;
-    Uint32 i;
 
-    SYSTEM_0Print("========== Sample Application : matrix ==========\n");
+    SYSTEM_0PrintDEBUG("========== Sample Application : matrix ==========\n");
 
-    if ((dspExecutable != NULL) && (strNumIterations != NULL))
+    if ((dspExecutable != NULL) && (strMatrixSize != NULL))
     {
-        numIterations = SYSTEM_Atoi(strNumIterations);
-
-        if (numIterations > 0xFFFF)
-        {
-            status = DSP_EINVALIDARG;
-            SYSTEM_1Print("ERROR! Invalid arguments specified for matrix application.\n Max iterations = %d\n", 0xFFFF);
+        size = SYSTEM_Atoi(strMatrixSize);
+        if (size == 0 || size > SIZE_MAXIMUM) {
+            size = SIZE_DEFAULT;
         }
-        else
+        printf("size  = %d\t", (uint32_t) size);
+
+        matrixInit(&mat1, size, 2);
+        matrixInit(&mat2, size, 3);
+        matrixInit(&prod, size, 0);
+        matrixMultiply(&mat1, &mat2, &prod, size);
+
+        #if defined (OUTPUT)
+            printf("mat1 =\n");
+            matrixPrint(&mat1, size);
+            printf("mat2 =\n");
+            matrixPrint(&mat2, size);
+
+
+            printf("prod =\n");
+            matrixPrint(&prod, size);
+            printf("\nDone !!! \n");
+        #endif
+
+        processorId = SYSTEM_Atoi(strProcessorId);
+
+        if (processorId >= MAX_DSPS)
         {
+            SYSTEM_1Print("== Error: Invalid processor id %d specified ==\n", processorId);
+            status = DSP_EFAIL;
+        }
+        /* Specify the dsp executable file name for message creation phase. */
+        if (DSP_SUCCEEDED(status))
+        {
+            status = messagehandler_Create(dspExecutable, strMatrixSize, processorId);
 
-                mat1 = malloc(MATRIX_SIZE * sizeof *mat1);
-                for (i = 0; i < MATRIX_SIZE; i++)
-                {
-                    mat1[i] = malloc(MATRIX_SIZE * sizeof *mat1[i]);
-                }
-                mat2 = malloc(MATRIX_SIZE * sizeof *mat2);
-                for (i = 0; i < MATRIX_SIZE; i++)
-                {
-                    mat2[i] = malloc(MATRIX_SIZE * sizeof *mat2[i]);
-                }
-                prod = malloc(MATRIX_SIZE * sizeof *prod);
-                for (i = 0; i < MATRIX_SIZE; i++)
-                {
-                    prod[i] = malloc(MATRIX_SIZE * sizeof *prod[i]);
-                }
-
-                matrixInit(mat1,MATRIX_SIZE,2);
-                MatrixInit(mat2,MATRIX_SIZE,3);
-
-                MatrixMultiply(mat1,mat2,prod,MATRIX_SIZE);
-
-                SYSTEM_0Print("mat1:\n");
-                MatrixPrint_new(mat1,MATRIX_SIZE);
-                SYSTEM_0Print("mat2:\n");
-                MatrixPrint_new(mat2,MATRIX_SIZE);
-                SYSTEM_0Print("prod:\n");
-                MatrixPrint_new(prod,MATRIX_SIZE);
-
-
-            processorId = SYSTEM_Atoi(strProcessorId);
-
-            if (processorId >= MAX_DSPS)
-            {
-                SYSTEM_1Print("== Error: Invalid processor id %d specified ==\n", processorId);
-                status = DSP_EFAIL;
-            }
-            /* Specify the dsp executable file name for message creation phase. */
+            /* Execute the message execute phase. */
             if (DSP_SUCCEEDED(status))
             {
-                status = messagehandler_Create(dspExecutable, strNumIterations, processorId);
-
-                /* Execute the message execute phase. */
-                if (DSP_SUCCEEDED(status))
-                {
-                    status = messagehandler_Execute(numIterations, processorId);
-                }
-
-                /* Perform cleanup operation. */
-                messagehandler_Delete(processorId);
+                status = messagehandler_Execute(size, processorId);
             }
+
+            /* Perform cleanup operation. */
+            messagehandler_Delete(processorId);
         }
     }
     else
@@ -629,7 +596,7 @@ NORMAL_API Void messagehandler_Main(IN Char8* dspExecutable, IN Char8* strNumIte
         status = DSP_EINVALIDARG;
         SYSTEM_0Print("ERROR! Invalid arguments specified for matrix application\n");
     }
-    SYSTEM_0Print("====================================================\n");
+    SYSTEM_0PrintDEBUG("====================================================\n");
 }
 
 #if defined (VERIFY_DATA)

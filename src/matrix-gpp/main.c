@@ -29,7 +29,7 @@ extern "C"
 int main(int argc, char** argv)
 {
     Char8* dspExecutable = NULL;
-    Char8* strNumIterations = NULL;
+    Char8* strMatrixSize = NULL;
     Char8* strProcessorId = NULL;
     Uint8 processorId = 0;
 
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     else
     {
         dspExecutable = argv[1];
-        strNumIterations = argv[2];
+        strMatrixSize = argv[2];
 
         if (argc == 3)
         {
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 
         if (processorId < MAX_PROCESSORS)
         {
-            messagehandler_Main(dspExecutable, strNumIterations, strProcessorId);
+            messagehandler_Main(dspExecutable, strMatrixSize, strProcessorId);
         }
     }
 
