@@ -1,48 +1,64 @@
 #include <stdio.h>
-#include <stdint.h>
 #include <Timer.h>
-#include <util.h>
 
+#define SIZE 4
 
-int main(int argc, char *argv[]) {
-	int size;
-	Timer totalTime;
-	uint32_t **mat1, **mat2, **prod;
-	initTimer(&totalTime, "Total Time");
+void matMult(int mat1[SIZE][SIZE], int mat2[SIZE][SIZE], int prod[SIZE][SIZE]);
 
-	if (argc != 2) {
-		printf("Wrong arguments supplied!\n Taking size = SIZE_DEFAULT = %d", SIZE_DEFAULT);
-		size = SIZE_DEFAULT;
-	}
-	else {
-		size = atoi(argv[1]);
-		if (size == 0) {
-			size = SIZE_DEFAULT;
-		}
-		printf("size  = %d\n", size);
-	}
+int main()
+{
+    Timer totalTime;
+    initTimer(&totalTime, "Total Time");
 
-	matrixInit(&mat1, size, 2);
-	matrixInit(&mat2, size, 3);
-	matrixInit(&prod, size, 0);
+    int mat1[SIZE][SIZE], mat2[SIZE][SIZE], prod[SIZE][SIZE];
+    int i, j;
 
-#if defined (OUTPUT)
-	printf("mat1 =\n");
-	MatrixPrint(&mat1, size);
-	printf("mat2 =\n");
-	MatrixPrint(&mat2, size);
+    for (i = 0; i < SIZE; i++)
+    {
+        for (j = 0; j < SIZE; j++)
+        {
+            mat1[i][j] = i + j * 2;
+        }
+    }
+
+    for (i = 0; i < SIZE; i++)
+    {
+        for (j = 0; j < SIZE; j++)
+        {
+            mat2[i][j] = i + j * 3;
+        }
+    }
+
+    startTimer(&totalTime);
+    matMult(mat1, mat2, prod);
+    stopTimer(&totalTime);
+    printTimer(&totalTime);
+
+#ifdef OUTPUT
+    for (i = 0; i < SIZE; i++)
+    {
+        printf("\n");
+        for (j = 0; j < SIZE; j++)
+        {
+            printf("\t%d ", prod[i][j]);
+        }
+    }
 #endif
 
-	startTimer(&totalTime);
-	matrixMultiply(&mat1, &mat2, &prod, size);
-	stopTimer(&totalTime);
-	printTimer(&totalTime);
+    printf("\nDone !!! \n");
+    return 0;
+}
 
-#if defined (OUTPUT)
-	printf("prod =\n");
-	MatrixPrint(&prod, size);
-	printf("\nDone !!! \n");
-#endif
-
-	return 0;
+void matMult(int mat1[SIZE][SIZE], int mat2[SIZE][SIZE], int prod[SIZE][SIZE])
+{
+    int i, j, k;
+    for (i = 0; i < SIZE; i++)
+    {
+        for (j = 0; j < SIZE; j++)
+        {
+            prod[i][j] = 0;
+            for (k = 0; k < SIZE; k++)
+                prod[i][j] = prod[i][j] + mat1[i][k] * mat2[k][j];
+        }
+    }
 }
