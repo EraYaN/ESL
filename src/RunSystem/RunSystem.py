@@ -17,6 +17,7 @@ from terminaltables import AsciiTable
 LOCAL_BASE_DIR = '..'
 BUILD_BASE_DIR = '~/projects'
 BEAGLE_BASE_DIR = '~/esLAB'
+LINE_MARKER = '@'
 
 benchmarks = {
     'vanilla':{'project':'matrix', 'executable':'matrix', 'deps':[],'baseargs':[],'sizearg':False, 'usesdsp':False},
@@ -254,6 +255,9 @@ class RunSystem(object):
         self.PrintCommandOutput(ssh_stdout,ssh_stderr)
         csv_data = ''
         for line in ssh_stdout: #read and store result in log file
+            if line[0:1] == LINE_MARKER:
+                csv_data+=line[1:]
+        for line in ssh_stderr: #read and store result in log file
             if line[0:1] == LINE_MARKER:
                 csv_data+=line[1:]
 
