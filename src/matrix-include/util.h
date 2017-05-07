@@ -25,12 +25,12 @@ void matrixInit(uint32_t ***matrix, uint32_t size, uint32_t salt) {
 }
 
 // Dynamically Allocated Matrix print
-void matrixPrint(uint32_t ***matrix, uint32_t size) {
+void matrixPrint(uint32_t **matrix, uint32_t size) {
 	uint32_t i, j;
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size; j++) {
 			// SYSTEM_1Print(" %d", matrix[i][j]);
-			printf("\t%d", (*matrix)[i][j]);
+			printf("\t%d", matrix[i][j]);
 		}
 		// SYSTEM_0Print("\n");
 		printf("\n");

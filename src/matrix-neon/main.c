@@ -4,7 +4,8 @@
 #include <util.h>
 #include <arm_neon.h>
 
-void MatrixMultiplyNeon(uint32_t ***mat1, uint32_t ***mat2, uint32_t ***prod, uint32_t size) {
+
+void matrixMultiplyNeon(uint32_t **mat1, uint32_t **mat2, uint32_t **prod, uint32_t size) {
 	int i, j, k;
 	uint32_t c;
 	uint32x4_t mat_vec, prod_vec;
@@ -15,14 +16,11 @@ void MatrixMultiplyNeon(uint32_t ***mat1, uint32_t ***mat2, uint32_t ***prod, ui
 			prod_vec = vdupq_n_u32(0);
 
 			for (k = 0; k < size; k++) {
-				// c = mat1[k + i*size];
-				c = (*mat1)[i][k];
-				// mat_vec = vld1q_u32(&mat2[j+k*size]);
-				mat_vec = vld1q_u32(&(*mat2)[k][j]);
+				c = mat1[i][k];
+				mat_vec = vld1q_u32(&(mat2[k][j]));
 				prod_vec = vmlaq_n_u32(prod_vec, mat_vec, c);
 			}
-			// vst1q_u32(&prod22[j+i*size], prod_vec);
-			vst1q_u32(&(*prod)[i][j], prod_vec);
+			vst1q_u32(&(prod[i][j]), prod_vec);
 		}
 	}
 }
@@ -51,19 +49,19 @@ int main(int argc, char *argv[]) {
 
 #if defined (OUTPUT)
 	printf("mat1 =\n");
-	MatrixPrint(&mat1, size);
+	matrixPrint(mat1, size);
 	printf("mat2 =\n");
-	MatrixPrint(&mat2, size);
+	matrixPrint(mat2, size);
 #endif
 
 	startTimer(&totalTime);
-	MatrixMultiplyNeon(&mat1, &mat2, &prod, size);
+	matrixMultiplyNeon(mat1, mat2, prod, size);
 	stopTimer(&totalTime);
 	printTimer(&totalTime);
 
 #if defined (OUTPUT)
 	printf("prod =\n");
-	MatrixPrint(&prod, size);
+	matrixPrint(prod, size);
 	printf("\nDone !!! \n");
 #endif
 
