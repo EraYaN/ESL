@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define CSV_SEPARATOR ','
+#define LINE_MARKER '@'
 #define SIZE_DEFAULT 16 // This size is used when no argument is supplied
 
 // Dynamically Allocated Matrix Init
