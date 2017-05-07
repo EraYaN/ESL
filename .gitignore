@@ -389,3 +389,4 @@ script/**/*.jpg
 *.cmd
 *.h62
 *.s62
+*.pickle
