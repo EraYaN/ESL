@@ -1,4 +1,3 @@
-print("Starting...")
 import paramiko
 import sys
 import argparse as ap
@@ -9,9 +8,9 @@ import stat
 import posixpath
 import csv
 try:
-   import cPickle as pickle
+    import cPickle as pickle
 except:
-   import pickle
+    import pickle
 from terminaltables import AsciiTable
 
 LOCAL_BASE_DIR = '..'
@@ -19,12 +18,16 @@ BUILD_BASE_DIR = '~/projects'
 BEAGLE_BASE_DIR = '~/esLAB'
 LINE_MARKER = '@'
 
+includes = {
+    'shared':{'project':'matrix-include'},
+}
+
 benchmarks = {
-    'vanilla':{'project':'matrix', 'executable':'matrix', 'deps':[],'baseargs':[],'sizearg':False, 'usesdsp':False},
-    'dynamic':{'project':'matrix-dynamic', 'executable':'matrix-mult-dynamic', 'deps':[],'baseargs':[],'sizearg':True, 'usesdsp':False},
-    'neon':{'project':'matrix-neon', 'executable':'matrix-mult-neon', 'deps':[],'baseargs':[],'sizearg':True, 'usesdsp':False},
-    'dsp':{'project':'matrix-dsp', 'executable':'matrix.out', 'deps':[],'baseargs':[],'sizearg':True, 'usesdsp':True},
-    'gpp':{'project':'matrix-gpp', 'executable':'matrixgpp', 'deps':['dsp'],'baseargs':['{basedir}/{depname}'],'sizearg':True, 'usesdsp':True},
+    'vanilla':{'project':'matrix', 'executable':'matrix','deps':[],'includes':['shared'],'baseargs':[],'sizearg':False, 'usesdsp':False},
+    'dynamic':{'project':'matrix-dynamic', 'executable':'matrix-mult-dynamic','deps':[],'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':False},
+    'neon':{'project':'matrix-neon', 'executable':'matrix-mult-neon', 'deps':[],'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':False},
+    'dsp':{'project':'matrix-dsp', 'executable':'matrix.out', 'deps':[], 'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':True},
+    'gpp':{'project':'matrix-gpp', 'executable':'matrixgpp', 'deps':['dsp'],'includes':['shared'],'baseargs':['{basedir}/{depname}'],'sizearg':True, 'usesdsp':True},
     }
 
 class Error(Exception):
@@ -43,25 +46,26 @@ class NotConnectedError(Error):
 
 def upload_files(sftp_client, local_dir, remote_dir):
     if not os.path.exists(local_dir):
+        print('Uploading files failed, local path does not exist.')
         return
-
-    if not exists_remote(sftp_client, remote_dir):
-        print('Attempting to create {} on the remote.'.format(remote_dir))
-        if mkdir_p(sftp_client,remote_dir):
-            print('Created {} on the remote.'.format(remote_dir))
-        else:
-            print('Could not create {} on the remote.'.format(remote_dir))
 
     local_dir = os.path.realpath(local_dir)
     remote_home_dir = sftp_client.normalize('.')
     remote_dir = remote_dir.replace('~',remote_home_dir)
+
+    if not exists_remote(sftp_client, remote_dir):
+        #print('Attempting to create {} on the remote.'.format(remote_dir))
+        if mkdir_p(sftp_client,remote_dir):
+            print('Created {} on the remote.'.format(remote_dir))
+        else:
+            print('Could not create {} on the remote.'.format(remote_dir))    
 
     for root, dirs, files in os.walk(local_dir):
         for dirname in dirs:
             local_path = os.path.join(root, dirname)
             remote_path = posixpath.join(remote_dir,os.path.relpath(local_path, local_dir).replace(os.path.sep,posixpath.sep))
             if not exists_remote(sftp_client, remote_path):
-                print('Attempting to create {} on the remote.'.format(remote_path))
+                #print('Attempting to create {} on the remote.'.format(remote_path))
                 if mkdir_p(sftp_client,remote_path):
                     print('Created {} on the remote.'.format(remote_path))
                 else:
@@ -82,6 +86,7 @@ def upload_files(sftp_client, local_dir, remote_dir):
 
 def download_files(sftp_client, remote_dir, local_dir):
     if not exists_remote(sftp_client, remote_dir):
+        print('Uploading files failed, remote path does not exist.')
         return
 
     if not os.path.exists(local_dir):
@@ -184,6 +189,21 @@ class RunSystem(object):
         
         try: 
             sftp = self.build_server.open_sftp()
+
+            for bench in self.benchmark['includes']:
+                dep_includes = includes[bench]
+                print("Sending sources for include set {project}.".format(**dep_includes))
+                local_dir = '{0}/{1}'.format(LOCAL_BASE_DIR,dep_includes['project'])
+                build_dir = '{0}/{1}'.format(BUILD_BASE_DIR,dep_includes['project'])
+                upload_files(sftp,local_dir,build_dir)
+
+            for bench in self.benchmark['deps']:
+                dep_bench = benchmarks[bench]
+                print("Sending sources for depency {project}.".format(**dep_bench))
+                local_dir = '{0}/{1}'.format(LOCAL_BASE_DIR,dep_bench['project'])
+                build_dir = '{0}/{1}'.format(BUILD_BASE_DIR,dep_bench['project'])
+                upload_files(sftp,local_dir,build_dir)
+
             print("Sending sources for {project}.".format(**self.benchmark))
             local_dir = '{0}/{1}'.format(LOCAL_BASE_DIR,self.benchmark['project'])
             build_dir = '{0}/{1}'.format(BUILD_BASE_DIR,self.benchmark['project'])
@@ -350,7 +370,7 @@ if __name__ == '__main__':
     parser.add_argument('--number-of-runs', action="store", type=int, help='The number of runs to do.', default=1)
     parser.add_argument('--benchmark', action="store", help='Benchmark to run',choices=list(benchmarks.keys()),default='vanilla')
     parser.add_argument('--variant', action="store", help='Variant name, used to save the results',default='default')
-
+    print("Starting...")
     try:
         opts = parser.parse_args(sys.argv[1:])
         try:
