@@ -45,6 +45,7 @@
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemGroup>
+    <ClInclude Include="matrix.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
