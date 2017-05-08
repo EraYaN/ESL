@@ -64,10 +64,10 @@ void matrixMultiplyDSP(uint32_t ***mat1, uint32_t ***mat2, Uint32 prod[SIZE_MAXI
     int i, j, k;
     for (i = 0;i < size; i++)
     {
-        for (j = 0; j < size; j++)
+        for(k = 0; k < size; k++)
         {
             // prod[i][j]=0; //Already empty :) (cleared my GPP, out of timed section)
-            for(k = 0; k < size; k++)
+            for (j = 0; j < size; j++)
                 prod[i][j] = prod[i][j] + (*mat1)[i][k] * (*mat2)[k][j];
         }
     }

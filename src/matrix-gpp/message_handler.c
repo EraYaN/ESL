@@ -555,7 +555,7 @@ NORMAL_API Void messagehandler_Main(IN Char8* dspExecutable, IN Char8* strMatrix
         matrixInit(&mat1, size, 2);
         matrixInit(&mat2, size, 3);
         matrixInit(&prod, size, 0);
-        matrixMultiply(&mat1, &mat2, &prod, size);
+        matrixMultiply(mat1, mat2, prod, size);
 
         #if defined (OUTPUT)
             printf("mat1 =\n");
