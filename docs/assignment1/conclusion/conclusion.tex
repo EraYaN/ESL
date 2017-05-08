@@ -6,5 +6,22 @@
 \addbibresource{../../../.library/bibliography.bib}
 \begin{document}
 \section{Conclusion}
-conclusion
+Four implementations were tested and the ranking of the final results are shown in \cref{tab:final-implementation-ranking}. 
+Implementing SIMD instructions are worth the relatively little effort to gain large improvements.
+
+\begin{table}[H]
+\centering
+\caption{Final implementation ranking}
+\label{tab:final-implementation-ranking}
+\begin{tabular}{lll}
+\toprule
+\textbf{\#} & \textbf{Implementation} & \textbf{Speed-up}\\
+\midrule
+1 & NEON        &  \numrange{15}{20}\\
+2 & Optimized   &  \numrange{2}{3}\\ %TODO verify
+3 & DSP         &  \numrange{0.27}{1.33}\\ %TODO verify
+4 & Naive       &  1\\
+\bottomrule
+\end{tabular}
+\end{table}
 \end{document}
