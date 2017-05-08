@@ -15,7 +15,6 @@
 % }
 % \makeatother
 
-
 \section{MCProf Result}\label{app:appendix-mcprof-result}
 
 \begin{figure}[H]
@@ -24,6 +23,43 @@
 \caption{Call graph produced by MCprof profiling.}
 \label{fig:callgraphall}
 \end{figure}
+
+\section{Results}\label{app:results}
+\begin{table}[H]
+\centering
+\caption{Matrix multiplication times in ms}
+\label{tab:results}
+\begin{tabular}{rrrr}
+\toprule
+Naive & Optimised & NEON & DSP \\
+\midrule
+	0.0092 & 0.01220 & 0.006000 & 0.6318\\
+	0.0366 & 0.02140 & 0.006200 & 0.6743\\
+	0.2896 & 0.08830 & 0.03050 & 1.0285\\
+	2.5969 & 0.6225 & 0.1190 & 2.661\\
+	19.1834 & 4.8216 & 0.8881 & 15.1887\\
+	170.9487 & 41.2506 & 7.8889 & - \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Matrix multiplication speed-ups}
+\label{tab:results}
+\begin{tabular}{rrrr}
+\toprule
+Optimised & NEON & DSP \\
+\midrule
+0.75 & 1.53 & 0.0145 \\
+1.71 & 5.90 & 0.0542 \\
+3.27 & 9.49 & 0.2815 \\
+4.17 & 21.8 & 0.9759 \\
+3.97 & 21.6 & 1.263 \\
+4.14 & 21.6 & 11.39 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Personal Analysis}\label{app:appendix-personal-analysis}
 
