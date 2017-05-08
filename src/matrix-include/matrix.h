@@ -24,7 +24,11 @@ void matrixInit(uint32_t ***matrix, uint32_t size, uint32_t salt) {
             exit(-1);
         }
         for (j = 0; j < size; j++) {
-            (*matrix)[i][j] = i + j*salt;
+            if (salt == 0) {
+                (*matrix)[i][j] = 0;
+            } else {
+                (*matrix)[i][j] = i + j*salt;
+            }
         }
     }
 }
@@ -46,9 +50,9 @@ void matrixPrint(uint32_t **matrix, uint32_t size) {
 void matrixMultiply(uint32_t **mat1, uint32_t **mat2, uint32_t **prod, uint32_t size) {
     int i, j, k;
     for (i = 0; i < size; i++) {
-        for (j = 0; j < size; j++) {
-            prod[i][j] = 0;
-            for (k = 0; k < size; k++) {
+        for (k = 0; k < size; k++) {
+            //prod[i][j] = 0;
+            for (j = 0; j < size; j++) {
                 prod[i][j] = prod[i][j] + mat1[i][k] * mat2[k][j];
             }
         }

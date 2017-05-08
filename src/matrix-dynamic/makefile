@@ -19,8 +19,8 @@ INCLUDES := -I../matrix-include \
 #   ----------------------------------------------------------------------------
 ALL_CFLAGS := $(INCLUDES)				  \
 			-mlittle-endian               \
-            -march=armv5t                 \
-            -mtune=arm9tdmi               \
+            -march=armv7-a                \
+            -mtune=cortex-a8              \
             -mfloat-abi=softfp            \
             -Uarm                         \
             -Wdeclaration-after-statement \
