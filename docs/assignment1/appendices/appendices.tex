@@ -37,9 +37,10 @@ The DSP should really be used for streaming data, doing the init and setup for a
 
 \subsection{Lars}
 The profiling tool showed that by far the matMult function was the one to optimize, this is quite obvious because there is only one function.
-This was fairly trivial but it was required to do, because the process is extremely useful for the next assignment.
+This was fairly trivial but it was required to do, because the process is extremely useful for the next assignment. Message passing to the DSP is quite complex, so unless it provides a significant performance gain, the effort might not be worth it.
 
 \subsection{Robin}
+Previous experience with SSE SIMD instructions imply high performance for NEON SIMD matrix multiplications. Matrix multiplication is not the best possible fit for DSP, so this is unlikely to result in high speed-ups, at the cost of much code complexity. The naive implementation does not optimise for caching and memory locality, which should provide an easily obtainable performance gain.
 
 \end{appendices}
 \end{document}
