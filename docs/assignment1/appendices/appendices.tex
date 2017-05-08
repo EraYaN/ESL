@@ -1,0 +1,31 @@
+%!TEX program = xelatex
+\documentclass[final]{article} %scrreprt of scrartcl
+\input{../../.library/preamble.tex}
+\input{../../.library/style.tex}
+\addbibresource{../../.library/bibliography.bib}
+\begin{document}
+\begin{appendices}
+\crefalias{section}{app}
+% \addtocontents{toc}{\protect\setcounter{tocdepth}{2}}
+% \makeatletter
+% \addtocontents{toc}{%
+% 	\begingroup
+% 	\let\protect\l@chapter\protect\l@section
+% 	\let\protect\l@section\protect\l@subsection
+% }
+% \makeatother
+
+
+\section{MCProf Result}\label{app:appendix-mcprof-result}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7]{resources/callgraphAll.pdf}
+\caption{Call graph produced by MCprof profiling.}
+\label{fig:callgraphall}
+\end{figure}
+
+
+
+\end{appendices}
+\end{document}
