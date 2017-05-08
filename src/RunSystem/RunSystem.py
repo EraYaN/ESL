@@ -26,8 +26,8 @@ benchmarks = {
     'vanilla':{'project':'matrix', 'executable':'matrix','deps':[],'includes':['shared'],'baseargs':[],'sizearg':False, 'usesdsp':False},
     'dynamic':{'project':'matrix-dynamic', 'executable':'matrix-mult-dynamic','deps':[],'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':False},
     'neon':{'project':'matrix-neon', 'executable':'matrix-mult-neon', 'deps':[],'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':False},
-    'dsp':{'project':'matrix-dsp', 'executable':'matrix.out', 'deps':[], 'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':True},
-    'gpp':{'project':'matrix-gpp', 'executable':'matrixgpp', 'deps':['dsp'],'includes':['shared'],'baseargs':['{basedir}/{depname}'],'sizearg':True, 'usesdsp':True},
+    'dspcore':{'project':'matrix-dsp', 'executable':'matrix.out', 'deps':[], 'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':True},
+    'dsp':{'project':'matrix-gpp', 'executable':'matrixgpp', 'deps':['dspcore'],'includes':['shared'],'baseargs':['{basedir}/{depname}'],'sizearg':True, 'usesdsp':True},
     }
 
 class Error(Exception):
