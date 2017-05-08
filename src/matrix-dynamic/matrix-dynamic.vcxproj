@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="makefile" />
+    <None Include="makefile-pynq" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c" />
