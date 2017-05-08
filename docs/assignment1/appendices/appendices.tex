@@ -46,7 +46,7 @@ Naive & Optimised & NEON & DSP \\
 \begin{table}[H]
 \centering
 \caption{Matrix multiplication speed-ups}
-\label{tab:results}
+\label{tab:results2}
 \begin{tabular}{rrrr}
 \toprule
 Optimised & NEON & DSP \\
@@ -64,6 +64,7 @@ Optimised & NEON & DSP \\
 \section{Personal Analysis}\label{app:appendix-personal-analysis}
 
 \subsection{Casper}
+Seeing the profiling output, the multiplication is the main thing to optimise. One of the implementations might be to send the matrix to the DSP and do the calculation there. For further optimisations, you can try different communication methods, i.e. sending a single column and row or sending whole matrices.
 
 \subsection{Erwin}
 NEON should be the fastest, based on experience from an earlier course with SIMD on the Intel platform.
