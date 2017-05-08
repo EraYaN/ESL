@@ -1,0 +1,65 @@
+%!TEX program = xelatex
+%!TEX spellcheck = en_GB
+\documentclass[final]{article}
+\input{../../.library/preamble.tex}
+\input{../../.library/style.tex}
+\addbibresource{../../.library/bibliography.bib}
+\begin{document}
+\section{Implementations}
+\label{sec:implementations}
+
+The following text lists each of the implementations that were created along with a short discussion of the results. Averaged timing and speed-up data can be found in \cref{app:results}.
+
+\subsection{Naive}
+The given matrix multiplication implementation is the most basic algorithm possible.
+Two two-dimensional arrays are statically initialized and multiplied in three consecutive nested loops.
+Source code for multiplying to matrices \texttt{mat1} and \texttt{mat2} and storing the result in a matrix \texttt{prod} is shown in \cref{lst:mmul}.
+
+\begin{lstlisting}[style=c, caption=Basic matrix multiplication algorithm, label=lst:mmul]
+int i, j, k;
+for (i = 0; i < size; i++) {
+	for (j = 0; j < size; j++) {
+		prod[i][j] = 0;
+		for (k = 0; k < size; k++) {
+			prod[i][j] = prod[i][j] + mat1[i][k] * mat2[k][j];
+		}
+	}
+}
+\end{lstlisting}
+
+This implementation is not very cache friendly due to little to no locality and has no intrinsic parallelism.
+Performance is therefore expected to be the worst of the four implementations in this report.
+
+Performance for $size = [4, 8, 16, 32, 64, 128]$ is shown in \cref{fig:comparison}.
+
+\subsection{Optimised}
+The next step is an optimisation step regarding the initialisation of the matrices.
+Whereas the original implementation uses static allocation, the requirements state that the application should be able to handle matrix sizes that are set using an input parameter.
+This implies dynamic allocation of the data structures.
+The allocation is implemented as the initialisation of a pointer array (pointing to rows), of which every element is initialized as a pointer to the element value.
+Note therefore that the matrices are stored in row-major order.
+Furthermore, looking at the source code shown in \cref{lst:mmul}, it can be seen that every iteration of the inner loop loads a consecutive row of \texttt{mat2}, incurring large steps and memory reads (since matrices are stored in row major order) and therefore poor locality.
+By switching the two innermost loops this is no longer the case, which should result in higher performance overall.
+
+Performance for $size = [4, 8, 16, 32, 64, 128]$ is shown in \cref{fig:comparison}.
+Note that a significant improvement over the given naive implementation is already present, obtained simply by optimising memory access and cache-friendliness.
+
+\subsection{NEON}
+One final possibility to increase multiplication performance is the use of the parallelism that is inherent to matrix multiplications.
+Newer ARM cores include support for single-instruction multiple-data (SIMD) instructions in the form of the NEON intrinsics library.
+The ARM processor present on the BeagleBoard allows for storing 4 32-bit integers in dedicated registers and performing operations on them in parallel.
+Since every element in the product of two matrices can be computed completely independently, this should yield a theoretical speed-up of 4x in addition to the optimisations that were already implemented.
+
+Performance for $size = [4, 8, 16, 32, 64, 128]$ is shown in \cref{fig:comparison}.
+Indeed, a large speed-up can be observed that is well over the required 3x.
+
+\subsection{DSP}
+The final requirement is an implementation that performs matrix multiplications not on the general purpose processor (GPP), but on the digital signal processor (DSP).
+The GPP should send both input matrices to the DSP via messaging passing, which will store them, compute their product and send that back.
+The rationale behind this is that the DSP should be relatively good at performing similar operations on a large dataset and might therefore perform well at multiplying matrices.
+This implementation requires a large amount of additional code to enable communication between the DSP and the GPP, but the matrix multiplication algorithm itself is equivalent to the one that is used in the optimised implementation.
+
+Performance for $size = [4, 8, 16, 32, 64, 128]$ is shown in \cref{fig:comparison}.
+Unfortunately, DSP performance mostly does not show an increase over the naive implementation. Still, a case could made for it, as we will briefly note in the next section.
+
+\end{document}

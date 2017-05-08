@@ -137,7 +137,7 @@ publish/
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
-# TODO: Comment the next line if you want to checkin your web deploy settings 
+# TODO: Comment the next line if you want to checkin your web deploy settings
 # but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj
@@ -381,3 +381,13 @@ script/**/*.tikz
 script/**/*.tiff
 script/**/*.png
 script/**/*.jpg
+
+###################
+## ESL (Embedded Systems Laboratory) Specific Build Results
+###################
+*.cdb
+*.cmd
+*.h62
+*.s62
+*.pickle
+pkg/

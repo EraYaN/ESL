@@ -1,0 +1,42 @@
+%!TEX program = xelatex
+%!TEX spellcheck = en_GB
+\documentclass[final]{article}
+\input{../../../.library/preamble.tex}
+\input{../../../.library/style.tex}
+\addbibresource{../../../.library/bibliography.bib}
+\begin{document}
+\section{Conclusion}
+Four implementations were tested and the ranking of the final results are shown in \cref{tab:final-implementation-ranking}.
+Implementing SIMD instructions are worth the relatively little effort to gain large improvements.
+
+\begin{table}[H]
+	\centering
+	\caption{Final implementation ranking}
+	\label{tab:final-implementation-ranking}
+	\begin{tabular}{lll}
+		\toprule
+		\textbf{\#} & \textbf{Implementation} & \textbf{Speed-up}\\
+		\midrule
+		1 & NEON        &  \numrange{15}{20}\\
+		2 & Optimised   &  \numrange{2}{3}\\ %TODO verify
+		3 & DSP         &  \numrange{0.27}{1.33}\\ %TODO verify
+		4 & Naive       &  1\\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+In any case, for NEON and optimised implementations (at least for larger sizes) the required speedup of 3x is obtained. It is likely that the DSP should in fact faster than it is now, unfortunately there was no time to explore further options.
+
+\section{Further work}
+Other possibilities to increase multiplication performance do exist.
+Looking at algorithms:
+\begin{itemize}
+	\item For increased cache performance, both input matrices may be tiled into blocks, after which these blocks are multiplied independently and the results merged into a whole. The smaller blocks imply better locality and may enable even more efficient parallel processing.
+	\item Advanced multiplication algorithms like the Strassen algorithm may be applied.
+\end{itemize}
+Looking at hardware:
+\begin{itemize}
+	\item The BeagleBoard also includes a GPU. Being an embarrassingly parallel computation, matrix multiplications should be extremely fast. A GPU implementation is likely to be significantly faster than even the NEON implementation.
+\end{itemize}
+
+\end{document}
