@@ -27,8 +27,8 @@ int main(int argc, char ** argv)
 	frame_capture.read(frame);
 
 	if (frame.cols < 10 || frame.rows < 10) {
-		std::cout << "input video could not be loaded" << std::endl;
-		return -1;
+		std::cout << "Input video could not be loaded, or is too small. 10x10 pixel is the minimum." << std::endl;
+		return 1;
 	}
 
 	MeanShift ms; // creat meanshift obj
@@ -50,15 +50,15 @@ int main(int argc, char ** argv)
 		if (0 == status) break;
 
 		// track object
-#ifndef ARMCC
-// MCPROF_START();
+#if !defined(ARMCC) && defined(MCPROF)
+		MCPROF_START();
 #endif
 		cv::Rect ms_rect = ms.track(frame);
-#ifndef ARMCC
-		// MCPROF_STOP();
+#if !defined(ARMCC) && defined(MCPROF)
+		MCPROF_STOP();
 #endif
 
-// mark the tracked object in frame
+		// mark the tracked object in frame
 		cv::rectangle(frame, ms_rect, cv::Scalar(0, 0, 255), 3);
 
 		// write the frame
@@ -68,11 +68,11 @@ int main(int argc, char ** argv)
 	MCPROF_STOP();
 #endif
 	perftime_t endTime = now();
-	
+
 	double nanoseconds = diffToNanoseconds(startTime, endTime);
 
 	std::cout << "Processed " << fcount << " frames" << std::endl;
-	std::cout << "Time: " << nanoseconds/1e9 << " sec\nFPS : " << fcount / (nanoseconds / 1e9) << std::endl;
+	std::cout << "Time: " << nanoseconds / 1e9 << " sec\nFPS : " << fcount / (nanoseconds / 1e9) << std::endl;
 
 	return 0;
 }
