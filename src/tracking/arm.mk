@@ -31,18 +31,18 @@ INCLUDES			:= $(sort $(INCLUDES))
 CFLAGS=$(DEFS) $(INCLUDES)          \
 	  -Wall -O3 -Wfatal-errors 		\
 	  --sysroot=/opt/rootfs			\
-      -mlittle-endian               \
-      -march=armv5t                 \
-      -mtune=arm9tdmi               \
-      -msoft-float                  \
-      -Uarm                         \
-      -marm                         \
-      -Wno-trigraphs                \
-      -fno-strict-aliasing          \
-      -fno-common                   \
-      -fno-omit-frame-pointer       \
-      -mapcs                        \
-      -mabi=aapcs-linux				\
+	  -mlittle-endian               \
+	  -march=armv5t                 \
+	  -mtune=arm9tdmi               \
+	  -msoft-float                  \
+	  -Uarm                         \
+	  -marm                         \
+	  -Wno-trigraphs                \
+	  -fno-strict-aliasing          \
+	  -fno-common                   \
+	  -fno-omit-frame-pointer       \
+	  -mapcs                        \
+	  -mabi=aapcs-linux				\
 	  -std=$(CPPSTD)
 
 all: clean $(EXEC)
@@ -55,4 +55,4 @@ $(OUTDIR)/%.o : ../%.cpp
 
 .PHONY: clean all
 clean:
-	rm -f $(OBJS) $(EXEC) tracking_result.avi *~
+	rm -rf out $(OBJS) $(EXEC) tracking_result.avi *~
