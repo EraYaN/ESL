@@ -22,7 +22,7 @@ SRC_DIR				:= $(addprefix ../,$(MODULES))
 OUTDIR				:= ./out/ARM
 BUILD_DIR			:= $(addprefix $(OUTDIR)/,$(MODULES))
 
-SRC				    := $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
+SRC					:= $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
 OBJ					:= $(patsubst ../%.cpp,$(OUTDIR)/%.o,$(SRC))
 
 MODULES_INCLUDES	:= $(addprefix -I../,$(MODULES))
@@ -49,7 +49,7 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	-ffast-math						\
 	-std=$(CPPSTD)					\
 	--sysroot=$(SYSROOT)
-	
+
 
 all: checkdirs $(EXEC)
 

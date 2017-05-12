@@ -4,8 +4,8 @@ using namespace std;
 #ifdef ARMCC
 double get_frequency(bool debug) {
 #if (defined __linux__ || defined __blrts__) && \
-	(defined __i386__ || defined __x86_64__ || defined __ia64__ || defined __PPC__) && \
-	(defined __GNUC__ || defined __INTEL_COMPILER || defined __PATHSCALE__ || defined __xlC__)
+    (defined __i386__ || defined __x86_64__ || defined __ia64__ || defined __PPC__) && \
+    (defined __GNUC__ || defined __INTEL_COMPILER || defined __PATHSCALE__ || defined __xlC__)
 	std::ifstream infile("/proc/cpuinfo");
 	char     buffer[256], *colon;
 
