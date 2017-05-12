@@ -2,7 +2,7 @@
 PIN_DIR=$(PIN_ROOT)
 
 # set the path to mcprof if not set in .bachrc
-MCPROF_DIR=~/mcprof
+MCPROF_DIR=/home/ubuntu/mcprof
 
 CC=g++
 EXEC=pcMeanshiftExec
@@ -12,7 +12,7 @@ CPPSTD=c++11
 # Modules are directories
 MODULES				:= tracking-shared tracking
 SRC_DIR				:= $(addprefix ../,$(MODULES))
-OUTDIR				:= ./out
+OUTDIR				:= ./out/x64
 BUILD_DIR			:= $(addprefix $(OUTDIR)/,$(MODULES))
 
 SRC				    := $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
@@ -43,20 +43,20 @@ debug: CFLAGS= -g -Wall -Wfatal-errors -std=$(CPPSTD)
 debug: checkdirs $(EXEC)
 	gdb --args $(CMD)
 
-valgrind: CFLAGS= -g -Wall -Wfatal-errors
-valgrind: clean $(EXEC)
+valgrind: CFLAGS= -g -Wall -Wfatal-errors -std=$(CPPSTD)
+valgrind: clean checkdirs $(EXEC)
 	valgrind --leak-check=full --tool=memcheck $(CMD)
 
-gprof: CFLAGS=-O2 -g -pg -Wall -Wfatal-errors
+gprof: CFLAGS=-O2 -g -pg -Wall -Wfatal-errors -std=$(CPPSTD)
 gprof: LDFLAGS=-pg
-gprof: clean $(EXEC)
+gprof: clean checkdirs $(EXEC)
 	$(CMD)
 	gprof -b $(EXEC) > gprof.txt
 	$(MCPROF_DIR)/scripts/gprof2pdf.sh gprof.txt
 
 MCPROF_OPT:=-RecordStack 0  -TrackObjects 1 -Engine 1 -TrackStartStop 1 -TrackZones 0 -Threshold 100
-mcprof: CFLAGS= -O2 -g -fno-omit-frame-pointer -Wall -Wfatal-errors
-mcprof: clean $(EXEC)
+mcprof: CFLAGS= -O2 -g -fno-omit-frame-pointer -Wall -Wfatal-errors -std=$(CPPSTD) -DMCPROF
+mcprof: clean checkdirs $(EXEC)
 	time $(PIN_DIR)/pin -t $(MCPROF_DIR)/obj-intel64/mcprof.so $(MCPROF_OPT) -- $(CMD)
 	$(MCPROF_DIR)/scripts/callgraph2pdf.sh
 	$(MCPROF_DIR)/scripts/dot2pdf.sh
@@ -68,7 +68,7 @@ $(OUTDIR) $(sort $(BUILD_DIR)):
 	mkdir -p $@
 
 clean:
-	rm -rf out/ $(EXEC) *~
+	rm -rf $(OUTDIR) $(EXEC) *~
 
 dist-clean: clean
 	rm -rf tracking_result.avi gmon.out gprof.txt \

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26401.1
+VisualStudioVersion = 15.0.26430.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "matrix-dsp", "matrix-dsp\matrix-dsp.vcxproj", "{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}"
 EndProject
@@ -137,6 +137,7 @@ Global
 		{43010785-99E5-4C45-BC1D-D496AD7D0A5B}.Debug|x64.ActiveCfg = Debug|x64
 		{43010785-99E5-4C45-BC1D-D496AD7D0A5B}.Debug|x64.Build.0 = Debug|x64
 		{43010785-99E5-4C45-BC1D-D496AD7D0A5B}.Release|Beagle.ActiveCfg = Release|x64
+		{43010785-99E5-4C45-BC1D-D496AD7D0A5B}.Release|Beagle.Build.0 = Release|x64
 		{43010785-99E5-4C45-BC1D-D496AD7D0A5B}.Release|x64.ActiveCfg = Release|x64
 		{43010785-99E5-4C45-BC1D-D496AD7D0A5B}.Release|x64.Build.0 = Release|x64
 		{44C92129-1496-4A5C-909A-F54BCDA9997A}.Debug|Beagle.ActiveCfg = Debug|x64
@@ -144,6 +145,7 @@ Global
 		{44C92129-1496-4A5C-909A-F54BCDA9997A}.Debug|x64.ActiveCfg = Debug|x64
 		{44C92129-1496-4A5C-909A-F54BCDA9997A}.Debug|x64.Build.0 = Debug|x64
 		{44C92129-1496-4A5C-909A-F54BCDA9997A}.Release|Beagle.ActiveCfg = Release|x64
+		{44C92129-1496-4A5C-909A-F54BCDA9997A}.Release|Beagle.Build.0 = Release|x64
 		{44C92129-1496-4A5C-909A-F54BCDA9997A}.Release|x64.ActiveCfg = Release|x64
 		{44C92129-1496-4A5C-909A-F54BCDA9997A}.Release|x64.Build.0 = Release|x64
 		{E3794D56-E12C-42CD-9BD6-A055F0BEEE9D}.Debug|Beagle.ActiveCfg = Debug|x64
@@ -151,6 +153,7 @@ Global
 		{E3794D56-E12C-42CD-9BD6-A055F0BEEE9D}.Debug|x64.ActiveCfg = Debug|x64
 		{E3794D56-E12C-42CD-9BD6-A055F0BEEE9D}.Debug|x64.Build.0 = Debug|x64
 		{E3794D56-E12C-42CD-9BD6-A055F0BEEE9D}.Release|Beagle.ActiveCfg = Release|x64
+		{E3794D56-E12C-42CD-9BD6-A055F0BEEE9D}.Release|Beagle.Build.0 = Release|x64
 		{E3794D56-E12C-42CD-9BD6-A055F0BEEE9D}.Release|x64.ActiveCfg = Release|x64
 		{E3794D56-E12C-42CD-9BD6-A055F0BEEE9D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection

@@ -2,12 +2,17 @@
 #include <timing.h>
 #include <iostream>
 
-#if !defined(ARMCC) && defined(MCPROF)
+#ifndef ARMCC
 #include "markers.h"
 #endif
 
 int main(int argc, char ** argv)
 {
+#ifdef ARMCC
+	double freq = get_frequency(false);
+#else
+	double freq = 1;
+#endif
 	cv::VideoCapture frame_capture;
 	if (argc < 2)
 	{
@@ -26,19 +31,18 @@ int main(int argc, char ** argv)
 	cv::Mat frame;
 	frame_capture.read(frame);
 
-	if (frame.cols < 10 || frame.rows < 10) {
-		std::cout << "Input video could not be loaded, or is too small. 10x10 pixel is the minimum." << std::endl;
-		return 1;
-	}
-
 	MeanShift ms; // creat meanshift obj
 	ms.Init_target_frame(frame, rect); // init the meanshift
 
 	int codec = CV_FOURCC('F', 'L', 'V', '1');
 	cv::VideoWriter writer("tracking_result.avi", codec, 20, cv::Size(frame.cols, frame.rows));
-
+#ifdef ARMCC
+#ifdef USECYCLES
+	init_perfcounters(1, 0);
+#endif
+#endif
 	perftime_t startTime = now();
-#if !defined(ARMCC) && defined(MCPROF)
+#ifndef ARMCC
 	MCPROF_START();
 #endif
 	int TotalFrames = 32;
@@ -50,11 +54,11 @@ int main(int argc, char ** argv)
 		if (0 == status) break;
 
 		// track object
-#if !defined(ARMCC) && defined(MCPROF)
+#ifndef ARMCC
 		MCPROF_START();
 #endif
 		cv::Rect ms_rect = ms.track(frame);
-#if !defined(ARMCC) && defined(MCPROF)
+#ifndef ARMCC
 		MCPROF_STOP();
 #endif
 
@@ -68,8 +72,7 @@ int main(int argc, char ** argv)
 	MCPROF_STOP();
 #endif
 	perftime_t endTime = now();
-
-	double nanoseconds = diffToNanoseconds(startTime, endTime);
+	double nanoseconds = diffToNanoseconds(startTime, endTime, freq);
 
 	std::cout << "Processed " << fcount << " frames" << std::endl;
 	std::cout << "Time: " << nanoseconds / 1e9 << " sec\nFPS : " << fcount / (nanoseconds / 1e9) << std::endl;

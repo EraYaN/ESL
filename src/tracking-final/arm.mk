@@ -1,10 +1,11 @@
-#BASE_TOOLCHAIN=/data/bbToolChain/usr/local/share/codesourcery
-#CC=$(BASE_TOOLCHAIN)/bin/arm-none-linux-gnueabi-g++
-BASE_TOOLCHAIN=/data/bbToolChain/usr/local/share/gcc-linaro-5.4.1-2017.01-x86_64_arm-linux-gnueabi
-CC=$(BASE_TOOLCHAIN)/bin/arm-linux-gnueabi-g++
+BASE_TOOLCHAIN=/data/bbToolChain/usr/local/share/codesourcery
+CC=$(BASE_TOOLCHAIN)/bin/arm-none-linux-gnueabi-g++
+#BASE_TOOLCHAIN=/data/bbToolChain/usr/local/share/gcc-linaro-5.4.1-2017.01-x86_64_arm-linux-gnueabi
+#CC=$(BASE_TOOLCHAIN)/bin/arm-linux-gnueabi-g++
 
 EXEC=armMeanshiftExec
-CPPSTD=c++11
+CPPSTD=c++0x
+
 SYSROOT=/data/rootfs
 #SYSROOT=/data/sysroot-glibc-linaro-2.21-2017.01-arm-linux-gnueabi
 
@@ -18,7 +19,7 @@ INCLUDES=-I. -I$(BASE_TOOLCHAIN)/include
 # Modules are directories
 MODULES				:= tracking-shared tracking-final
 SRC_DIR				:= $(addprefix ../,$(MODULES))
-OUTDIR				:= ./out
+OUTDIR				:= ./out/ARM
 BUILD_DIR			:= $(addprefix $(OUTDIR)/,$(MODULES))
 
 SRC				    := $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
@@ -28,7 +29,7 @@ MODULES_INCLUDES	:= $(addprefix -I../,$(MODULES))
 
 INCLUDES			+= $(MODULES_INCLUDES) 
 
-
+INCLUDES			:= $(sort $(INCLUDES))
 
 CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	-mlittle-endian					\
@@ -63,6 +64,13 @@ checkdirs: $(OUTDIR) $(BUILD_DIR)
 $(OUTDIR) $(sort $(BUILD_DIR)):
 	mkdir -p $@
 
+send: $(EXEC)
+	scp -oKexAlgorithms=+diffie-hellman-group1-sha1 $(EXEC) root@192.168.0.202:/home/root/esLAB/.
+
 .PHONY: clean all
 clean:
-	rm -rf out/ $(EXEC) tracking_result.avi *~
+	rm -rf $(OUTDIR) $(EXEC) tracking_result.avi *~
+	
+info:
+	echo $(SRC)
+	echo $(OBJ)
