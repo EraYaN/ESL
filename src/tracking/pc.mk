@@ -15,14 +15,14 @@ SRC_DIR				:= $(addprefix ../,$(MODULES))
 OUTDIR				:= ./out
 BUILD_DIR			:= $(addprefix $(OUTDIR)/,$(MODULES))
 
-SRC				    := $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
+SRC					:= $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
 OBJ					:= $(patsubst ../%.cpp,$(OUTDIR)/%.o,$(SRC))
 
 MODULES_INCLUDES	:= $(addprefix -I../,$(MODULES))
 
 INCLUDES			+= $(MODULES_INCLUDES) 
 
-INCLUDES					:= $(sort $(INCLUDES))
+INCLUDES			:= $(sort $(INCLUDES))
 
 CFLAGS = -Wall -O3 -Wfatal-errors -std=$(CPPSTD)
 LIBS = -lm -lpthread `pkg-config --libs opencv`
