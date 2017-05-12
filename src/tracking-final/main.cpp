@@ -8,72 +8,70 @@
 
 int main(int argc, char ** argv)
 {
-	cv::VideoCapture frame_capture;
-	if (argc < 2)
-	{
-		std::cout << "specifiy an input video file to track" << std::endl;
-		std::cout << "Usage:  ./" << argv[0] << " car.avi" << std::endl;
-		return -1;
-	}
-	else
-	{
-		frame_capture = cv::VideoCapture(argv[1]);
-	}
+    cv::VideoCapture frame_capture;
+    if (argc < 2) {
+        std::cout << "specifiy an input video file to track" << std::endl;
+        std::cout << "Usage:  ./" << argv[0] << " car.avi" << std::endl;
+        return -1;
+    } else {
+        frame_capture = cv::VideoCapture(argv[1]);
+    }
 
-	// this is used for testing the car video
-	// instead of selection of object of interest using mouse
-	cv::Rect rect(228, 367, 86, 58);
-	cv::Mat frame;
-	frame_capture.read(frame);
+    // this is used for testing the car video
+    // instead of selection of object of interest using mouse
+    cv::Rect rect(228, 367, 86, 58);
+    cv::Mat frame;
+    frame_capture.read(frame);
 
-	if (frame.cols < 10 || frame.rows < 10) {
-		std::cout << "Input video could not be loaded, or is too small. 10x10 pixel is the minimum." << std::endl;
-		return 1;
-	}
+    if (frame.cols < 10 || frame.rows < 10) {
+        std::cout << "Input video could not be loaded, or is too small. 10x10 pixel is the minimum." << std::endl;
+        return 1;
+    }
 
-	MeanShift ms; // creat meanshift obj
-	ms.Init_target_frame(frame, rect); // init the meanshift
+    MeanShift ms; // creat meanshift obj
+    ms.Init_target_frame(frame, rect); // init the meanshift
 
-	int codec = CV_FOURCC('F', 'L', 'V', '1');
-	cv::VideoWriter writer("tracking_result.avi", codec, 20, cv::Size(frame.cols, frame.rows));
+    int codec = CV_FOURCC('F', 'L', 'V', '1');
+    cv::VideoWriter writer("tracking_result.avi", codec, 20, cv::Size(frame.cols, frame.rows));
 
-	perftime_t startTime = now();
+    perftime_t startTime = now();
 #if !defined(ARMCC) && defined(MCPROF)
-	MCPROF_START();
+    MCPROF_START();
 #endif
-	int TotalFrames = 32;
-	int fcount;
-	for (fcount = 0; fcount < TotalFrames; ++fcount)
-	{
-		// read a frame
-		int status = frame_capture.read(frame);
-		if (0 == status) break;
+    int TotalFrames = 32;
+    int fcount;
+    for (fcount = 0; fcount < TotalFrames; ++fcount) {
+        // read a frame
+        int status = frame_capture.read(frame);
+        if (0 == status) break;
 
-		// track object
-#if !defined(ARMCC) && defined(MCPROF)
-		MCPROF_START();
-#endif
-		cv::Rect ms_rect = ms.track(frame);
-#if !defined(ARMCC) && defined(MCPROF)
-		MCPROF_STOP();
-#endif
+        // track object
+        #if !defined(ARMCC) && defined(MCPROF)
+            MCPROF_START();
+        #endif
 
-		// mark the tracked object in frame
-		cv::rectangle(frame, ms_rect, cv::Scalar(0, 0, 255), 3);
+        cv::Rect ms_rect = ms.track(frame);
 
-		// write the frame
-		writer << frame;
-	}
-#if !defined(ARMCC) && defined(MCPROF)
-	MCPROF_STOP();
-#endif
-	perftime_t endTime = now();
+        #if !defined(ARMCC) && defined(MCPROF)
+            MCPROF_STOP();
+        #endif
 
-	double nanoseconds = diffToNanoseconds(startTime, endTime);
+        // mark the tracked object in frame
+        cv::rectangle(frame, ms_rect, cv::Scalar(0, 0, 255), 3);
 
-	std::cout << "Processed " << fcount << " frames" << std::endl;
-	std::cout << "Time: " << nanoseconds / 1e9 << " sec\nFPS : " << fcount / (nanoseconds / 1e9) << std::endl;
+        // write the frame
+        writer << frame;
+    }
+    #if !defined(ARMCC) && defined(MCPROF)
+        MCPROF_STOP();
+    #endif
+    perftime_t endTime = now();
 
-	return 0;
+    double nanoseconds = diffToNanoseconds(startTime, endTime);
+
+    std::cout << "Processed " << fcount << " frames" << std::endl;
+    std::cout << "Time: " << nanoseconds / 1e9 << " sec\nFPS : " << fcount / (nanoseconds / 1e9) << std::endl;
+
+    return 0;
 }
 

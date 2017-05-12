@@ -48,7 +48,7 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	-ffast-math						\
 	-std=$(CPPSTD)					\
 	--sysroot=$(SYSROOT)
-	
+
 
 all: checkdirs $(EXEC)
 
