@@ -19,12 +19,15 @@ BEAGLE_BASE_DIR = '~/esLAB'
 LINE_MARKER = '@'
 
 includes = {
-    'shared':{'project':'tracking-include'},
+    'shared':{'project':'matrix-include'},
 }
 
 benchmarks = {
-    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/car.avi'],'sizearg':False, 'usesdsp':False},   
-    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/car.avi'],'sizearg':False, 'usesdsp':False},
+    'vanilla':{'project':'matrix', 'executable':'matrix','deps':[],'includes':['shared'],'baseargs':[],'sizearg':False, 'usesdsp':False},
+    'dynamic':{'project':'matrix-dynamic', 'executable':'matrix-mult-dynamic','deps':[],'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':False},
+    'neon':{'project':'matrix-neon', 'executable':'matrix-mult-neon', 'deps':[],'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':False},
+    'dspcore':{'project':'matrix-dsp', 'executable':'matrix.out', 'deps':[], 'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':True},
+    'dsp':{'project':'matrix-gpp', 'executable':'matrixgpp', 'deps':['dspcore'],'includes':['shared'],'baseargs':['{basedir}/{depname}'],'sizearg':True, 'usesdsp':True},
     }
 
 class Error(Exception):
@@ -151,7 +154,8 @@ class RunSystem(object):
 
         self.build_server = paramiko.SSHClient()
         self.build_server.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.build_server.connect(hostname=host, port=port, username=user, pkey=k, allow_agent=True)            
+        self.build_server.connect(hostname=host, port=port, username=user, pkey=k, allow_agent=True)
+            
 
         #self.build_server_sftp = self.build_server.open_sftp()
             
@@ -169,6 +173,8 @@ class RunSystem(object):
         self.beagle_board = paramiko.SSHClient()
         self.beagle_board.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.beagle_board.connect('192.168.0.202', port=22, username='root',password='', sock=channel)
+                    
+
 
     def Disconnect(self):        
         if self.beagle_board:
@@ -213,17 +219,17 @@ class RunSystem(object):
         for bench in self.benchmark['deps']:
             dep_bench = benchmarks[bench]
             print("Cleaning dependency {project}.".format(**dep_bench))
-            ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make clean -C ~/projects/{project} -f arm.mk".format(**dep_bench))
+            ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make clean -C ~/projects/{project}".format(**dep_bench))
             self.PrintCommandOutput(ssh_stdout,ssh_stderr)
             print("Building dependency {project}.".format(**dep_bench))
-            ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make all -C ~/projects/{project} -f arm.mk".format(**dep_bench))
+            ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make all -C ~/projects/{project}".format(**dep_bench))
             self.PrintCommandOutput(ssh_stdout,ssh_stderr)
 
         print("Cleaning {project}.".format(**self.benchmark))
-        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make clean -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
+        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make clean -C ~/projects/{project}".format(**self.benchmark))
         self.PrintCommandOutput(ssh_stdout,ssh_stderr)
         print("Building {project}.".format(**self.benchmark))
-        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make all -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
+        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make all -C ~/projects/{project}".format(**self.benchmark))
         self.PrintCommandOutput(ssh_stdout,ssh_stderr)       
 
     def SendExec(self):
@@ -233,11 +239,11 @@ class RunSystem(object):
         for bench in self.benchmark['deps']:
             dep_bench = benchmarks[bench]
             print("Sending compiled dependency {project} to BeagleBoard.".format(**dep_bench))
-            ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/{project} -f arm.mk".format(**dep_bench))
+            ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/{project}".format(**dep_bench))
             self.PrintCommandOutput(ssh_stdout,ssh_stderr)   
 
         print("Sending compiled {project} to BeagleBoard.".format(**self.benchmark))
-        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
+        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/{project}".format(**self.benchmark))
         self.PrintCommandOutput(ssh_stdout,ssh_stderr)   
 
     def Run(self, size=64):
@@ -264,7 +270,7 @@ class RunSystem(object):
             formatarguments['arguments'].append('{0:d}'.format(size))
 
         formatarguments['arguments_str'] = ' '.join(formatarguments['arguments'])
-        print("{basedir}/{executable} {arguments_str}".format(**formatarguments))
+
         ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("{basedir}/{executable} {arguments_str}".format(**formatarguments))        
         self.PrintCommandOutput(ssh_stdout,ssh_stderr)
         csv_data = ''
