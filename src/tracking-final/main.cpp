@@ -46,15 +46,15 @@ int main(int argc, char ** argv)
         if (0 == status) break;
 
         // track object
-        #if !defined(ARMCC) && defined(MCPROF)
-            MCPROF_START();
-        #endif
+#if !defined(ARMCC) && defined(MCPROF)
+        MCPROF_START();
+#endif
 
         cv::Rect ms_rect = ms.track(frame);
 
-        #if !defined(ARMCC) && defined(MCPROF)
-            MCPROF_STOP();
-        #endif
+#if !defined(ARMCC) && defined(MCPROF)
+        MCPROF_STOP();
+#endif
 
         // mark the tracked object in frame
         cv::rectangle(frame, ms_rect, cv::Scalar(0, 0, 255), 3);
@@ -62,9 +62,9 @@ int main(int argc, char ** argv)
         // write the frame
         writer << frame;
     }
-    #if !defined(ARMCC) && defined(MCPROF)
-        MCPROF_STOP();
-    #endif
+#if !defined(ARMCC) && defined(MCPROF)
+    MCPROF_STOP();
+#endif
     perftime_t endTime = now();
 
     double nanoseconds = diffToNanoseconds(startTime, endTime);
