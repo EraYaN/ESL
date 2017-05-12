@@ -6,7 +6,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#define PI 3.1415926
+#define PI 3.14159265358979323846264338327950
+
 class MeanShift
 {
 private:
