@@ -6,12 +6,16 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#ifdef ARMCC
+#include <arm_neon.h>
+#endif
+
 #define PI 3.14159265358979323846264338327950
 
 class MeanShift
 {
 private:
-    float bin_width;
+    float reciprocal_bin_width;
     cv::Mat target_model;
     cv::Rect target_Region;
     float normalized_C;
@@ -19,9 +23,15 @@ private:
 
     struct config {
         int num_bins;
-        int piexl_range;
+        int pixel_range;
         int MaxIter;
     } cfg;
+
+    float weightKernel(int curr_pixel, cv::Mat &target_model, cv::Mat &target_candidate, int k);
+#ifdef ARMCC
+    void weightKernel_NEON(const uint8_t *curr_pixels, const float *target_model_row, const float *target_candidate_row, const float *weight);
+#endif
+
 
 public:
     MeanShift();

@@ -9,8 +9,8 @@ MeanShift::MeanShift()
 {
 	cfg.MaxIter = 8;
 	cfg.num_bins = 16;
-	cfg.piexl_range = 256;
-	bin_width = cfg.piexl_range / cfg.num_bins;
+	cfg.pixel_range = 256;
+	bin_width = cfg.pixel_range / cfg.num_bins;
 }
 
 void  MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)

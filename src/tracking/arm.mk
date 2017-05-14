@@ -17,7 +17,7 @@ DEFS=-DARMCC
 INCLUDES=-I. -I$(BASE_TOOLCHAIN)/include
 
 # Modules are directories
-MODULES				:= tracking-shared tracking-final
+MODULES				:= tracking-shared tracking
 SRC_DIR				:= $(addprefix ../,$(MODULES))
 OUTDIR				:= ./out/ARM
 BUILD_DIR			:= $(addprefix $(OUTDIR)/,$(MODULES))
@@ -36,7 +36,6 @@ CFLAGS= -Wall -O3 -Wfatal-errors 		\
 	  -mlittle-endian               \
 	  -march=armv5t                 \
 	  -mtune=arm9tdmi               \
-	  -msoft-float                  \
 	  -Uarm                         \
 	  -marm                         \
 	  -Wno-trigraphs                \

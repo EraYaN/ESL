@@ -38,9 +38,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <RemoteBuildCommandLine>make -f pc.mk -C $(RemoteProjectDir)</RemoteBuildCommandLine>
-    <RemoteReBuildCommandLine>make rebuild -f pc.mk -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
-    <RemoteCleanCommandLine>make clean -f pc.mk -C $(RemoteProjectDir)</RemoteCleanCommandLine>
+    <RemoteBuildCommandLine>make -f arm.mk -C $(RemoteProjectDir)</RemoteBuildCommandLine>
+    <RemoteReBuildCommandLine>make rebuild -f arm.mk -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
+    <RemoteCleanCommandLine>make clean -f arm.mk -C $(RemoteProjectDir)</RemoteCleanCommandLine>
     <NMakeIncludeSearchPath>$(SolutionDir)tracking-shared;$(SolutionDir)includes\opencv;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\usr;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux\2.6.18;$(SolutionDir)includes\codesourcery\arm-none-linux-gnueabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <RemoteBuildOutputs>$(RemoteProjectDir)/pcMeanshiftExec</RemoteBuildOutputs>
   </PropertyGroup>

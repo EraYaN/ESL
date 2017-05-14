@@ -16,7 +16,7 @@ private:
 
 	struct config {
 		int num_bins;
-		int piexl_range;
+		int pixel_range;
 		int MaxIter;
 	}cfg;
 

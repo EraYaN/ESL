@@ -35,7 +35,7 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	-mlittle-endian					\
 	-march=armv7-a					\
 	-mtune=cortex-a8				\
-	-msoft-float					\
+	-mcpu=cortex-a8					\
 	-Uarm							\
 	-marm							\
 	-Wno-trigraphs					\
@@ -45,6 +45,7 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	-mapcs							\
 	-mabi=aapcs-linux				\
 	-mfpu=neon						\
+	-mfloat-abi=softfp				\
 	-ftree-vectorize				\
 	-ffast-math						\
 	-std=$(CPPSTD)					\

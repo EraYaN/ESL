@@ -15,6 +15,9 @@
     <ClInclude Include="meanshift.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="neon_util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="arm.mk" />
