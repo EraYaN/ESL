@@ -15,7 +15,7 @@ int main(int argc, char ** argv)
 {
 #ifdef ARMCC
 #ifdef USECYCLES
-    double freq = get_frequency(true);
+    double freq = get_frequency(true);;
 #else
     double freq = 1;
 #endif
@@ -115,6 +115,17 @@ int main(int argc, char ** argv)
 #endif
     endTime = now();    
     totalTime = diffToNanoseconds(startTime, endTime, freq);
+
+#ifdef TIMING
+    std::cout << "loadPixelTime: " << ms.loadPixelTime << std::endl;
+    std::cout << "calcBinTime: " << ms.calcBinTime << std::endl;
+    std::cout << "loadModelTime: " << ms.loadModelTime << std::endl;
+    std::cout << "loadCandidateTime: " << ms.loadCandidateTime << std::endl;
+    std::cout << "calcMultiplierTime: " << ms.calcMultiplierTime << std::endl;
+    std::cout << "loadWeighTime: " << ms.loadWeightTime << std::endl;
+    std::cout << "calcWeightTime: " << ms.calcWeightTime << std::endl;
+    std::cout << "storeWeightTime: " << ms.storeWeightTime << std::endl;
+#endif
 
     std::cout << "Processed " << fcount << " frames" << std::endl;
     std::cout << "Time: " << totalTime / 1e9 << " sec\nFPS : " << fcount / (totalTime / 1e9) << std::endl;

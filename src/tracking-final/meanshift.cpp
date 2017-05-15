@@ -8,6 +8,10 @@
 #include "neon_util.h"
 #endif
 
+#ifdef TIMING
+#include "timing.h"
+#endif
+
 MeanShift::MeanShift()
 {
     cfg.MaxIter = 8;
@@ -53,19 +57,19 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     cv::Vec3f bin_value;
 
     int row_index = rect.y;
-    int clo_index = rect.x;
+    int col_index = rect.x;
 
     for (int i = 0; i < rect.height; i++) {
-        clo_index = rect.x;
+        col_index = rect.x;
         for (int j = 0; j < rect.width; j++) {
-            curr_pixel_value = frame.at<cv::Vec3b>(row_index, clo_index);
+            curr_pixel_value = frame.at<cv::Vec3b>(row_index, col_index);
             bin_value[0] = (curr_pixel_value[0] * reciprocal_bin_width);
             bin_value[1] = (curr_pixel_value[1] * reciprocal_bin_width);
             bin_value[2] = (curr_pixel_value[2] * reciprocal_bin_width);
             pdf_model.at<float>(0, bin_value[0]) += kernel.at<float>(i, j)*normalized_C;
             pdf_model.at<float>(1, bin_value[1]) += kernel.at<float>(i, j)*normalized_C;
             pdf_model.at<float>(2, bin_value[2]) += kernel.at<float>(i, j)*normalized_C;
-            clo_index++;
+            col_index++;
         }
         row_index++;
     }
@@ -79,7 +83,7 @@ float MeanShift::weightKernel(int curr_pixel, cv::Mat &target_model, cv::Mat &ta
     return static_cast<float>((sqrt(target_model.at<float>(k, bin_value) / target_candidate.at<float>(k, bin_value))));
 }
 
-#ifdef ARMCC
+#ifdef __ARM_NEON__
 /**
  * Run the weight calculation kernel in blocks of eight at a time using NEON.
 
@@ -89,6 +93,11 @@ float MeanShift::weightKernel(int curr_pixel, cv::Mat &target_model, cv::Mat &ta
  */
 void MeanShift::weightKernel_NEON(const uint8_t *curr_pixels, const float *target_model_row, const float *target_candidate_row, const float *weight_row)
 {
+#ifdef TIMING
+    perftime_t startTime, endTime;
+    startTime = now();
+#endif
+
     // Load current pixels into a vector of 8 uint8 elements, expand into a
     // vector of 8 uint16 elements.
     uint16x8_t pixel_vec = vmovl_u8(vld1_u8(curr_pixels));
@@ -96,9 +105,22 @@ void MeanShift::weightKernel_NEON(const uint8_t *curr_pixels, const float *targe
     // vectors and convert to float.
     float32x4_t pixel_vec_high = vcvtq_f32_u32(vmovl_u16(vget_high_u16(pixel_vec)));
     float32x4_t pixel_vec_low = vcvtq_f32_u32(vmovl_u16(vget_low_u16(pixel_vec)));
+
+#ifdef TIMING
+    endTime = now();
+    this->loadPixelTime += diffToNanoseconds(startTime, endTime, 1);
+    startTime = now();
+#endif
+
     // Multiply both parts to obtain bins and convert back to int.
     uint32x4_t bin_vec1 = vcvtq_u32_f32(vmulq_n_f32(pixel_vec_low, reciprocal_bin_width));
     uint32x4_t bin_vec2 = vcvtq_u32_f32(vmulq_n_f32(pixel_vec_high, reciprocal_bin_width));
+
+#ifdef TIMING
+    endTime = now();
+    this->calcBinTime += diffToNanoseconds(startTime, endTime, 1);
+    startTime = now();
+#endif
 
     float32x4_t model_vec1, model_vec2, candidate_vec1, candidate_vec2, multiplier1, multiplier2;
     // Load elements for both sets of vectors individually,
@@ -115,6 +137,12 @@ void MeanShift::weightKernel_NEON(const uint8_t *curr_pixels, const float *targe
     model_vec2 = vld1q_lane_f32((float32_t*)&target_model_row[vgetq_lane_u32(bin_vec2, 2)], model_vec2, 2);
     model_vec2 = vld1q_lane_f32((float32_t*)&target_model_row[vgetq_lane_u32(bin_vec2, 3)], model_vec2, 3);
 
+#ifdef TIMING
+    endTime = now();
+    this->loadModelTime += diffToNanoseconds(startTime, endTime, 1);
+    startTime = now();
+#endif
+
     candidate_vec1 = vdupq_n_f32(0.0f);
     candidate_vec1 = vld1q_lane_f32((float32_t*)&target_candidate_row[vgetq_lane_u32(bin_vec1, 0)], candidate_vec1, 0);
     candidate_vec1 = vld1q_lane_f32((float32_t*)&target_candidate_row[vgetq_lane_u32(bin_vec1, 1)], candidate_vec1, 1);
@@ -126,6 +154,12 @@ void MeanShift::weightKernel_NEON(const uint8_t *curr_pixels, const float *targe
     candidate_vec2 = vld1q_lane_f32((float32_t*)&target_candidate_row[vgetq_lane_u32(bin_vec2, 1)], candidate_vec2, 1);
     candidate_vec2 = vld1q_lane_f32((float32_t*)&target_candidate_row[vgetq_lane_u32(bin_vec2, 2)], candidate_vec2, 2);
     candidate_vec2 = vld1q_lane_f32((float32_t*)&target_candidate_row[vgetq_lane_u32(bin_vec2, 3)], candidate_vec2, 3);
+
+#ifdef TIMING
+    endTime = now();
+    this->loadCandidateTime += diffToNanoseconds(startTime, endTime, 1);
+    startTime = now();
+#endif
 
     // The following calculates c = sqrt(a / b) = 1 / sqrt (b * 1 / a),
     // since NEON only supports reciprocal square root and division by
@@ -140,19 +174,43 @@ void MeanShift::weightKernel_NEON(const uint8_t *curr_pixels, const float *targe
     multiplier1 = vrsqrteq_f32(vmulq_f32(candidate_vec1, model_vec1));
     multiplier2 = vrsqrteq_f32(vmulq_f32(candidate_vec2, model_vec2));
 
+#ifdef TIMING
+    endTime = now();
+    this->calcMultiplierTime += diffToNanoseconds(startTime, endTime, 1);
+    startTime = now();
+#endif
+
     // Load current weight into two 4 element vectors.
     float32x4_t weight_vec1 = vld1q_f32((float32_t*)&weight_row[0]);
     float32x4_t weight_vec2 = vld1q_f32((float32_t*)&weight_row[4]);
 
+#ifdef TIMING
+    endTime = now();
+    this->loadWeightTime += diffToNanoseconds(startTime, endTime, 1);
+    startTime = now();
+#endif
+
     // Do multiplication.
     weight_vec1 = vmulq_f32(weight_vec1, multiplier1);
     weight_vec2 = vmulq_f32(weight_vec2, multiplier2);
+
+#ifdef TIMING
+    endTime = now();
+    this->calcWeightTime += diffToNanoseconds(startTime, endTime, 1);
+    startTime = now();
+#endif
 
     // Store result.
     float32_t weight_temp[8];
     vst1q_f32(&weight_temp[0], weight_vec1);
     vst1q_f32(&weight_temp[4], weight_vec2);
     memcpy((void*)weight_row, weight_temp, 8 * sizeof(float32_t));
+
+#ifdef TIMING
+    endTime = now();
+    this->storeWeightTime += diffToNanoseconds(startTime, endTime, 1);
+    startTime = now();
+#endif
 }
 #endif
 
