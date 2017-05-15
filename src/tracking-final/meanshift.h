@@ -41,17 +41,6 @@ public:
     cv::Mat CalWeight(const cv::Mat &frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec);
     cv::Mat CalWeight_opt(const cv::Mat &frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec);
     cv::Rect track(const cv::Mat &next_frame);
-
-#ifdef TIMING
-    double loadPixelTime;
-    double calcBinTime;
-    double loadModelTime;
-    double loadCandidateTime;
-    double calcMultiplierTime;
-    double loadWeightTime;
-    double calcWeightTime;
-    double storeWeightTime;
-#endif
 };
 
 #endif // MEANSHIFT_H
