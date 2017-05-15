@@ -6,6 +6,10 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#endif
+
 #define PI 3.14159265358979323846264338327950
 
 class MeanShift
@@ -21,6 +25,7 @@ private:
         int pixel_range;
         int MaxIter;
     } cfg;
+
 
 public:
     MeanShift();

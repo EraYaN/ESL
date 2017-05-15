@@ -165,6 +165,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
         row_index = rec.y;
         for (int i = 0; i < rows; i++) {
             col_index = rec.x;
+
             for (int j = 0; j < cols; j++) {
                 int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index)[k]);
                 weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
