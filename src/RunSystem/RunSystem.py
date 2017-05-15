@@ -23,8 +23,8 @@ includes = {
 }
 
 benchmarks = {
-    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/car.avi'],'sizearg':False, 'usesdsp':False},   
-    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/car.avi'],'sizearg':False, 'usesdsp':False},
+    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/car.avi'],'sizearg':False, 'usesdsp':False, 'output':['{basedir}/tracking_result.avi', '{basedir}/tracking_result.coords']},   
+    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/car.avi'],'sizearg':False, 'usesdsp':False, 'output':['{basedir}/tracking_result.avi', '{basedir}/tracking_result.coords']},
     }
 
 class Error(Exception):
@@ -83,7 +83,7 @@ def upload_files(sftp_client, local_dir, remote_dir):
 
 def download_files(sftp_client, remote_dir, local_dir):
     if not exists_remote(sftp_client, remote_dir):
-        print('Uploading files failed, remote path does not exist.')
+        print('Downloading files failed, remote path does not exist.')
         return
 
     if not os.path.exists(local_dir):
@@ -92,10 +92,27 @@ def download_files(sftp_client, remote_dir, local_dir):
     for filename in sftp_client.listdir(remote_dir):
         if stat.S_ISDIR(sftp_client.stat(remote_dir + filename).st_mode):
             # uses '/' path delimiter for remote server
-            download_file(sftp_client, remote_dir + filename + '/', os.path.join(local_dir, filename))
+            download_files(sftp_client, remote_dir + filename + '/', os.path.join(local_dir, filename))
         else:
             if not os.path.isfile(os.path.join(local_dir, filename)):
                 sftp_client.get(remote_dir + filename, os.path.join(local_dir, filename))
+
+
+def download_file(sftp_client, remote_file, local_file):
+    remote_home_dir = sftp_client.normalize('.')
+    remote_file = remote_file.replace('~',remote_home_dir)
+
+    if not exists_remote(sftp_client, remote_file):
+        print('Downloading file failed, remote file does not exist.')
+        return
+
+    local_dir = os.path.dirname(local_file)
+    if not os.path.exists(local_dir):
+        os.mkdir(local_dir)
+
+
+    sftp_client.get(remote_file, local_file)
+
 
 def exists_remote(sftp_client, path):
     try:
@@ -281,6 +298,20 @@ class RunSystem(object):
                 testName = '{}({})'.format(testName,size)
             self.results.append({'testName':testName,'init_time':init_time,'kernel_time':kernel_time,'cleanup_time':cleanup_time,'total_time':total_time})
 
+        if self.benchmark['output']:
+            try: 
+                sftp = self.beagle_board.open_sftp()
+
+                for filename in self.benchmark['output']:
+                    formattedfilename = filename.format(**formatarguments)          
+                    
+                    local_path = formattedfilename.replace(posixpath.sep, os.path.sep).replace('~', '.')
+                    download_file(sftp, formattedfilename, local_path)
+            finally:
+                if sftp:
+                    sftp.close()
+
+
     def RunN(self, size=64, n=5):
         for i in range(0,n):
             print("Doing run {0} out of {1}.".format(i+1,n))
@@ -380,8 +411,9 @@ if __name__ == '__main__':
                 for sweep_size in sweep_sizes:
                     rs.RunN(int(sweep_size),opts.number_of_runs)
                 rs.SaveResults("{0}-{2}-{1}.pickle".format(opts.benchmark,opts.sweep.replace(',','_'),opts.variant))
-                
+
                 rs.PrintResults()
+
         finally:
             if rs:
                 rs.Disconnect()
