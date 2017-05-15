@@ -1,10 +1,10 @@
 SHELL = /bin/sh
 
-BASE_TOOLCHAIN := /opt/bbToolChain/usr/local/share/codesourcery/
+BASE_TOOLCHAIN := /data/bbToolChain/usr/local/share/codesourcery/
 
 CC := arm-none-linux-gnueabi-gcc
 
-DSPLINK := /opt/bbToolChain/usr/local/share/bbframework/platform/beagle-linux/tools/dsplink_linux_1_65_00_03
+DSPLINK := /data/bbToolChain/usr/local/share/bbframework/platform/beagle-linux/tools/dsplink_linux_1_65_00_03
 
 #   ----------------------------------------------------------------------------
 #   General options, sources and libraries
