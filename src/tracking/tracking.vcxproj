@@ -43,6 +43,7 @@
     <RemoteCleanCommandLine>make clean -f arm.mk -C $(RemoteProjectDir)</RemoteCleanCommandLine>
     <NMakeIncludeSearchPath>$(SolutionDir)tracking-shared;$(SolutionDir)includes\opencv;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\usr;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux\2.6.18;$(SolutionDir)includes\codesourcery\arm-none-linux-gnueabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <RemoteBuildOutputs>$(RemoteProjectDir)/pcMeanshiftExec</RemoteBuildOutputs>
+    <NMakePreprocessorDefinitions>ARMCC</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

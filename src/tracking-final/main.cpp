@@ -9,11 +9,16 @@
 #endif
 
 #define PROGRESSFRAMES 10
+#define VARIANT "vanilla"
 
 int main(int argc, char ** argv)
 {
 #ifdef ARMCC
-    double freq = get_frequency(false);
+#ifdef USECYCLES
+    double freq = get_frequency(true);
+#else
+    double freq = 1;
+#endif
 #else
     double freq = 1;
 #endif
@@ -55,6 +60,18 @@ int main(int argc, char ** argv)
 #endif
 #endif
     perftime_t startTime = now();
+    double totalTime = 0;
+    double kernelTime = 0;
+    double initTime = 0;
+    double cleanupTime = 0;
+    perftime_t kernelStart;
+    perftime_t kernelEnd;
+    perftime_t initStart;
+    perftime_t initEnd;
+    perftime_t cleanupStart;
+    perftime_t cleanupEnd;
+    perftime_t endTime;
+
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_START();
 #endif
@@ -62,18 +79,25 @@ int main(int argc, char ** argv)
     int fcount;
     for (fcount = 0; fcount < TotalFrames; ++fcount)
     {
+        initStart = now();
         // read a frame
         int status = frame_capture.read(frame);
         if (0 == status) break;
 
+        initEnd = now();
+        initTime += diffToNanoseconds(initStart, initEnd, freq);
+        kernelStart = now();
         // track object
 #if !defined(ARMCC) && defined(MCPROF)
         MCPROF_START();
-#endif
-        cv::Rect ms_rect = ms.track(frame);
+#endif        
+        cv::Rect ms_rect = ms.track(frame);        
 #if !defined(ARMCC) && defined(MCPROF)
         MCPROF_STOP();
 #endif
+        kernelEnd = now();
+        kernelTime += diffToNanoseconds(kernelStart, kernelEnd, freq);
+        cleanupStart = now();
         coordinatesfile << fcount << CSV_SEPARATOR << ms_rect.x << CSV_SEPARATOR << ms_rect.y << std::endl;
         // mark the tracked object in frame
         cv::rectangle(frame, ms_rect, cv::Scalar(0, 0, 255), 3);
@@ -82,16 +106,19 @@ int main(int argc, char ** argv)
         writer << frame;
         if (fcount % PROGRESSFRAMES == 0)
             std::cout << "Written " << fcount << " frames" << std::endl;
+        cleanupEnd = now();
+        cleanupTime += diffToNanoseconds(cleanupStart, cleanupEnd, freq);
     }
     coordinatesfile.close();
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_STOP();
 #endif
-    perftime_t endTime = now();
-    double nanoseconds = diffToNanoseconds(startTime, endTime, freq);
+    endTime = now();    
+    totalTime = diffToNanoseconds(startTime, endTime, freq);
 
     std::cout << "Processed " << fcount << " frames" << std::endl;
-    std::cout << "Time: " << nanoseconds / 1e9 << " sec\nFPS : " << fcount / (nanoseconds / 1e9) << std::endl;
+    std::cout << "Time: " << totalTime / 1e9 << " sec\nFPS : " << fcount / (totalTime / 1e9) << std::endl;
+    std::cout << LINE_MARKER << VARIANT << CSV_SEPARATOR << initTime / 1e9 << CSV_SEPARATOR << kernelTime / 1e9 << CSV_SEPARATOR << cleanupTime / 1e9 << CSV_SEPARATOR << totalTime / 1e9 << CSV_SEPARATOR << fcount / (totalTime / 1e9) << std::endl;
 #if !defined(ARMCC)
     std::cout << "Press enter to quit." << std::endl;
     std::cin.get();

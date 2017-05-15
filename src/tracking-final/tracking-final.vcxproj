@@ -40,7 +40,7 @@
     <RemoteReBuildCommandLine>make rebuild -f arm.mk -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
     <RemoteCleanCommandLine>make clean -f arm.mk -C $(RemoteProjectDir)</RemoteCleanCommandLine>
     <RemoteBuildOutputs>$(RemoteProjectDir)/pcMeanshiftExec</RemoteBuildOutputs>
-    <NMakePreprocessorDefinitions>ARMCC;__ARM_NEON__</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>ARMCC</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeIncludeSearchPath>$(SolutionDir)tracking-shared;$(SolutionDir)includes\opencv;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\usr;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux\2.6.18;$(SolutionDir)includes\codesourcery\arm-none-linux-gnueabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
@@ -48,6 +48,7 @@
     <RemoteReBuildCommandLine>make rebuild -f pc.mk -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
     <RemoteCleanCommandLine>make clean -f pc.mk -C $(RemoteProjectDir)</RemoteCleanCommandLine>
     <RemoteBuildOutputs>$(RemoteProjectDir)/pcMeanshiftExec</RemoteBuildOutputs>
+    <NMakePreprocessorDefinitions>ARMCC</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemGroup>
     <ClInclude Include="meanshift.h" />

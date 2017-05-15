@@ -19,12 +19,12 @@ BEAGLE_BASE_DIR = '~/esLAB'
 LINE_MARKER = '@'
 
 includes = {
-    'shared':{'project':'tracking-include'},
+    'shared':{'project':'tracking-shared'},
 }
 
 benchmarks = {
-    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/car.avi'],'sizearg':False, 'usesdsp':False, 'output':['{basedir}/tracking_result.avi', '{basedir}/tracking_result.coords']},   
-    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/car.avi'],'sizearg':False, 'usesdsp':False, 'output':['{basedir}/tracking_result.avi', '{basedir}/tracking_result.coords']},
+    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['{basedir}/tracking_result.avi', '{basedir}/tracking_result.coords']},   
+    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['{basedir}/tracking_result.avi', '{basedir}/tracking_result.coords']},
     }
 
 class Error(Exception):
@@ -62,7 +62,8 @@ def upload_files(sftp_client, local_dir, remote_dir):
             local_path = os.path.join(root, dirname)
             remote_path = posixpath.join(remote_dir,os.path.relpath(local_path, local_dir).replace(os.path.sep,posixpath.sep))
             if not exists_remote(sftp_client, remote_path):
-                #print('Attempting to create {} on the remote.'.format(remote_path))
+                #print('Attempting to create {} on the
+                #remote.'.format(remote_path))
                 if mkdir_p(sftp_client,remote_path):
                     print('Created {} on the remote.'.format(remote_path))
                 else:
@@ -181,7 +182,8 @@ class RunSystem(object):
         local_addr = ('127.0.0.1', 1234)
         channel = self.transport.open_channel("direct-tcpip", dest_addr, local_addr)
         
-        # Create a NEW client and pass this channel to it as the `sock` (along with
+        # Create a NEW client and pass this channel to it as the `sock` (along
+        # with
         # whatever credentials you need to auth into your REMOTE box
         self.beagle_board = paramiko.SSHClient()
         self.beagle_board.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -257,7 +259,7 @@ class RunSystem(object):
         ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
         self.PrintCommandOutput(ssh_stdout,ssh_stderr)   
 
-    def Run(self, size=64):
+    def Run(self, file):
         if not self.build_server or not self.beagle_board:
             raise NotConnectedError('Please make sure the class made a successfull connection to the build server and the development board.')
         
@@ -270,33 +272,31 @@ class RunSystem(object):
         formatarguments = {}
         formatarguments['basedir'] = BEAGLE_BASE_DIR
         formatarguments['executable'] = self.benchmark['executable']
+        print("Using file {0}".format(file))
+        formatarguments['testfile'] = file
         formatarguments['depname'] = ''
         if len(self.benchmark['deps']) >= 1:
-            formatarguments['depname'] = benchmarks[self.benchmark['deps'][0]]['executable']
+            formatarguments['depname'] = benchmarks[self.benchmark['deps'][0]]['executable']        
+
+        formatarguments['arguments'] = [basearg.format(**formatarguments) for basearg in self.benchmark['baseargs']]   
         
-
-        formatarguments['arguments'] = [basearg.format(**formatarguments) for basearg in self.benchmark['baseargs']]
-        if self.benchmark['sizearg']:
-            print("Using size {0}".format(size))
-            formatarguments['arguments'].append('{0:d}'.format(size))
-
         formatarguments['arguments_str'] = ' '.join(formatarguments['arguments'])
         print("{basedir}/{executable} {arguments_str}".format(**formatarguments))
         ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("{basedir}/{executable} {arguments_str}".format(**formatarguments))        
-        self.PrintCommandOutput(ssh_stdout,ssh_stderr)
+        #self.PrintCommandOutput(ssh_stdout,ssh_stderr)
         csv_data = ''
         for line in ssh_stdout: #read and store result in log file
             if line[0:1] == LINE_MARKER:
                 csv_data+=line[1:]
+            sys.stdout.write('#stdout {}'.format(line))
         for line in ssh_stderr: #read and store result in log file
             if line[0:1] == LINE_MARKER:
                 csv_data+=line[1:]
-
+            sys.stderr.write('#stderr {}'.format(line))
         reader = csv.reader(csv_data.splitlines())
-        for testName,init_time,kernel_time,cleanup_time,total_time in reader:
-            if self.benchmark['sizearg']:
-                testName = '{}({})'.format(testName,size)
-            self.results.append({'testName':testName,'init_time':init_time,'kernel_time':kernel_time,'cleanup_time':cleanup_time,'total_time':total_time})
+        for testName,init_time,kernel_time,cleanup_time,total_time,fps in reader:
+            testName = '{}-{}'.format(testName, file)
+            self.results.append({'testName':testName,'init_time':float(init_time),'kernel_time':float(kernel_time),'cleanup_time':float(cleanup_time),'total_time':float(total_time),'fps':float(fps)})
 
         if self.benchmark['output']:
             try: 
@@ -312,10 +312,10 @@ class RunSystem(object):
                     sftp.close()
 
 
-    def RunN(self, size=64, n=5):
+    def RunN(self, file, n=5):
         for i in range(0,n):
-            print("Doing run {0} out of {1}.".format(i+1,n))
-            self.Run(size)
+            print("Doing run {0} out of {1}.".format(i + 1,n))
+            self.Run(file)
 
     def SaveResults(self, filename):
         print('Saving Results...')
@@ -333,34 +333,33 @@ class RunSystem(object):
         sys.stderr.flush()
 
     def PrintResults(self):
-        table_heading = [
-            'test',
+        table_heading = ['test',
             'isAverage',
-            'iT',
+            'tI',
             'tK',
             'tC',
-            'tT'
-            ]
+            'tT',
+            'fps']
         table_justify = {
             0:'left',
             1:'left',
             2:'right',
             3:'right',
             4:'right',
-            5:'right'
+            5:'right',            
+            6:'right'
         }
         display_results = []
         display_results.append(table_heading)
-        sorted_results = []
+        sorted_results = {}
         for result in self.results:            
-            display_results.append([
-            result['testName'],
+            display_results.append([result['testName'],
             'No',
             "{0:.3f} s".format(result['init_time']),
             "{0:.3f} s".format(result['kernel_time']),
             "{0:.3f} s".format(result['cleanup_time']),
-            "{0:.3f} s".format(result['total_time'])
-            ])
+            "{0:.3f} s".format(result['total_time']),
+            "{0:.3f} s".format(result['fps'])])
 
             if result['testName'] not in sorted_results:
                 sorted_results[result['testName']] = []
@@ -368,15 +367,14 @@ class RunSystem(object):
             sorted_results[result['testName']].append(result)
         
         for testName in sorted_results:    
-            count = len(sorted_results['testName'])            
-            display_results.append([
-            result['testName'],
+            count = len(sorted_results[result['testName']])            
+            display_results.append([result['testName'],
             'Yes',
-            "{0:.3f} s".format(sum(item['init_time'] for item in sorted_results['testName'])/count),
-            "{0:.3f} s".format(sum(item['kernel_time'] for item in sorted_results['testName'])/count),
-            "{0:.3f} s".format(sum(item['cleanup_time'] for item in sorted_results['testName'])/count),
-            "{0:.3f} s".format(sum(item['total_time'] for item in sorted_results['testName'])/count)
-            ])
+            "{0:.3f} s".format(sum(item['init_time'] for item in sorted_results[result['testName']]) / count),
+            "{0:.3f} s".format(sum(item['kernel_time'] for item in sorted_results[result['testName']]) / count),
+            "{0:.3f} s".format(sum(item['cleanup_time'] for item in sorted_results[result['testName']]) / count),
+            "{0:.3f} s".format(sum(item['total_time'] for item in sorted_results[result['testName']]) / count),
+            "{0:.3f} s".format(sum(item['fps'] for item in sorted_results[result['testName']]) / count)])
 
         results_table = AsciiTable(display_results)
         results_table.justify_columns = table_justify
@@ -391,7 +389,7 @@ if __name__ == '__main__':
     parser.add_argument('--sendsource', action="store_true", help='Should we upload the source to the BuildServer')
     parser.add_argument('--build', action="store_true", help='Should we build the executable for the BeagleBoard')
     parser.add_argument('--run', action="store_true", help='Should we run the executable on the BeagleBoard')
-    parser.add_argument('--sweep', action="store", help='The sweep matrix sizes in comma seperated list, if the benchmark supports the size argument.', default='64')
+    parser.add_argument('--files', action="store", help='The test files to use in this run.', default='car.avi')
     parser.add_argument('--number-of-runs', action="store", type=int, help='The number of runs to do.', default=1)
     parser.add_argument('--benchmark', action="store", help='Benchmark to run',choices=list(benchmarks.keys()),default='vanilla')
     parser.add_argument('--variant', action="store", help='Variant name, used to save the results',default='default')
@@ -407,10 +405,10 @@ if __name__ == '__main__':
                 rs.Build()
                 rs.SendExec()
             if opts.run:
-                sweep_sizes = opts.sweep.split(',')
-                for sweep_size in sweep_sizes:
-                    rs.RunN(int(sweep_size),opts.number_of_runs)
-                rs.SaveResults("{0}-{2}-{1}.pickle".format(opts.benchmark,opts.sweep.replace(',','_'),opts.variant))
+                files = opts.files.split(',')
+                for file in files:
+                    rs.RunN(file,opts.number_of_runs)
+                rs.SaveResults("{0}-{2}-{1}.pickle".format(opts.benchmark,opts.files.replace(',','_'),opts.variant))
 
                 rs.PrintResults()
 
