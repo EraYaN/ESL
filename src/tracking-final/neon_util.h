@@ -43,3 +43,22 @@ void neon_print(uint32x4_t vector)
 {
     neon_print(vector, "uint32x4_t vector");
 }
+
+void neon_print(uint8x8_t vector, std::string label)
+{
+    uint8_t data[8];
+    vst1_u8(data, vector);
+
+    std::cout << "Data from " << label << ":" << std::endl;
+
+    for (int i = 0; i < 8; i++)
+    {
+        std::cout << (unsigned int)data[i] << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+void neon_print(uint8x8_t vector)
+{
+    neon_print(vector, "uint8x8_t vector");
+}
