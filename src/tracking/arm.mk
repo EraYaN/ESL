@@ -44,12 +44,13 @@ CFLAGS= -Wall -O3 -Wfatal-errors 		\
 	  -fno-omit-frame-pointer       \
 	  -mapcs                        \
 	  -mabi=aapcs-linux				\
-	  -std=$(CPPSTD)
+	  -std=$(CPPSTD) \
+	  -pg
 
 all: checkdirs $(EXEC)
 
 $(EXEC): $(OBJ)
-	$(CC) -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
+	$(CC) -pg -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
 
 $(OUTDIR)/%.o : ../%.cpp
 	$(CC) $(DEFS) $(INCLUDES) $(CFLAGS) -c $< -o $@

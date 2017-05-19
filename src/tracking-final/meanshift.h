@@ -27,9 +27,7 @@ private:
         int MaxIter;
     } cfg;
 
-    float weightKernel(int curr_pixel, cv::Mat &target_model, cv::Mat &target_candidate, int k);
 #ifdef ARMCC
-    void weightKernel_NEON(const uint8_t *curr_pixels, const float *target_model_row, const float *target_candidate_row, float *weight);
     cv::Mat pdf_representation_NEON(std::vector<cv::Mat> bgr_planes, const cv::Rect &rect);
 #endif
 
@@ -40,7 +38,13 @@ public:
     float Epanechnikov_kernel(cv::Mat &kernel);
     cv::Mat pdf_representation(const cv::Mat &frame, const cv::Rect &rect);
     cv::Mat CalWeight(std::vector<cv::Mat> &bgr_planes, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec);
+    cv::Mat CalWeight_NEON(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec);
     cv::Rect track(const cv::Mat &next_frame);
+
+    double pdfTime;
+    double calWeightTime;
+    double nextRectTime;
+    double splitTime;
 };
 
 #endif // MEANSHIFT_H

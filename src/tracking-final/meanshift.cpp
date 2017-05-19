@@ -18,6 +18,8 @@ MeanShift::MeanShift()
     cfg.num_bins = 16;
     cfg.pixel_range = 256;
     bin_width = cfg.pixel_range / cfg.num_bins;
+
+    pdfTime = calWeightTime = nextRectTime = splitTime = 0;
 }
 
 void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
@@ -140,116 +142,25 @@ cv::Mat MeanShift::pdf_representation_NEON(std::vector<cv::Mat> bgr_planes, cons
     return pdf_model;
 }
 
-float MeanShift::weightKernel(int curr_pixel, cv::Mat &target_model, cv::Mat &target_candidate, int k)
-{
-    int bin_value = curr_pixel / bin_width;
-    return static_cast<float>((sqrt(target_model.at<float>(k, bin_value) / target_candidate.at<float>(k, bin_value))));
-}
-
-#ifdef __ARM_NEON__
-/**
- * Run the weight calculation kernel in blocks of eight at a time using NEON.
-
- * Ideally, we would supply target_model_row, target_candidate_row and
- * weight_row as type float32_t*, but a gcc bug prevents us from doing so,
- * hence the casts.
- */
-void MeanShift::weightKernel_NEON(const uint8_t *curr_pixels, const float *target_model_row, const float *target_candidate_row, float *weight_row)
-{
-    uint8x8_t pixel_vec = vld1_u8(curr_pixels);
-
-    // Divide by 16 using 4 right shifts, discarding precision
-    // to obtain an index, like the original code.
-    pixel_vec = vshr_n_u8(pixel_vec, 4);
-
-    float32x4_t model_vec1, model_vec2, candidate_vec1, candidate_vec2, multiplier1, multiplier2;
-    // Load elements for both sets of vectors individually,
-    // due to a lack of memory locality.
-    model_vec1 = vdupq_n_f32(0.0f);
-    model_vec1 = vld1q_lane_f32((float32_t*)&target_model_row[vget_lane_u8(pixel_vec, 0)], model_vec1, 0);
-    model_vec1 = vld1q_lane_f32((float32_t*)&target_model_row[vget_lane_u8(pixel_vec, 1)], model_vec1, 1);
-    model_vec1 = vld1q_lane_f32((float32_t*)&target_model_row[vget_lane_u8(pixel_vec, 2)], model_vec1, 2);
-    model_vec1 = vld1q_lane_f32((float32_t*)&target_model_row[vget_lane_u8(pixel_vec, 3)], model_vec1, 3);
-
-    model_vec2 = vdupq_n_f32(0.0f);
-    model_vec2 = vld1q_lane_f32((float32_t*)&target_model_row[vget_lane_u8(pixel_vec, 4)], model_vec2, 0);
-    model_vec2 = vld1q_lane_f32((float32_t*)&target_model_row[vget_lane_u8(pixel_vec, 5)], model_vec2, 1);
-    model_vec2 = vld1q_lane_f32((float32_t*)&target_model_row[vget_lane_u8(pixel_vec, 6)], model_vec2, 2);
-    model_vec2 = vld1q_lane_f32((float32_t*)&target_model_row[vget_lane_u8(pixel_vec, 7)], model_vec2, 3);
-
-    candidate_vec1 = vdupq_n_f32(0.0f);
-    candidate_vec1 = vld1q_lane_f32((float32_t*)&target_candidate_row[vget_lane_u8(pixel_vec, 0)], candidate_vec1, 0);
-    candidate_vec1 = vld1q_lane_f32((float32_t*)&target_candidate_row[vget_lane_u8(pixel_vec, 1)], candidate_vec1, 1);
-    candidate_vec1 = vld1q_lane_f32((float32_t*)&target_candidate_row[vget_lane_u8(pixel_vec, 2)], candidate_vec1, 2);
-    candidate_vec1 = vld1q_lane_f32((float32_t*)&target_candidate_row[vget_lane_u8(pixel_vec, 3)], candidate_vec1, 3);
-
-    candidate_vec2 = vdupq_n_f32(0.0f);
-    candidate_vec2 = vld1q_lane_f32((float32_t*)&target_candidate_row[vget_lane_u8(pixel_vec, 4)], candidate_vec2, 0);
-    candidate_vec2 = vld1q_lane_f32((float32_t*)&target_candidate_row[vget_lane_u8(pixel_vec, 5)], candidate_vec2, 1);
-    candidate_vec2 = vld1q_lane_f32((float32_t*)&target_candidate_row[vget_lane_u8(pixel_vec, 6)], candidate_vec2, 2);
-    candidate_vec2 = vld1q_lane_f32((float32_t*)&target_candidate_row[vget_lane_u8(pixel_vec, 7)], candidate_vec2, 3);
-
-    // The following calculates c = sqrt(a / b) = 1 / sqrt (b * 1 / a),
-    // since NEON only supports reciprocal square root and division by
-    // multiplication with the reciprocal of the divisor.
-
-    // Calculate model reciprocal 1 / a.
-    model_vec1 = vrecpeq_f32(model_vec1);
-    model_vec2 = vrecpeq_f32(model_vec2);
-
-    // Perform division (by means of multiplication) b * 1 / a
-    // and take reciprocal square root of result to obtain c.
-    multiplier1 = vrsqrteq_f32(vmulq_f32(candidate_vec1, model_vec1));
-    multiplier2 = vrsqrteq_f32(vmulq_f32(candidate_vec2, model_vec2));
-
-    // Load current weight into two 4 element vectors.
-    float32x4_t weight_vec1 = vld1q_f32((float32_t*)&weight_row[0]);
-    float32x4_t weight_vec2 = vld1q_f32((float32_t*)&weight_row[4]);
-
-    // Do multiplication.
-    weight_vec1 = vmulq_f32(weight_vec1, multiplier1);
-    weight_vec2 = vmulq_f32(weight_vec2, multiplier2);
-
-    // Store result.
-    vst1q_f32((float32_t*)&weight_row[0], weight_vec1);
-    vst1q_f32((float32_t*)&weight_row[4], weight_vec2);
-}
-#endif
-
 cv::Mat MeanShift::CalWeight(std::vector<cv::Mat> &bgr_planes, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec)
 {
     int rows = rec.height;
     int cols = rec.width;
     int row_index = rec.y;
     int col_index = rec.x;
-
-#ifdef __ARM_NEON__
-    // Initialize weight matrix width to be a multiple of 8 so we can use NEON
-    // for every iteration, while preventing memory access violations.
-    int iterations = (cols / 8) * (8 + 1);
-    cv::Mat weight(rows, (iterations / 8) * (8 + 1), CV_32F, cv::Scalar(1.0000));
-#else
     cv::Mat weight(rows, cols, CV_32F, cv::Scalar(1.0000));
-#endif
 
     for (int k = 0; k < 3; k++) {
         row_index = rec.y;
         for (int i = 0; i < rows; i++) {
             col_index = rec.x;
-#ifdef __ARM_NEON__
-            for (int j = 0; j < iterations; j += 8) {
-                uint8_t *curr_pixels = &(bgr_planes[k].ptr<uchar>(row_index)[col_index]);
-                weightKernel_NEON(curr_pixels, target_model.ptr<float>(k), target_candidate.ptr<float>(k), &(weight.ptr<float>(i)[j]));
-                col_index += 8;
-            }
-#else
             for (int j = 0; j < cols; j++) {
                 int curr_pixel = (bgr_planes[k].at<uchar>(row_index, col_index));
-                weight.at<float>(i, j) *= weightKernel(curr_pixel, target_model, target_candidate, k);
+                int bin_value = curr_pixel / bin_width;
+                weight.at<float>(i, j) *= static_cast<float>((sqrt(target_model.at<float>(k, bin_value) / target_candidate.at<float>(k, bin_value))));
 
                 col_index++;
             }
-#endif
             row_index++;
         }
     }
@@ -257,19 +168,84 @@ cv::Mat MeanShift::CalWeight(std::vector<cv::Mat> &bgr_planes, cv::Mat &target_m
     return weight;
 }
 
+#ifdef __ARM_NEON__
+cv::Mat MeanShift::CalWeight_NEON(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec)
+{
+    int rows = rec.height;
+    int cols = rec.width;
+    int row_index = rec.y;
+    int col_index = rec.x;
+    cv::Mat weight(rows, cols, CV_32F, cv::Scalar(1.f));
+    float32_t multipliers[cfg.num_bins];
+    float32x4_t model_vec, candidate_vec, multiplier_vec;
+
+    for (int k = 0; k < 3; k++)
+    {
+        for (int bin = 0; bin < cfg.num_bins; bin += 4) {
+            model_vec = vld1q_f32((float32_t*)&target_model.ptr<float>(k)[bin]);
+            candidate_vec = vld1q_f32((float32_t*)&target_candidate.ptr<float>(k)[bin]);
+
+            // Calculate model reciprocal 1 / a.
+            model_vec = vrecpeq_f32(model_vec);
+
+            // Perform division (by means of multiplication) b * 1 / a
+            // and take reciprocal square root of result to obtain c.
+            multiplier_vec = vrsqrteq_f32(vmulq_f32(candidate_vec, model_vec));
+            vst1q_f32(&multipliers[bin], multiplier_vec);
+        }
+
+        row_index = rec.y;
+        for (int i = 0; i < rows; i++) {
+            col_index = rec.x;
+            for (int j = 0; j < cols; j++) {
+                int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index)[k]);
+                weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
+
+                col_index++;
+            }
+            row_index++;
+        }
+    } 
+    
+    return weight;
+}
+#endif
+
 cv::Rect MeanShift::track(const cv::Mat &next_frame)
 {
     cv::Rect next_rect;
+#ifdef TIMING
+    perftime_t startTime, endTime;
+#endif
+
     for (int iter = 0; iter < cfg.MaxIter; iter++) {
-        std::vector<cv::Mat> bgr_planes;
-        cv::split(next_frame, bgr_planes);
+#ifdef TIMING
+        startTime = now();
+#endif
+
+//#ifdef __ARM_NEON__
+//        cv::Mat target_candidate = pdf_representation_NEON(bgr_planes, target_Region);
+//#else
+        cv::Mat target_candidate = pdf_representation(next_frame, target_Region);
+//#endif
+
+#ifdef TIMING
+        endTime = now();
+        pdfTime += diffToNanoseconds(startTime, endTime, 0);
+        startTime = now();
+#endif
 
 #ifdef __ARM_NEON__
-        cv::Mat target_candidate = pdf_representation_NEON(bgr_planes, target_Region);
+        cv::Mat weight = CalWeight_NEON(next_frame, target_model, target_candidate, target_Region);
 #else
-        cv::Mat target_candidate = pdf_representation(next_frame, target_Region);
-#endif
         cv::Mat weight = CalWeight(bgr_planes, target_model, target_candidate, target_Region);
+#endif
+
+#ifdef TIMING
+        endTime = now();
+        calWeightTime += diffToNanoseconds(startTime, endTime, 0);
+        startTime = now();
+#endif
 
         float delta_x = 0.0;
         float sum_wij = 0.0;
@@ -303,7 +279,13 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
             target_Region.x = next_rect.x;
             target_Region.y = next_rect.y;
         }
+
+#ifdef TIMING
+        endTime = now();
+        nextRectTime += diffToNanoseconds(startTime, endTime, 0);
+#endif
     }
+
 
     return next_rect;
 }
