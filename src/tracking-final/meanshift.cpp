@@ -44,7 +44,6 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
         }
     }
 #endif
-
     target_model = pdf_representation(frame, target_Region);
 }
 
@@ -53,7 +52,7 @@ float MeanShift::Epanechnikov_kernel(cv::Mat &kernel)
     int h = kernel.rows;
     int w = kernel.cols;
 
-    float epanechnikov_cd = 0.1f*PI*h*w;
+    float epanechnikov_cd = 0.1*PI*h*w;
     float kernel_sum = 0.0;
     for (int i = 0; i < h; i++) {
         for (int j = 0; j < w; j++) {

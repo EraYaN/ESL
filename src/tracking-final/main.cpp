@@ -1,15 +1,16 @@
 #include "meanshift.h"
 #include <timing.h>
 #include <iostream>
-#include <fstream>
-#include "util.h"
 
-#if !defined(ARMCC) && defined(MCPROF)
+#ifndef ARMCC
 #include "markers.h"
 #endif
 
 #define PROGRESSFRAMES 10
 #define VARIANT "vanilla"
+
+#include <pool_notify.h>
+
 
 int main(int argc, char ** argv)
 {
@@ -22,29 +23,31 @@ int main(int argc, char ** argv)
 #else
     double freq = 1;
 #endif
+
     cv::VideoCapture frame_capture;
-    if (argc < 2)
+    char *dspExecutable = NULL;
+    char *strBufferSize = NULL ;
+    DSP_STATUS status;
+
+    if (argc < 4)
     {
         std::cout << "specifiy an input video file to track" << std::endl;
-        std::cout << "Usage:  ./" << argv[0] << " car.avi" << std::endl;
+        std::cout << "Usage:  ./" << argv[0] << "car.avi pool_notify.out buffer_size" << std::endl;
         return -1;
     }
     else
     {
         frame_capture = cv::VideoCapture(argv[1]);
+        dspExecutable = argv[2];
+        strBufferSize = argv[3];
     }
+
 
     // this is used for testing the car video
     // instead of selection of object of interest using mouse
     cv::Rect rect(228, 367, 86, 58);
-    //cv::Rect rect(1300, 300, 900, 700);
     cv::Mat frame;
     frame_capture.read(frame);
-
-    if (frame.cols < 10 || frame.rows < 10) {
-        std::cout << "Input video could not be loaded, or is too small. 10x10 pixel is the minimum." << std::endl;
-        return 1;
-    }
 
     MeanShift ms; // creat meanshift obj
     ms.Init_target_frame(frame, rect); // init the meanshift
@@ -55,11 +58,15 @@ int main(int argc, char ** argv)
     std::ofstream coordinatesfile;
     coordinatesfile.open("/tmp/tracking_result.coords");
     coordinatesfile << "f" << CSV_SEPARATOR << "x" << CSV_SEPARATOR << "y" << std::endl;
+
 #ifdef ARMCC
 #ifdef USECYCLES
     init_perfcounters(1, 0);
 #endif
 #endif
+
+    pool_notify_Init(dspExecutable,strBufferSize) ;
+
     perftime_t startTime = now();
     double totalTime = 0;
     double kernelTime = 0;
@@ -78,6 +85,9 @@ int main(int argc, char ** argv)
 #endif
     int TotalFrames = 32;
     int fcount;
+
+    status = pool_notify_Execute(0);
+
     for (fcount = 0; fcount < TotalFrames; ++fcount)
     {
         initStart = now();
@@ -110,10 +120,11 @@ int main(int argc, char ** argv)
         cleanupEnd = now();
         cleanupTime += diffToNanoseconds(cleanupStart, cleanupEnd, freq);
     }
-    coordinatesfile.close();
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_STOP();
 #endif
+	pool_notify_Delete(0);
+
     endTime = now();    
     totalTime = diffToNanoseconds(startTime, endTime, freq);
 
@@ -131,6 +142,7 @@ int main(int argc, char ** argv)
     std::cout << "Press enter to quit." << std::endl;
     std::cin.get();
 #endif
+
     return 0;
 }
 
