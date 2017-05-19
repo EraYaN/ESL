@@ -1,5 +1,5 @@
-#include<stdlib.h>
-#include<stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include <semaphore.h>
 /*  ----------------------------------- DSP/BIOS Link                   */
@@ -16,13 +16,9 @@
 
 
 /*  ----------------------------------- Application Header              */
-#include <pool_notify.h>
-//#include <pool_notify_os.h>
+#include "pool_notify.h"
+// #include <pool_notify_os.h>
 
-
-#if defined (__cplusplus)
-extern "C" {
-#endif /* defined (__cplusplus) */
 
 /*  ============================================================================
  *  @const   NUM_ARGS
@@ -139,9 +135,8 @@ sem_t sem;
  *
  *  @modif  None
  *  ============================================================================
- */BUFFER_SIZE
-NORMAL_API DSP_STATUS pool_notify_Create (  IN Char8 * dspExecutable,
-                                            IN Uint8   processorId)
+ */
+NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, IN Char8 * strBufferSize, IN Uint8 processorId)
 {
     DSP_STATUS      status     = DSP_SOK  ;
     Uint32          numArgs    = NUM_ARGS ;
@@ -152,7 +147,7 @@ NORMAL_API DSP_STATUS pool_notify_Create (  IN Char8 * dspExecutable,
     Char8 *         args [NUM_ARGS] ;
 
     #ifdef DEBUG
-    printf("Entered pool_notify_Create ()\n") ;
+        printf("Entered pool_notify_Create ()\n") ;
     #endif
 
     sem_init(&sem,0,0);
@@ -318,7 +313,7 @@ long long get_usec(void)
   return r;
 }
 
-int sum_dsp(unsigned char* buf, int length) 
+int sum_dsp(Uint16 *buf, int length) 
 {
     int a=0,i;
     for(i=0;i<length;i++) 
@@ -343,7 +338,8 @@ NORMAL_API DSP_STATUS pool_notify_Execute(Uint8 processorId)
     long long start;
 
     #if defined(DSP)
-    unsigned char *buf_dsp;
+    // unsigned char *buf_dsp;
+    void*buf_dsp;
     #endif
 
     #ifdef DEBUG
@@ -354,24 +350,24 @@ NORMAL_API DSP_STATUS pool_notify_Execute(Uint8 processorId)
 
     start = get_usec();
 
-    #if !defined(DSP)
-    printf(" Result is %d \n", sum_dsp(pool_notify_DataBuf,pool_notify_BufferSize));
-    #endif
+    // #if !defined(DSP)
+    // printf(" Result is %d \n", sum_dsp(pool_notify_DataBuf,pool_notify_BufferSize));
+    // #endif
 
-    #if defined(DSP)
+    // #if defined(DSP)
     POOL_writeback (POOL_makePoolId(processorId, SAMPLE_POOL_ID),
                     pool_notify_DataBuf,
                     pool_notify_BufferSize);
 
     POOL_translateAddr ( POOL_makePoolId(processorId, SAMPLE_POOL_ID),
-                         (void*)&buf_dsp,
+                         &buf_dsp,
                          AddrType_Dsp,
                          (Void *) pool_notify_DataBuf,
                          AddrType_Usr) ;
     NOTIFY_notify (processorId,pool_notify_IPS_ID,pool_notify_IPS_EVENTNO,1);
 
     sem_wait(&sem);
-    #endif
+    // #endif
 
     printf("Sum execution time %lld us.\n", get_usec()-start);
 
@@ -536,8 +532,3 @@ STATIC Void pool_notify_Notify (Uint32 eventNo, Pvoid arg, Pvoid info)
         printf(" Result on DSP is %d \n", (int)info);
     }
 }
-
-
-#if defined (__cplusplus)
-}
-#endif /* defined (__cplusplus) */

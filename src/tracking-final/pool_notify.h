@@ -43,12 +43,7 @@
  *  @see    pool_notify_Delete
  *  ============================================================================
  */
-NORMAL_API
-DSP_STATUS
-pool_notify_Create (IN Char8 * dspExecutable,
-                    IN Char8 * strBufferSize,
-                    IN Uint8   processorId) ;
-
+NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, IN Char8 *strBufferSize, IN Uint8 processorId);
 
 /** ============================================================================
  *  @func   pool_notify_Execute
@@ -72,9 +67,7 @@ pool_notify_Create (IN Char8 * dspExecutable,
  *  @see    pool_notify_Delete , pool_notify_Create
  *  ============================================================================
  */
-NORMAL_API
-DSP_STATUS
-pool_notify_Execute (IN Uint8 processorId) ;
+NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 processorId);
 
 
 /** ============================================================================

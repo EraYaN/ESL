@@ -9,7 +9,7 @@
 #define PROGRESSFRAMES 10
 #define VARIANT "vanilla"
 
-#include <pool_notify.h>
+#include "pool_notify.h"
 
 
 int main(int argc, char ** argv)
@@ -49,7 +49,7 @@ int main(int argc, char ** argv)
     cv::Mat frame;
     frame_capture.read(frame);
 
-    MeanShift ms; // creat meanshift obj
+    MeanShift ms; // create meanshift obj
     ms.Init_target_frame(frame, rect); // init the meanshift
 
     int codec = CV_FOURCC('F', 'L', 'V', '1');
@@ -65,7 +65,7 @@ int main(int argc, char ** argv)
 #endif
 #endif
 
-    pool_notify_Init(dspExecutable,strBufferSize) ;
+    pool_notify_Init(dspExecutable, strBufferSize) ;
 
     perftime_t startTime = now();
     double totalTime = 0;
