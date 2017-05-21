@@ -7,6 +7,13 @@ import errno
 import stat
 import posixpath
 import csv
+import io
+import socket
+import time
+import getpass
+import stat
+from operator import itemgetter
+
 try:
     import cPickle as pickle
 except:
@@ -104,7 +111,7 @@ def download_file(sftp_client, remote_file, local_file):
     remote_file = remote_file.replace('~',remote_home_dir)
 
     if not exists_remote(sftp_client, remote_file):
-        print('Downloading file failed, remote file does not exist.')
+        print('Downloading file for {0} failed, remote file does not exist.'.format(remote_file))
         return
 
     local_dir = os.path.dirname(local_file)
@@ -148,11 +155,17 @@ def mkdir_p(sftp, remote_directory):
 
 class RunSystem(object):
 
+    REF_FILE = 'car.avi.refs-coords'
+    MUTEX_FILE = '/tmp/run-system.pid'
+    MUTEX_TIMEOUT = 20
+    MUTEX_INTERVAL = 1
+
     def __init__(self, benchmark):
         """Return a new RunSystem object."""
         self.build_server = None
         self.transport = None
         self.beagle_board = None
+        self.build_channel = None
         self.benchmark = benchmarks[benchmark]
         self.results = []
 
@@ -177,10 +190,11 @@ class RunSystem(object):
 
         # Get the client's transport and open a `direct-tcpip` channel passing
         # the destination hostname:port and the local hostname:port
-        self.transport = self.build_server.get_transport()
+        self.transport = self.build_server.get_transport()        
+
         dest_addr = ('192.168.0.202', 22)
         local_addr = ('127.0.0.1', 1234)
-        channel = self.transport.open_channel("direct-tcpip", dest_addr, local_addr)
+        channel = self.transport.open_channel("direct-tcpip", dest_addr, local_addr)       
         
         # Create a NEW client and pass this channel to it as the `sock` (along
         # with
@@ -195,6 +209,47 @@ class RunSystem(object):
             self.transport.close()
         if self.build_server:
             self.build_server.close()
+
+    def BuildExecute(self, cmd):
+        try:
+            build_channel = self.transport.open_session()
+            build_channel.settimeout(10800) 
+
+            # Execute the given command
+            build_channel.exec_command(cmd)
+
+            # To capture Data.  Need to read the entire buffer to capture
+            # output
+            contents = io.StringIO()
+            error = io.StringIO()
+
+            while not build_channel.exit_status_ready():
+                if build_channel.recv_ready():
+                    data = build_channel.recv(1024)
+                    #print "Indside stdout"
+                    while data:
+                        contents.write(data.decode("utf-8"))
+                        sys.stdout.write(data.decode("utf-8"))
+                        data = build_channel.recv(1024)
+
+                if build_channel.recv_stderr_ready():            
+                    error_buff = build_channel.recv_stderr(1024)
+                    while error_buff:
+                        error.write(error_buff.decode("utf-8"))
+                        sys.stderr.write(error_buff.decode("utf-8"))
+                        error_buff = build_channel.recv_stderr(1024)
+
+            exit_status = build_channel.recv_exit_status()
+
+        except socket.timeout:
+            raise socket.timeout
+
+        output = contents.getvalue()
+        error_value = error.getvalue()
+
+        build_channel.close()
+
+        return output, error_value, exit_status
 
     def SendSource(self):
         if not self.build_server or not self.beagle_board:
@@ -221,29 +276,36 @@ class RunSystem(object):
             local_dir = '{0}/{1}'.format(LOCAL_BASE_DIR,self.benchmark['project'])
             build_dir = '{0}/{1}'.format(BUILD_BASE_DIR,self.benchmark['project'])
             upload_files(sftp,local_dir,build_dir)
+        except:
+            return False
         finally:
             if sftp:
                 sftp.close()
+        return True
 
     def Build(self):
         if not self.build_server or not self.beagle_board:
             raise NotConnectedError('Please make sure the class made a successfull connection to the build server and the development board.')
         
-        for bench in self.benchmark['deps']:
-            dep_bench = benchmarks[bench]
+        for dep in self.benchmark['deps']:
+            dep_bench = benchmarks[dep['project']]
             print("Cleaning dependency {project}.".format(**dep_bench))
-            ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make clean -C ~/projects/{project} -f arm.mk".format(**dep_bench))
-            self.PrintCommandOutput(ssh_stdout,ssh_stderr)
+            out,error,exit_code = self.BuildExecute("make clean -C ~/projects/{project} -f arm.mk".format(**dep_bench))            
             print("Building dependency {project}.".format(**dep_bench))
-            ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make all -C ~/projects/{project} -f arm.mk".format(**dep_bench))
-            self.PrintCommandOutput(ssh_stdout,ssh_stderr)
+            out,error,exit_code = self.BuildExecute("make all -C ~/projects/{project} -f arm.mk".format(**dep_bench))            
+            if exit_code != 0:
+                print('Dependency {0} build failed with exit code {1}'.format(dep,exit_code))
+                return False
 
         print("Cleaning {project}.".format(**self.benchmark))
-        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make clean -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
-        self.PrintCommandOutput(ssh_stdout,ssh_stderr)
+        out,error,exit_code = self.BuildExecute("make clean -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
         print("Building {project}.".format(**self.benchmark))
-        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make all -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
-        self.PrintCommandOutput(ssh_stdout,ssh_stderr)       
+        out,error,exit_code = self.BuildExecute("make all -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
+        if exit_code != 0:
+            print('Main {0} build failed with exit code {1}'.format(self.benchmark['project'],exit_code))
+            return False
+        
+        return True
 
     def SendExec(self):
         if not self.build_server or not self.beagle_board:
@@ -252,75 +314,194 @@ class RunSystem(object):
         for bench in self.benchmark['deps']:
             dep_bench = benchmarks[bench]
             print("Sending compiled dependency {project} to BeagleBoard.".format(**dep_bench))
-            ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/{project} -f arm.mk".format(**dep_bench))
-            self.PrintCommandOutput(ssh_stdout,ssh_stderr)   
+            out,error,exit_code = self.BuildExecute("make send -C ~/projects/{project} -f arm.mk".format(**dep_bench))
+            if exit_code != 0:
+                print('Sending {0} failed with exit code {1}'.format(dep_bench['project'],exit_code))
+                return False
 
         print("Sending compiled {project} to BeagleBoard.".format(**self.benchmark))
-        ssh_stdin, ssh_stdout, ssh_stderr = self.build_server.exec_command("make send -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
-        self.PrintCommandOutput(ssh_stdout,ssh_stderr)   
+        out,error,exit_code = self.BuildExecute("make send -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
+        if exit_code != 0:
+            print('Sending {0} failed with exit code {1}'.format(self.benchmark['project'],exit_code))
+            return False 
+
+        return True
+
+    def TryMutexLock(self, sftp):
+        return not exists_remote(sftp,self.MUTEX_FILE)        
+
+    def WaitForMutexLock(self, sftp):
+        start_time = time.time()
+        while True:
+            pid = -1
+            user = 'none'
+            if exists_remote(sftp,self.MUTEX_FILE):
+                file = sftp.file(self.MUTEX_FILE, "r", -1)
+                pid = int(file.readline().strip())
+                user = file.readline().strip()                
+                file.close()
+                if not os.path.exists("/proc/{}".format(pid)): 
+                    self.ResetMutexLock(sftp)
+                    print('Mutex lock acquired from {} by {}, the process already quit.'.format(pid,user))
+                    return True
+                if start_time + self.MUTEX_TIMEOUT < time.time():
+                    print('Mutex Lock timed out for process {} by {}.'.format(pid,user))
+                    return False
+            else:
+                print('Mutex lock acquired.'.format(pid,user))
+                return True
+            print('Waiting for process {} by {} to exit.'.format(pid,user))
+            time.sleep(self.MUTEX_INTERVAL)
+
+    def SetMutexLock(self, sftp):
+        try:
+            pid = os.getpid()
+            file = sftp.file(self.MUTEX_FILE, "w", -1)
+            file.chmod(stat.S_IRUSR|stat.S_IRGRP|stat.S_IROTH|stat.S_IWUSR|stat.S_IWGRP|stat.S_IWOTH)
+            file.write("{}\n".format(pid))
+            file.write("{}\n".format(getpass.getuser()))
+            file.flush()
+            
+        except Exception:
+            print('Could not create mutex lock file.')
+            return False
+        finally:
+            if file:
+                file.close()
+        print('Created mutex lock file successfully.')
+        return True
+
+    def ResetMutexLock(self, sftp):
+        if exists_remote(sftp,self.MUTEX_FILE):
+            code = sftp.remove(self.MUTEX_FILE)
+            if code == paramiko.SFTP_OK or code == None:                
+                print('Reset mutex lock file successfully.')
+                return True
+            else:
+                print('Could not remove mutex lock file, code: {0}.'.format(code))
+                return False
+        else:
+            print('Mutex lock file does not exist.')
+            return True
 
     def Run(self, file):
         if not self.build_server or not self.beagle_board:
             raise NotConnectedError('Please make sure the class made a successfull connection to the build server and the development board.')
         
-        if self.benchmark['usesdsp']:
-            print("Powercycling DSP on BeagleBoard.")
-            ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("~/powercycle.sh")        
-            self.PrintCommandOutput(ssh_stdout,ssh_stderr)
+        try: 
+            sftp_build = self.build_server.open_sftp()
+            if not self.WaitForMutexLock(sftp_build):
+                return False
+            if not self.SetMutexLock(sftp_build):
+                return False
+            if self.benchmark['usesdsp']:
+                print("Powercycling DSP on BeagleBoard.")
+                ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("~/powercycle.sh")        
+                self.PrintCommandOutput(ssh_stdout,ssh_stderr)
 
-        print("Executing project {project} on BeagleBoard.".format(**self.benchmark))
-        formatarguments = {}
-        formatarguments['basedir'] = BEAGLE_BASE_DIR
-        formatarguments['executable'] = self.benchmark['executable']
-        print("Using file {0}".format(file))
-        formatarguments['testfile'] = file
-        formatarguments['depname'] = ''
-        if len(self.benchmark['deps']) >= 1:
-            formatarguments['depname'] = benchmarks[self.benchmark['deps'][0]]['executable']        
+            print("Executing project {project} on BeagleBoard.".format(**self.benchmark))
+            formatarguments = {}
+            formatarguments['basedir'] = BEAGLE_BASE_DIR
+            formatarguments['executable'] = self.benchmark['executable']
+            print("Using file {0}".format(file))
+            formatarguments['testfile'] = file
+            formatarguments['depname'] = ''
+            if len(self.benchmark['deps']) >= 1:
+                formatarguments['depname'] = benchmarks[self.benchmark['deps'][0]]['executable']        
 
-        formatarguments['arguments'] = [basearg.format(**formatarguments) for basearg in self.benchmark['baseargs']]   
+            formatarguments['arguments'] = [basearg.format(**formatarguments) for basearg in self.benchmark['baseargs']]   
         
-        formatarguments['arguments_str'] = ' '.join(formatarguments['arguments'])
-        print("{basedir}/{executable} {arguments_str}".format(**formatarguments))
-        ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("{basedir}/{executable} {arguments_str}".format(**formatarguments))        
-        #self.PrintCommandOutput(ssh_stdout,ssh_stderr)
-        csv_data = ''
-        for line in ssh_stdout: #read and store result in log file
-            if line[0:1] == LINE_MARKER:
-                csv_data+=line[1:]
-            sys.stdout.write('#stdout {}'.format(line))
-        for line in ssh_stderr: #read and store result in log file
-            if line[0:1] == LINE_MARKER:
-                csv_data+=line[1:]
-            sys.stderr.write('#stderr {}'.format(line))
-        reader = csv.reader(csv_data.splitlines())
-        for testName,init_time,kernel_time,cleanup_time,total_time,fps in reader:
-            testName = '{}-{}'.format(testName, file)
-            self.results.append({'testName':testName,'init_time':float(init_time),'kernel_time':float(kernel_time),'cleanup_time':float(cleanup_time),'total_time':float(total_time),'fps':float(fps)})
+            formatarguments['arguments_str'] = ' '.join(formatarguments['arguments'])
+            print("{basedir}/{executable} {arguments_str}".format(**formatarguments))
+            ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("{basedir}/{executable} {arguments_str}".format(**formatarguments))        
+            #self.PrintCommandOutput(ssh_stdout,ssh_stderr)
+            csv_data = ''
+            for line in ssh_stdout: #read and store result in log file
+                if line[0:1] == LINE_MARKER:
+                    csv_data+=line[1:]
+                sys.stdout.write('#stdout {}'.format(line))
+            for line in ssh_stderr: #read and store result in log file
+                if line[0:1] == LINE_MARKER:
+                    csv_data+=line[1:]
+                sys.stderr.write('#stderr {}'.format(line))
+            reader = csv.reader(csv_data.splitlines())
+            result = {}
+            for testName,init_time,kernel_time,cleanup_time,total_time,fps in reader:
+                testName = '{}-{}'.format(testName, file)
+                result = {'testName':testName,'init_time':float(init_time),'kernel_time':float(kernel_time),'cleanup_time':float(cleanup_time),'total_time':float(total_time),'fps':float(fps)}
 
-        if self.benchmark['output']:
-            try: 
-                sftp = self.beagle_board.open_sftp()
+            result['error'] = 0
+            if self.benchmark['output']:
+                try: 
+                    sftp = self.beagle_board.open_sftp()
 
-                for filename in self.benchmark['output']:
-                    formattedfilename = filename.format(**formatarguments)          
+                    for filename in self.benchmark['output']:
+                        formattedfilename = filename.format(**formatarguments)          
                     
-                    local_path = formattedfilename.replace(posixpath.sep, os.path.sep).replace('~', '.')
-                    download_file(sftp, formattedfilename, local_path)
-            finally:
-                if sftp:
-                    sftp.close()
+                        local_path = formattedfilename.replace(posixpath.sep, os.path.sep).replace('~', '.')
+                        download_file(sftp, formattedfilename, local_path)
+                        if os.path.splitext(formattedfilename)[1] == '.coords':
+                            result['error'] += self.Verify(local_path)
+                finally:
+                    if sftp:
+                        sftp.close()
 
+            self.results.append(result)
+            if not self.ResetMutexLock(sftp_build):
+                return False
+            return True
+        except Exception as e:
+            print(e)
+            return False
+        finally:
+            if sftp:
+                sftp.close()
+        return True
+
+    def Verify(self, file):
+        if not os.path.exists(file):
+            print('Verification file does not exist.')
+            return
+        if not os.path.exists(self.REF_FILE):
+            print('Reference file does not exist.')
+            return
+        ref = []
+        res = []
+        with open(self.REF_FILE, 'r') as f:
+            reader = csv.reader(f)
+            next(reader, None)
+            for f,x,y in reader:
+                ref.append({'f':int(f),'x':int(x),'y':int(y)})
+
+        with open(file, 'r') as f:
+            reader = csv.reader(f)
+            next(reader, None)
+            for f,x,y in reader:
+                res.append({'f':int(f),'x':int(x),'y':int(y)})
+
+        if len(res) > len(ref):
+            print('There are more data points in the verification file then in the reference file.')
+
+        ref = sorted(ref, key=itemgetter('f'))
+        res = sorted(res, key=itemgetter('f'))
+        error = 0
+        for i in range(0,len(ref)):
+            res_p = res[i]
+            ref_p = ref[i]
+            if res_p['f'] != ref_p['f']:
+                print('Item {0} in the two files does not have the same framenumber.'.format(i))
+
+            error += ref_p['x'] - res_p['x']
+            error += ref_p['y'] - res_p['y']
+
+        return error        
 
     def RunN(self, file, n=5):
         for i in range(0,n):
             print("Doing run {0} out of {1}.".format(i + 1,n))
-            self.Run(file)
-
-    def SaveResults(self, filename):
-        print('Saving Results...')
-        with open(filename, 'wb') as handle:
-            pickle.dump(self.results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            if not self.Run(file):
+                return False
+        return True
 
     def PrintCommandOutput(self, stdout, stderr):
         out = stdout.readlines()
@@ -332,22 +513,31 @@ class RunSystem(object):
         sys.stdout.flush()
         sys.stderr.flush()
 
+    def SaveResults(self, filename):
+        print('Saving Results...')
+        with open(filename, 'wb') as handle:
+            pickle.dump(self.results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     def PrintResults(self):
         table_heading = ['test',
             'isAverage',
+            'Passed',
             'tI',
             'tK',
             'tC',
             'tT',
-            'fps']
+            'fps',
+            'error']
         table_justify = {
             0:'left',
             1:'left',
-            2:'right',
+            2:'left',
             3:'right',
             4:'right',
-            5:'right',            
-            6:'right'
+            5:'right',
+            6:'right',            
+            7:'right',                        
+            8:'right'
         }
         display_results = []
         display_results.append(table_heading)
@@ -355,11 +545,13 @@ class RunSystem(object):
         for result in self.results:            
             display_results.append([result['testName'],
             'No',
+            'Yes' if result['error'] == 0 else 'No',
             "{0:.3f} s".format(result['init_time']),
             "{0:.3f} s".format(result['kernel_time']),
             "{0:.3f} s".format(result['cleanup_time']),
             "{0:.3f} s".format(result['total_time']),
-            "{0:.3f} s".format(result['fps'])])
+            "{0:.3f}".format(result['fps']),
+            "{0}".format(result['error'])])
 
             if result['testName'] not in sorted_results:
                 sorted_results[result['testName']] = []
@@ -370,11 +562,13 @@ class RunSystem(object):
             count = len(sorted_results[result['testName']])            
             display_results.append([result['testName'],
             'Yes',
+            'Yes' if sum(item['error'] for item in sorted_results[result['testName']]) / count == 0 else 'No',
             "{0:.3f} s".format(sum(item['init_time'] for item in sorted_results[result['testName']]) / count),
             "{0:.3f} s".format(sum(item['kernel_time'] for item in sorted_results[result['testName']]) / count),
             "{0:.3f} s".format(sum(item['cleanup_time'] for item in sorted_results[result['testName']]) / count),
             "{0:.3f} s".format(sum(item['total_time'] for item in sorted_results[result['testName']]) / count),
-            "{0:.3f} s".format(sum(item['fps'] for item in sorted_results[result['testName']]) / count)])
+            "{0:.3f}".format(sum(item['fps'] for item in sorted_results[result['testName']]) / count),
+            "{0:.3f}".format(sum(item['error'] for item in sorted_results[result['testName']]) / count)])
 
         results_table = AsciiTable(display_results)
         results_table.justify_columns = table_justify
@@ -400,14 +594,22 @@ if __name__ == '__main__':
             rs = RunSystem(benchmark=opts.benchmark)
             rs.Connect(opts.host,opts.port,opts.user,opts.key_file)
             if opts.sendsource:
-                rs.SendSource()
+                if not rs.SendSource():
+                    print('SendSource Failed.')
+                    exit(1)
             if opts.build:
-                rs.Build()
-                rs.SendExec()
+                if not rs.Build():
+                    print('Build Failed.')
+                    exit(2)
+                if not rs.SendExec():
+                    print('SendExec Failed.')
+                    exit(3)
             if opts.run:
                 files = opts.files.split(',')
                 for file in files:
-                    rs.RunN(file,opts.number_of_runs)
+                    if not rs.RunN(file,opts.number_of_runs):
+                        print('RunN Failed.')
+                        exit(4)
                 rs.SaveResults("{0}-{2}-{1}.pickle".format(opts.benchmark,opts.files.replace(',','_'),opts.variant))
 
                 rs.PrintResults()
