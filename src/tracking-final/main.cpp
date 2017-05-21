@@ -121,7 +121,6 @@ int main(int argc, char ** argv)
     std::cout << LINE_MARKER << VARIANT << CSV_SEPARATOR << initTime / 1e9 << CSV_SEPARATOR << kernelTime / 1e9 << CSV_SEPARATOR << cleanupTime / 1e9 << CSV_SEPARATOR << totalTime / 1e9 << CSV_SEPARATOR << fcount / (totalTime / 1e9) << std::endl;
 
 #ifdef TIMING
-    std::cout << "Split time: " << ms.splitTime / 1e9 << std::endl;
     std::cout << "PDF time: " << ms.pdfTime / 1e9 << std::endl;
     std::cout << "CalWeight time: " << ms.calWeightTime / 1e9 << std::endl;
     std::cout << "Next Rect time: " << ms.nextRectTime / 1e9 << std::endl;
