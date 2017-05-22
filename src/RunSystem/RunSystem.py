@@ -413,7 +413,7 @@ class RunSystem(object):
         
             formatarguments['arguments_str'] = ' '.join(formatarguments['arguments'])
             print("{basedir}/{executable} {arguments_str}".format(**formatarguments))
-            ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("{basedir}/{executable} {arguments_str}".format(**formatarguments))        
+            ssh_stdin, ssh_stdout, ssh_stderr = self.beagle_board.exec_command("cd {basedir}; {basedir}/{executable} {arguments_str}".format(**formatarguments))        
             #self.PrintCommandOutput(ssh_stdout,ssh_stderr)
             csv_data = ''
             for line in ssh_stdout: #read and store result in log file
