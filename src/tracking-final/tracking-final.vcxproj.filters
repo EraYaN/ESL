@@ -18,6 +18,9 @@
     <ClInclude Include="neon_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pool_notify.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="arm.mk" />
@@ -28,6 +31,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="meanshift.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pool_notify.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

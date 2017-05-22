@@ -1,6 +1,8 @@
 #include "meanshift.h"
 #include <timing.h>
 #include <iostream>
+#include <fstream>
+#include "util.h"
 
 #ifndef ARMCC
 #include "markers.h"
@@ -26,7 +28,7 @@ int main(int argc, char ** argv)
 
     cv::VideoCapture frame_capture;
     char *dspExecutable = NULL;
-    char *strBufferSize = NULL ;
+    char *strBufferSize = NULL;
     DSP_STATUS status;
 
     if (argc < 4)
@@ -95,7 +97,7 @@ int main(int argc, char ** argv)
         int status = frame_capture.read(frame);
         if (0 == status) break;
 
-        initEnd = now();
+		initEnd = now();
         initTime += diffToNanoseconds(initStart, initEnd, freq);
         kernelStart = now();
         // track object
@@ -110,6 +112,7 @@ int main(int argc, char ** argv)
         kernelTime += diffToNanoseconds(kernelStart, kernelEnd, freq);
         cleanupStart = now();
         coordinatesfile << fcount << CSV_SEPARATOR << ms_rect.x << CSV_SEPARATOR << ms_rect.y << std::endl;
+
         // mark the tracked object in frame
         cv::rectangle(frame, ms_rect, cv::Scalar(0, 0, 255), 3);
 
@@ -120,6 +123,7 @@ int main(int argc, char ** argv)
         cleanupEnd = now();
         cleanupTime += diffToNanoseconds(cleanupStart, cleanupEnd, freq);
     }
+	coordinatesfile.close();
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_STOP();
 #endif
