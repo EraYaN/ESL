@@ -4,7 +4,7 @@
 */
 
 #include "meanshift.h"
-#ifdef ARMCC
+#ifdef __ARM_NEON__
 #include "neon_util.h"
 #endif
 
@@ -25,7 +25,7 @@ MeanShift::MeanShift()
 void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
 {
     target_Region = rect;
-    this->kernel = cv::Mat(rect.height, rect.width, CV_32F, cv::Scalar(0));
+    this->kernel = cv::Mat(rect.height, (rect.width / 16 + 1) * 16, CV_32F, cv::Scalar(0));
     float normalized_C = 1 / Epanechnikov_kernel(kernel);
 #ifdef __ARM_NEON__
     float32x4_t kernel_vec;
@@ -72,7 +72,7 @@ float MeanShift::Epanechnikov_kernel(cv::Mat &kernel)
 #ifdef __ARM_NEON__
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
-    cv::Mat pdf_model(8, 16, CV_32F, cv::Scalar(1e-10));
+    cv::Mat pdf_model(3, 16, CV_32F, cv::Scalar(1e-10));
     cv::Vec3b *bin_values = new cv::Vec3b[(rect.width / 16 + 1) * 16];
 
     int row_index = rect.y;
@@ -106,7 +106,7 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 #else
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
-    cv::Mat pdf_model(8, 16, CV_32F, cv::Scalar(1e-10));
+    cv::Mat pdf_model(3, 16, CV_32F, cv::Scalar(1e-10));
 
     cv::Vec3f curr_pixel_value;
     cv::Vec3f bin_value;
@@ -185,15 +185,19 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
     int row_index = rec.y;
     int col_index = rec.x;
     cv::Mat weight(rows, cols, CV_32F, cv::Scalar(1.0000));
+    float multipliers[cfg.num_bins];
 
     for (int k = 0; k < 3; k++) {
+        for (int bin = 0; bin < cfg.num_bins; bin++) {
+            multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
+        }
+
         row_index = rec.y;
         for (int i = 0; i < rows; i++) {
             col_index = rec.x;
             for (int j = 0; j < cols; j++) {
-                int curr_pixel = (next_frame.at<uchar>(row_index, col_index)[k]);
-                int bin_value = curr_pixel / bin_width;
-                weight.at<float>(i, j) *= static_cast<float>((sqrt(target_model.at<float>(k, bin_value) / target_candidate.at<float>(k, bin_value))));
+                int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
+                weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
 
                 col_index++;
             }

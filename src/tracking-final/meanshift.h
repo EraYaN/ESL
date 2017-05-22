@@ -6,10 +6,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#ifdef ARMCC
-#include <arm_neon.h>
-#endif
-
 #define PI 3.14159265358979323846264338327950
 
 class MeanShift
