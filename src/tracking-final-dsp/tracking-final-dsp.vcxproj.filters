@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{628c23f5-a48e-49f6-89af-28a5ba0a8508}</UniqueIdentifier>
+      <Extensions>.c;.cpp</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{54e33d8f-b200-4e24-a77e-980d2f509567}</UniqueIdentifier>
+      <Extensions>.h;.hpp</Extensions>
+    </Filter>
+    <Filter Include="Config Files">
+      <UniqueIdentifier>{9319eca3-446b-4a5d-8e6f-a304f526e7b1}</UniqueIdentifier>
+      <Extensions>.cmd;.tcf;.tci</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="arm.mk" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dsp_main.c" />
+    <ClCompile Include="pool_notify_config.c" />
+    <ClCompile Include="task.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pool_notify_config.h" />
+    <ClInclude Include="task.h" />
+  </ItemGroup>
+</Project>
