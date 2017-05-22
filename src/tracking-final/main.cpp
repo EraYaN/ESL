@@ -9,7 +9,7 @@
 #endif
 
 #define PROGRESSFRAMES 10
-#define VARIANT "vanilla"
+#define VARIANT "final"
 
 int main(int argc, char ** argv)
 {
