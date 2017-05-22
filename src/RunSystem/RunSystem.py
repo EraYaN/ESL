@@ -35,10 +35,10 @@ benchmarks = {
 reference_performance = {
     'testName':'reference',
     'init_time':0.433,
-    'kernel_time':10.224,
-    'cleanup_time':1.759,
-    'total_time':12.418,
-    'fps':2.577
+    'kernel_time':10.137,
+    'cleanup_time':1.745,
+    'total_time':12.318,
+    'fps':2.598
 }
 
 ignore_strings = [
