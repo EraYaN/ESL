@@ -439,7 +439,7 @@ class RunSystem(object):
                     for filename in self.benchmark['output']:
                         formattedfilename = filename.format(**formatarguments)          
                     
-                        local_path = formattedfilename.replace(posixpath.sep, os.path.sep).replace('~', '.')
+                        local_path = formattedfilename.replace('~', '.').replace('/tmp', '.').replace(posixpath.sep, os.path.sep)
                         download_file(sftp, formattedfilename, local_path)
                         if os.path.splitext(formattedfilename)[1] == '.coords':
                             result['error'] += self.Verify(local_path)
