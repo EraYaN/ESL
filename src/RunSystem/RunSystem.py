@@ -21,9 +21,6 @@ except:
     import pickle
 from terminaltables import AsciiTable
 
-LOCAL_BASE_DIR = '..'
-BUILD_BASE_DIR = '~/projects'
-BEAGLE_BASE_DIR = '~/esLAB'
 LINE_MARKER = '@'
 
 includes = {
@@ -33,7 +30,22 @@ includes = {
 benchmarks = {
     'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},   
     'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},
-    }
+}
+
+reference_performance = {
+    'testName':'reference',
+    'init_time':0.433,
+    'kernel_time':10.224,
+    'cleanup_time':1.759,
+    'total_time':12.418,
+    'fps':2.577
+}
+
+ignore_strings = [
+    '\\obj\\' ,
+    '\\bin\\'
+]
+
 
 class Error(Exception):
     """Base class for exceptions in this module."""
@@ -49,14 +61,18 @@ class NotConnectedError(Error):
     def __init__(self, msg):
         self.msg = msg
 
+def is_ignored(name):
+    for ignore_string in ignore_strings:
+        if ignore_string in name:
+            return True
+    return False
+
 def upload_files(sftp_client, local_dir, remote_dir):
     if not os.path.exists(local_dir):
         print('Uploading files failed, local path does not exist.')
         return
 
     local_dir = os.path.realpath(local_dir)
-    remote_home_dir = sftp_client.normalize('.')
-    remote_dir = remote_dir.replace('~',remote_home_dir)
 
     if not exists_remote(sftp_client, remote_dir):
         #print('Attempting to create {} on the remote.'.format(remote_dir))
@@ -66,8 +82,10 @@ def upload_files(sftp_client, local_dir, remote_dir):
             print('Could not create {} on the remote.'.format(remote_dir))    
 
     for root, dirs, files in os.walk(local_dir):
-        for dirname in dirs:
+        for dirname in dirs:   
             local_path = os.path.join(root, dirname)
+            if is_ignored(local_path):
+                continue;
             remote_path = posixpath.join(remote_dir,os.path.relpath(local_path, local_dir).replace(os.path.sep,posixpath.sep))
             if not exists_remote(sftp_client, remote_path):
                 #print('Attempting to create {} on the
@@ -81,11 +99,12 @@ def upload_files(sftp_client, local_dir, remote_dir):
             #upload_files(sftp_client, local_path, remote_path)
 
         for filename in files:
-            local_path = os.path.join(root, filename)
+            local_path = os.path.join(root, filename)            
+            if is_ignored(local_path):
+                continue;
             remote_path = posixpath.join(remote_dir,os.path.relpath(local_path, local_dir).replace(os.path.sep,posixpath.sep))
             if stat.S_ISDIR(os.stat(local_path).st_mode):  
-                print('Found directory?')
-                
+                print('Found directory?')                
             else:
                 print('Uploading {0} to {1}.'.format(local_path,remote_path))
                 sftp_client.put(local_path,remote_path)
@@ -106,10 +125,7 @@ def download_files(sftp_client, remote_dir, local_dir):
             if not os.path.isfile(os.path.join(local_dir, filename)):
                 sftp_client.get(remote_dir + filename, os.path.join(local_dir, filename))
 
-
 def download_file(sftp_client, remote_file, local_file):
-    remote_home_dir = sftp_client.normalize('.')
-    remote_file = remote_file.replace('~',remote_home_dir)
 
     if not exists_remote(sftp_client, remote_file):
         print('Downloading file for {0} failed, remote file does not exist.'.format(remote_file))
@@ -122,7 +138,6 @@ def download_file(sftp_client, remote_file, local_file):
 
     sftp_client.get(remote_file, local_file)
 
-
 def exists_remote(sftp_client, path):
     try:
         sftp_client.stat(path)
@@ -132,7 +147,6 @@ def exists_remote(sftp_client, path):
         raise
     else:
         return True
-
 
 def mkdir_p(sftp, remote_directory):
     """Change to this directory, recursively making new folders if needed.
@@ -153,13 +167,15 @@ def mkdir_p(sftp, remote_directory):
         sftp.chdir(basename)
         return True
 
-
 class RunSystem(object):
 
     REF_FILE = 'car.avi.refs-coords'
     MUTEX_FILE = '/tmp/run-system.pid'
     MUTEX_TIMEOUT = 20
     MUTEX_INTERVAL = 1
+    LOCAL_BASE_DIR = '..'
+    BUILD_BASE_DIR = '~/projects'
+    BEAGLE_BASE_DIR = '~/esLAB'
 
     def __init__(self, benchmark):
         """Return a new RunSystem object."""
@@ -204,6 +220,10 @@ class RunSystem(object):
         self.beagle_board.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.beagle_board.connect('192.168.0.202', port=22, username='root',password='', sock=channel)
 
+        # Get Build home dir.
+        output, _, _ = self.BuildExecute('echo ~')
+        self.BUILD_BASE_DIR = self.BUILD_BASE_DIR.replace('~',output.strip())
+
     def Disconnect(self):        
         if self.beagle_board:
             self.beagle_board.close()
@@ -224,7 +244,7 @@ class RunSystem(object):
             contents = io.StringIO()
             error = io.StringIO()
 
-            while not build_channel.exit_status_ready():
+            while not build_channel.exit_status_ready() or build_channel.recv_ready() or build_channel.recv_stderr_ready():
                 if build_channel.recv_ready():
                     data = build_channel.recv(1024)
                     #print "Indside stdout"
@@ -256,28 +276,29 @@ class RunSystem(object):
         if not self.build_server or not self.beagle_board:
             raise NotConnectedError('Please make sure the class made a successfull connection to the build server and the development board.')
         
-        try: 
+        try:             
             sftp = self.build_server.open_sftp()
 
             for bench in self.benchmark['includes']:
                 dep_includes = includes[bench]
                 print("Sending sources for include set {project}.".format(**dep_includes))
-                local_dir = '{0}/{1}'.format(LOCAL_BASE_DIR,dep_includes['project'])
-                build_dir = '{0}/{1}'.format(BUILD_BASE_DIR,dep_includes['project'])
+                local_dir = '{0}/{1}'.format(self.LOCAL_BASE_DIR,dep_includes['project'])
+                build_dir = '{0}/{1}'.format(self.BUILD_BASE_DIR,dep_includes['project'])
                 upload_files(sftp,local_dir,build_dir)
 
             for bench in self.benchmark['deps']:
                 dep_bench = benchmarks[bench]
                 print("Sending sources for depency {project}.".format(**dep_bench))
-                local_dir = '{0}/{1}'.format(LOCAL_BASE_DIR,dep_bench['project'])
-                build_dir = '{0}/{1}'.format(BUILD_BASE_DIR,dep_bench['project'])
+                local_dir = '{0}/{1}'.format(self.LOCAL_BASE_DIR,dep_bench['project'])
+                build_dir = '{0}/{1}'.format(self.BUILD_BASE_DIR,dep_bench['project'])
                 upload_files(sftp,local_dir,build_dir)
 
             print("Sending sources for {project}.".format(**self.benchmark))
-            local_dir = '{0}/{1}'.format(LOCAL_BASE_DIR,self.benchmark['project'])
-            build_dir = '{0}/{1}'.format(BUILD_BASE_DIR,self.benchmark['project'])
+            local_dir = '{0}/{1}'.format(self.LOCAL_BASE_DIR,self.benchmark['project'])
+            build_dir = '{0}/{1}'.format(self.BUILD_BASE_DIR,self.benchmark['project'])
             upload_files(sftp,local_dir,build_dir)
-        except:
+        except Exception as e:
+            print(e)
             return False
         finally:
             if sftp:
@@ -402,7 +423,7 @@ class RunSystem(object):
 
             print("Executing project {project} on BeagleBoard.".format(**self.benchmark))
             formatarguments = {}
-            formatarguments['basedir'] = BEAGLE_BASE_DIR
+            formatarguments['basedir'] = self.BEAGLE_BASE_DIR
             formatarguments['executable'] = self.benchmark['executable']
             print("Using file {0}".format(file))
             formatarguments['testfile'] = file
@@ -521,15 +542,19 @@ class RunSystem(object):
             pickle.dump(self.results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     def PrintResults(self):
-        table_heading = ['test',
-            'isAverage',
+        table_heading = ['Test',
+            'Avg',
             'Passed',
             'tI',
             'tK',
             'tC',
             'tT',
-            'fps',
-            'error']
+            'fps',            
+            'Error',
+            'sI',
+            'sK',
+            'sC',
+            'sT']
         table_justify = {
             0:'left',
             1:'left',
@@ -537,9 +562,13 @@ class RunSystem(object):
             3:'right',
             4:'right',
             5:'right',
-            6:'right',            
-            7:'right',                        
-            8:'right'
+            6:'right', 
+            7:'right',
+            8:'right',
+            9:'right',
+            10:'right',  
+            11:'right',                        
+            12:'right'
         }
         display_results = []
         display_results.append(table_heading)
@@ -553,7 +582,11 @@ class RunSystem(object):
             "{0:.3f} s".format(result['cleanup_time']),
             "{0:.3f} s".format(result['total_time']),
             "{0:.3f}".format(result['fps']),
-            "{0}".format(result['error'])])
+            "{0:.3f}".format(result['error']),
+            "{0:.1f}x".format(reference_performance['init_time'] / result['init_time']),
+            "{0:.1f}x".format(reference_performance['kernel_time'] / result['kernel_time']),
+            "{0:.1f}x".format(reference_performance['cleanup_time'] / result['cleanup_time']),
+            "{0:.1f}x".format(reference_performance['total_time'] / result['total_time'])])
 
             if result['testName'] not in sorted_results:
                 sorted_results[result['testName']] = []
@@ -570,7 +603,11 @@ class RunSystem(object):
             "{0:.3f} s".format(sum(item['cleanup_time'] for item in sorted_results[result['testName']]) / count),
             "{0:.3f} s".format(sum(item['total_time'] for item in sorted_results[result['testName']]) / count),
             "{0:.3f}".format(sum(item['fps'] for item in sorted_results[result['testName']]) / count),
-            "{0:.3f}".format(sum(item['error'] for item in sorted_results[result['testName']]) / count)])
+            "{0:.3f}".format(sum(item['error'] for item in sorted_results[result['testName']]) / count),
+            "{0:.1f}x".format(sum(reference_performance['init_time'] / item['init_time'] for item in sorted_results[result['testName']]) / count),
+            "{0:.1f}x".format(sum(reference_performance['kernel_time'] / item['kernel_time'] for item in sorted_results[result['testName']]) / count),
+            "{0:.1f}x".format(sum(reference_performance['cleanup_time'] / item['cleanup_time'] for item in sorted_results[result['testName']]) / count),
+            "{0:.1f}x".format(sum(reference_performance['total_time'] / item['total_time'] for item in sorted_results[result['testName']]) / count)])
 
         results_table = AsciiTable(display_results)
         results_table.justify_columns = table_justify
