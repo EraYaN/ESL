@@ -151,6 +151,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
             model_vec = vld1q_f32((float32_t*)&target_model.ptr<float>(k)[bin]);
             candidate_vec = vld1q_f32((float32_t*)&target_candidate.ptr<float>(k)[bin]);
 
+            // ->> fixed point? https://stackoverflow.com/a/1100591/7346781
             // The following calculates c = sqrt(a / b) = 1 / sqrt (b * 1 / a).
             // Calculate model reciprocal 1 / a.
             model_vec = vrecpeq_f32(model_vec);

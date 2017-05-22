@@ -12,7 +12,7 @@
     <Name>RunSystem</Name>
     <RootNamespace>RunSystem</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>--benchmark final --files car.avi --number-of-runs 1 --sendsource --build --run</CommandLineArguments>
+    <CommandLineArguments>--benchmark final --files car.avi --number-of-runs 5 --sendsource --build --run</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

@@ -12,6 +12,7 @@ import socket
 import time
 import getpass
 import stat
+import math
 from operator import itemgetter
 
 try:
@@ -30,8 +31,8 @@ includes = {
 }
 
 benchmarks = {
-    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['{basedir}/tracking_result.avi', '{basedir}/tracking_result.coords']},   
-    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['{basedir}/tracking_result.avi', '{basedir}/tracking_result.coords']},
+    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},   
+    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},
     }
 
 class Error(Exception):
@@ -491,8 +492,9 @@ class RunSystem(object):
             if res_p['f'] != ref_p['f']:
                 print('Item {0} in the two files does not have the same framenumber.'.format(i))
 
-            error += ref_p['x'] - res_p['x']
-            error += ref_p['y'] - res_p['y']
+            error_x = ref_p['x'] - res_p['x']
+            error_y = ref_p['y'] - res_p['y']
+            error += math.sqrt(error_x**2+error_y**2)
 
         return error        
 
