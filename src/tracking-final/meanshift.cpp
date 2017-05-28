@@ -139,8 +139,8 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
 {
     int rows = rec.height;
     int cols = rec.width;
-    int row_index = rec.y;
-    int col_index = rec.x;
+    int row_index;
+    int col_index;
     cv::Mat weight(rows, cols, CV_32F, cv::Scalar(1.f));
     float32_t multipliers[cfg.num_bins];
     float32x4_t model_vec, candidate_vec, multiplier_vec;

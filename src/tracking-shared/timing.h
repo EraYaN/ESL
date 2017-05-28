@@ -19,13 +19,15 @@
 
 //  Windows#ifdef _WIN32
 #ifdef ARMCC
-typedef uint64_t perftime_t;
+
 #ifdef USECYCLES
+typedef uint64_t perftime_t;
 double get_frequency(bool debug);
 unsigned int now();
 double diffToNanoseconds(unsigned int t1, unsigned int t2, double freq = 1);
 void init_perfcounters(int32_t do_reset, int32_t enable_divider);
 #else
+typedef timespec perftime_t;
 perftime_t now();
 double diffToNanoseconds(perftime_t t1, perftime_t t2, double freq = 1);
 #endif

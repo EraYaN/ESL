@@ -13,6 +13,7 @@ import time
 import getpass
 import stat
 import math
+import re
 from operator import itemgetter
 
 try:
@@ -31,6 +32,8 @@ benchmarks = {
     'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},   
     'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},
 }
+
+DISASSEMBLY_CMD = 'arm-linux-gnueabi-objdump ~/projects/{project}/{executable} --disassemble -M reg-names-gcc --demangle --endian=little --no-show-raw-insn --reloc'
 
 reference_performance = {
     'testName':'reference',
@@ -327,6 +330,24 @@ class RunSystem(object):
             print('Main {0} build failed with exit code {1}'.format(self.benchmark['project'],exit_code))
             return False
         
+        return True
+
+    def Disassemble(self, filename):
+        if not self.build_server:
+            raise NotConnectedError('Please make sure the class made a successfull connection to the build server.')
+        
+        cmd = DISASSEMBLY_CMD.format(**self.benchmark)
+        out,error,exit_code = self.BuildExecute(cmd)
+        if exit_code != 0:
+            print('Disassembly of {0} failed with exit code {1}'.format(self.benchmark['project'],exit_code))
+            return False
+
+        #regex = re.compile('\s*([a-z0-9]+):\s*')
+        with open(filename, 'w') as f:
+            for line in iter(out.splitlines()):
+                #matches = regex.match(line)
+                f.write(line + '\n')
+
         return True
 
     def SendExec(self):
@@ -640,6 +661,11 @@ if __name__ == '__main__':
                 if not rs.Build():
                     print('Build Failed.')
                     exit(2)
+
+                if not rs.Disassemble("{0}-{2}-{1}.disassembly.txt".format(opts.benchmark,opts.files.replace(',','_'),opts.variant)):
+                    print('Disassemble Failed.')
+                    exit(5)
+
                 if not rs.SendExec():
                     print('SendExec Failed.')
                     exit(3)

@@ -78,13 +78,13 @@ void init_perfcounters(int32_t do_reset, int32_t enable_divider)
 #else
 double diffToNanoseconds(perftime_t t1, perftime_t t2, double freq) {
 
-	return (double)(t2 - t1);
+	return (double)((t2.tv_sec * 1e9 + t2.tv_nsec) - (t1.tv_sec * 1e9 + t1.tv_nsec));
 }
 perftime_t now() {
 	struct timespec tp;
 	//clock_gettime(CLOCK_REALTIME, &tp);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tp);    
-    return tp.tv_sec * 1e9 + tp.tv_nsec;
+    return tp;
 }
 #endif
 #else

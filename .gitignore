@@ -392,3 +392,4 @@ script/**/*.jpg
 *.pickle
 pkg/
 tracking_result.*
+*.disassembly.txt
