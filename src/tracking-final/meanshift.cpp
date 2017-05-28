@@ -4,6 +4,7 @@
 */
 
 #include "meanshift.h"
+#include "pool_notify.h"
 #ifdef __ARM_NEON__
 #include "neon_util.h"
 #endif
@@ -236,6 +237,8 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         calWeightTime += diffToNanoseconds(startTime, endTime, 0);
         startTime = now();
 #endif
+
+
 
         float delta_x = 0.0;
         float sum_wij = 0.0;

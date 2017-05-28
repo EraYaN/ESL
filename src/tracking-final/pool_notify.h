@@ -3,6 +3,9 @@
 
 /*  ----------------------------------- DSP/BIOS Link                 */
 #include <dsplink.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 
 /** ============================================================================
@@ -12,6 +15,32 @@
  *  ============================================================================
  */
 #define ID_PROCESSOR       0
+
+
+ /** ============================================================================
+ *  @name   pool_notify_DataBuf
+ *
+ *  @desc   Pointer to the shared data buffer used by the pool_notify sample
+ *          application.
+ *  ============================================================================
+ */
+
+//Pointers to shared databuffers
+extern Uchar8 * poolFrame;
+extern float * poolWeight;
+extern float * poolModel;
+
+//Class for determining buffer sizes for initialization.
+class bufferInit
+{
+public:
+	int frame;
+	int frameAligned;
+	int region;
+	int regionAligned;
+	bufferInit(cv::Mat frame, cv::Rect rect);
+};
+
 
 
 /** ============================================================================
@@ -43,7 +72,7 @@
  *  @see    pool_notify_Delete
  *  ============================================================================
  */
-NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, IN Char8 *strBufferSize, IN Uint8 processorId);
+NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit bufferSizes, IN Uint8 processorId, IN Char8 * strBuffersize);
 
 /** ============================================================================
  *  @func   pool_notify_Execute
@@ -67,7 +96,7 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, IN Char8 *strB
  *  @see    pool_notify_Delete , pool_notify_Create
  *  ============================================================================
  */
-NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 processorId);
+NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 processorId, bufferInit bufferSizes);
 
 
 /** ============================================================================
@@ -94,7 +123,7 @@ NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 processorId);
  *  @see    pool_notify_Create
  *  ============================================================================
  */
-NORMAL_API Void pool_notify_Delete(IN Uint8 processorId);
+NORMAL_API Void pool_notify_Delete(IN Uint8 processorId, bufferInit bufferSizes);
 
 
 /** ============================================================================
@@ -122,7 +151,10 @@ NORMAL_API Void pool_notify_Delete(IN Uint8 processorId);
  *  @see    pool_notify_Create, pool_notify_Execute, pool_notify_Delete
  *  ============================================================================
  */
-NORMAL_API Void pool_notify_Init(IN Char8 * dspExecutable, IN Char8 * strBufferSize);
+NORMAL_API Void pool_notify_Init(IN Char8 * dspExecutable, bufferInit bufferSizes, IN Char8 * strBuffersize);
+
+
+
 
 
 #endif /* !defined (pool_notify_H) */

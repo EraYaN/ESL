@@ -16,6 +16,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="arm.mk" />
+    <None Include="pool_notify.tcf" />
+    <None Include="pool_notify.tci" />
+    <None Include="pool_notify.cmd" />
+    <None Include="dsp_main.asm" />
+    <None Include="pool_notify_config.asm" />
+    <None Include="task.asm" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pool_notify_config.c">

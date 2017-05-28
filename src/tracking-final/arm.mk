@@ -49,7 +49,7 @@ INCLUDES := -I$(DSPLINK)/gpp/inc                  \
             -I$(DSPLINK)/gpp/inc/sys/Linux        \
             -I$(DSPLINK)/gpp/inc/sys/Linux/2.6.18 \
             -I$(BASE_TOOLCHAIN)/include           \
-            -I../tracking-shared                  \
+            -I../tracking-shared                \
             -I./
 
 # Modules are directories
