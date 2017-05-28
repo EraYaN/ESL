@@ -14,24 +14,21 @@
 
 MeanShift::MeanShift()
 {
-    cfg.MaxIter = 8;
-    cfg.num_bins = 16;
-    cfg.pixel_range = 256;
-    bin_width = cfg.pixel_range / cfg.num_bins;
-
+#ifdef TIMING
     pdfTime = calWeightTime = nextRectTime = 0;
+#endif
 }
 
 void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
 {
     target_Region = rect;
-    this->kernel = cv::Mat(rect.height, (rect.width / 16 + 1) * 16, CV_32F, cv::Scalar(0));
+    this->kernel = cv::Mat(RECT_ROWS, RECT_COLS_PADDED, CV_32F, cv::Scalar(0));
     float normalized_C = 1 / Epanechnikov_kernel(kernel);
 #ifdef __ARM_NEON__
     float32x4_t kernel_vec;
 
-    for (int i = 0; i < kernel.rows; i++) {
-        for (int j = 0; j < kernel.cols; j += 4) {
+    for (int i = 0; i < RECT_ROWS; i++) {
+        for (int j = 0; j < RECT_COLS_PADDED; j += 4) {
             kernel_vec = vld1q_f32((float32_t*)&kernel.ptr<float>(i)[j]);
             kernel_vec = vmulq_n_f32(kernel_vec, normalized_C);
             vst1q_f32((float32_t*)&kernel.ptr<float>(i)[j], kernel_vec);
@@ -50,16 +47,16 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
 
 float MeanShift::Epanechnikov_kernel(cv::Mat &kernel)
 {
-    int h = kernel.rows;
-    int w = kernel.cols;
+    int h = RECT_ROWS;
+    int w = RECT_COLS_PADDED;
 
     float epanechnikov_cd = 0.1f*PI*h*w;
     float kernel_sum = 0.0;
-    for (int i = 0; i < h; i++) {
-        for (int j = 0; j < w; j++) {
-            float x = static_cast<float>(i - h / 2);
-            float y = static_cast<float> (j - w / 2);
-            float norm_x = x*x / (h*h / 4) + y*y / (w*w / 4);
+    for (int i = 0; i < RECT_ROWS; i++) {
+        for (int j = 0; j < RECT_COLS_PADDED; j++) {
+            float x = static_cast<float>(i - RECT_ROWS / 2);
+            float y = static_cast<float> (j - RECT_COLS_PADDED / 2);
+            float norm_x = x*x / (RECT_ROWS*RECT_ROWS / 4) + y*y / (RECT_COLS_PADDED*RECT_COLS_PADDED / 4);
             float result = norm_x < 1 ? (epanechnikov_cd*(1.0 - norm_x)) : 0;
             kernel.at<float>(i, j) = result;
             kernel_sum += result;
@@ -73,14 +70,14 @@ float MeanShift::Epanechnikov_kernel(cv::Mat &kernel)
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
     cv::Mat pdf_model(3, 16, CV_32F, cv::Scalar(1e-10));
-    cv::Vec3b *bin_values = new cv::Vec3b[(rect.width / 16 + 1) * 16];
+    cv::Vec3b *bin_values = new cv::Vec3b[RECT_COLS_PADDED];
 
     int row_index = rect.y;
     int col_index = rect.x;
-
-    for (int i = 0; i < rect.height; i++) {
+    for (int i = 0; i < RECT_ROWS; i++) {
         col_index = rect.x;
 
+        //TODO if the RECT_COLS is used it breaks with an memory corruption error. Both a 86, WTF
         for (int j = 0; j < rect.width; j += 16) {
             uint8x16x3_t pixels = vld3q_u8(&frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
             pixels.val[0] = vshrq_n_u8(pixels.val[0], 4);
@@ -92,7 +89,8 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 
         col_index = rect.x;
 
-        for (int j = 0; j < rect.width; j++) {
+        //TODO This one makes it go from 18.0x to 18.3x
+        for (int j = 0; j < RECT_COLS; j++) {
             pdf_model.at<float>(0, bin_values[j][0]) += kernel.at<float>(i, j);
             pdf_model.at<float>(1, bin_values[j][1]) += kernel.at<float>(i, j);
             pdf_model.at<float>(2, bin_values[j][2]) += kernel.at<float>(i, j);
@@ -119,9 +117,9 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 
         for (int j = 0; j < rect.width; j++) {
             curr_pixel_value = frame.at<cv::Vec3b>(row_index, col_index);
-            bin_value[0] = (curr_pixel_value[0] / bin_width);
-            bin_value[1] = (curr_pixel_value[1] / bin_width);
-            bin_value[2] = (curr_pixel_value[2] / bin_width);
+            bin_value[0] = (curr_pixel_value[0] / CFG_BIN_WIDTH);
+            bin_value[1] = (curr_pixel_value[1] / CFG_BIN_WIDTH);
+            bin_value[2] = (curr_pixel_value[2] / CFG_BIN_WIDTH);
             pdf_model.at<float>(0, bin_value[0]) += kernel.at<float>(i, j);
             pdf_model.at<float>(1, bin_value[1]) += kernel.at<float>(i, j);
             pdf_model.at<float>(2, bin_value[2]) += kernel.at<float>(i, j);
@@ -137,17 +135,15 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 #ifdef __ARM_NEON__
 cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec)
 {
-    int rows = rec.height;
-    int cols = rec.width;
     int row_index;
     int col_index;
-    cv::Mat weight(rows, cols, CV_32F, cv::Scalar(1.f));
-    float32_t multipliers[cfg.num_bins];
+    cv::Mat weight(RECT_ROWS, RECT_COLS, CV_32F, cv::Scalar(1.f));
+    float32_t multipliers[CFG_NUM_BINS];
     float32x4_t model_vec, candidate_vec, multiplier_vec;
 
     for (int k = 0; k < 3; k++)
     {
-        for (int bin = 0; bin < cfg.num_bins; bin += 4) {
+        for (int bin = 0; bin < CFG_NUM_BINS; bin += 4) {
             model_vec = vld1q_f32((float32_t*)&target_model.ptr<float>(k)[bin]);
             candidate_vec = vld1q_f32((float32_t*)&target_candidate.ptr<float>(k)[bin]);
 
@@ -163,9 +159,9 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
         }
 
         row_index = rec.y;
-        for (int i = 0; i < rows; i++) {
+        for (int i = 0; i < RECT_ROWS; i++) {
             col_index = rec.x;
-            for (int j = 0; j < cols; j++) {
+            for (int j = 0; j < RECT_COLS; j++) {
                 int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index)[k]);
                 weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
 
@@ -185,10 +181,10 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
     int row_index = rec.y;
     int col_index = rec.x;
     cv::Mat weight(rows, cols, CV_32F, cv::Scalar(1.0000));
-    float multipliers[cfg.num_bins];
+    float multipliers[CFG_NUM_BINS];
 
     for (int k = 0; k < 3; k++) {
-        for (int bin = 0; bin < cfg.num_bins; bin++) {
+        for (int bin = 0; bin < CFG_NUM_BINS; bin++) {
             multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
         }
 
@@ -216,7 +212,7 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
     perftime_t startTime, endTime;
 #endif
 
-    for (int iter = 0; iter < cfg.MaxIter; iter++) {
+    for (int iter = 0; iter < CFG_MAX_ITER; iter++) {
 #ifdef TIMING
         startTime = now();
 #endif
@@ -240,16 +236,17 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         float delta_x = 0.0;
         float sum_wij = 0.0;
         float delta_y = 0.0;
-        float centre = static_cast<float>((weight.rows - 1) / 2.0);
+        //float centre = static_cast<float>((RECT_ROWS - 1) / 2.0);
+        float centre = RECT_CENTRE;
         double mult = 0.0;
 
         next_rect.x = target_Region.x;
         next_rect.y = target_Region.y;
-        next_rect.width = target_Region.width;
-        next_rect.height = target_Region.height;
+        next_rect.width = RECT_COLS;
+        next_rect.height = RECT_ROWS;
 
-        for (int i = 0; i < target_Region.height; i++) {
-            for (int j = 0; j < target_Region.width; j++) {
+        for (int i = 0; i < RECT_ROWS; i++) {
+            for (int j = 0; j < RECT_COLS; j++) {
                 float norm_i = static_cast<float>(i - centre) / centre;
                 float norm_j = static_cast<float>(j - centre) / centre;
                 mult = pow(norm_i, 2) + pow(norm_j, 2) > 1.0 ? 0.0 : 1.0;

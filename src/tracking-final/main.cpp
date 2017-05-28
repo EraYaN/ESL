@@ -36,7 +36,7 @@ int main(int argc, char ** argv)
 
     // this is used for testing the car video
     // instead of selection of object of interest using mouse
-    cv::Rect rect(228, 367, 86, 58);
+    cv::Rect rect(228, 367, RECT_COLS, RECT_ROWS);
     //cv::Rect rect(1300, 300, 900, 700);
     cv::Mat frame;
     frame_capture.read(frame);
@@ -49,8 +49,9 @@ int main(int argc, char ** argv)
     MeanShift ms; // creat meanshift obj
     ms.Init_target_frame(frame, rect); // init the meanshift
 
-    int codec = CV_FOURCC('F', 'L', 'V', '1');
-    
+    int codec = CV_FOURCC('F', 'L', 'V', '1'); //Slow and playable
+    //int codec = CV_FOURCC('Y', 'V', '1', '2'); //Fast and somewhat playable, saves a full second
+    //int codec = 0x00000000; //Fast and playable, saves a full second
     cv::VideoWriter writer("/tmp/tracking_result.avi", codec, 20, cv::Size(frame.cols, frame.rows));
     std::ofstream coordinatesfile;
     coordinatesfile.open("/tmp/tracking_result.coords");
@@ -105,8 +106,10 @@ int main(int argc, char ** argv)
 
         // write the frame
         writer << frame;
+#ifdef REPORTPROGRESS
         if (fcount % PROGRESSFRAMES == 0)
             std::cout << "Written " << fcount << " frames" << std::endl;
+#endif
         cleanupEnd = now();
         cleanupTime += diffToNanoseconds(cleanupStart, cleanupEnd, freq);
     }

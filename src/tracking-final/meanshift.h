@@ -2,6 +2,7 @@
 #define MEANSHIFT_H
 #include <iostream>
 #include <math.h>
+#include "util.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -11,16 +12,9 @@
 class MeanShift
 {
 private:
-    int bin_width;
     cv::Mat target_model;
     cv::Rect target_Region;
     cv::Mat kernel;
-
-    struct config {
-        int num_bins;
-        int pixel_range;
-        int MaxIter;
-    } cfg;
 
 public:
     MeanShift();
@@ -29,10 +23,11 @@ public:
     cv::Mat pdf_representation(const cv::Mat &frame, const cv::Rect &rect);
     cv::Mat CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec);
     cv::Rect track(const cv::Mat &next_frame);
-
+#ifdef TIMING
     double pdfTime;
     double calWeightTime;
     double nextRectTime;
+#endif
 };
 
 #endif // MEANSHIFT_H
