@@ -23,16 +23,13 @@ from terminaltables import AsciiTable
 
 LINE_MARKER = '@'
 
-#python ./RunSystem.py --key-file C:\Users\Gebruiker\Dropbox\erayanprivateopenssh --user lars --run --build --sendsource
-
 includes = {
-	#'dsp':{'project':'tracking-final-dsp'},
-    'final':{'project':'tracking-final'},
+    'shared':{'project':'tracking-shared'},
 }
 
 benchmarks = {
-    'vanilla':{'project':'tracking-final', 'executable':'armMeanshiftExec','deps':[],'includes':['final'],'baseargs':['{basedir}/{testfile}', '~/esLAB/pool_notify.out', '851968'], 'usesdsp':True, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},   
-    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['final'],'baseargs':['{basedir}/{testfile}', '~/esLAB/pool_notify.out', '851968'], 'usesdsp':True, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},
+    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},   
+    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},
 }
 
 reference_performance = {
@@ -56,7 +53,6 @@ class Error(Exception):
 
 class NotConnectedError(Error):
     """Exception raised for errors with the connection.
-
     Attributes:
         msg  -- explanation of the error
     """
@@ -196,7 +192,7 @@ class RunSystem(object):
             try:
                 k = paramiko.RSAKey.from_private_key_file(keyfile)
             except paramiko.PasswordRequiredException:
-                k = paramiko.RSAKey.from_private_key_file(keyfile,password="BergLadderPlantScoop")
+                k = paramiko.RSAKey.from_private_key_file(keyfile,password=getpass.getpass(prompt='SSH keyfile password: '))
         else:
             k = None
 
