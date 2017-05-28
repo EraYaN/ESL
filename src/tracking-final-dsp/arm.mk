@@ -215,5 +215,5 @@ clean:
 	@rm -f ./$(OBJDIR_R)/* *~
 
 send: $(BINDIR_R)/$(BIN)
-	scp $(BINDIR_R)/$(BIN) root@192.168.0.202:/home/root/esLAB/pool_notify/.
+	scp -oKexAlgorithms=+diffie-hellman-group1-sha1 $(BINDIR_R)/$(BIN) root@192.168.0.202:/home/root/esLAB/.
 

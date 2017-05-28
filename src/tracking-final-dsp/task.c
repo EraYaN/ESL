@@ -91,40 +91,52 @@ Int Task_create (Task_TransferInfo ** infoPtr)
      */
     SEM_pend (&(info->notifySemObj), SYS_FOREVER) ;
     SEM_pend (&(info->notifySemObj), SYS_FOREVER) ;
+	SEM_pend(&(info->notifySemObj), SYS_FOREVER);
+	SEM_pend(&(info->notifySemObj), SYS_FOREVER);
+	SEM_pend(&(info->notifySemObj), SYS_FOREVER);
+	SEM_pend(&(info->notifySemObj), SYS_FOREVER);
 
     return status ;
 }
 
-unsigned char* buf;
-int length;
+unsigned char* frame;
+float * weight;
+float * model;
+int framesize;
+int weightsize;
+float modelsize;
 
-int sum_dsp() 
+void sum_dsp() 
 {
-    int sum=0,i;
-    for(i=0;i<length;i++) 
-	{
-       sum=sum+buf[i];
-    }
-    return sum;
+	//Test function
+	weight[0] = frame[0] + model[0];
+	frame[0] = 1;
+	model[0] = frame[0] * 2;
 }
 
 Int Task_execute (Task_TransferInfo * info)
 {
-    int sum;
 
     //wait for semaphore
 	SEM_pend (&(info->notifySemObj), SYS_FOREVER);
 
 	//invalidate cache
-    BCACHE_inv ((Ptr)buf, length, TRUE) ;
+    BCACHE_inv((Ptr)frame, framesize, TRUE) ;
+	BCACHE_inv((Ptr)model, modelsize, TRUE);
+	BCACHE_inv((Ptr)weight, weightsize, TRUE);
 
 	//call the functionality to be performed by dsp
-    sum = sum_dsp();
-    
+    sum_dsp();
+
+	//Writeback data
+	BCACHE_wbInv((Ptr)weight, weightsize, TRUE);
+	BCACHE_wbInv((Ptr)model, modelsize, TRUE);
+	BCACHE_wbInv((Ptr)frame, framesize, TRUE);
+
 	//notify that we are done
     NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO,(Uint32)0);
 	//notify the result
-    NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO,(Uint32)sum);
+    NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO,(Uint32)weight[0]);
 
     return SYS_OK;
 }
@@ -161,11 +173,23 @@ static Void Task_notify (Uint32 eventNo, Ptr arg, Ptr info)
 
     count++;
     if (count==1) {
-        buf =(unsigned char*)info ;
+        frame =(unsigned char*)info ;
     }
     if (count==2) {
-        length = (int)info;
+        framesize = (int)info;
     }
+	if (count == 3) {
+		model = (float*)info;
+	}
+	if (count == 4) {
+		modelsize = (int)info;
+	}
+	if (count == 5) {
+		weight = (float*)info;
+	}
+	if (count == 6) {
+		weightsize = (int)info;
+	}
 
     SEM_post(&(mpcsInfo->notifySemObj));
 }

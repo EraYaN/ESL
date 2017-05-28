@@ -1,8 +1,9 @@
-#include "meanshift.h"
+
 #include <timing.h>
 #include <iostream>
 #include <fstream>
 #include "util.h"
+#include "meanshift.h"
 
 #ifndef ARMCC
 #include "markers.h"
@@ -13,6 +14,13 @@
 
 #include "pool_notify.h"
 
+inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
+{
+	frame = initframe.cols * initframe.rows;
+	region = rect.height * rect.width * sizeof(float);
+	frameAligned = DSPLINK_ALIGN(frame, DSPLINK_BUF_ALIGN);
+	regionAligned = DSPLINK_ALIGN(region, DSPLINK_BUF_ALIGN);
+}
 
 int main(int argc, char ** argv)
 {
@@ -28,20 +36,20 @@ int main(int argc, char ** argv)
 
     cv::VideoCapture frame_capture;
     char *dspExecutable = NULL;
-    char *strBufferSize = NULL;
+	char *strBuffersize = NULL;
     DSP_STATUS status;
 
     if (argc < 4)
     {
         std::cout << "specifiy an input video file to track" << std::endl;
-        std::cout << "Usage:  ./" << argv[0] << "car.avi pool_notify.out buffer_size" << std::endl;
+        std::cout << "Usage:  ./" << argv[0] << "car.avi pool_notify.out" << std::endl;
         return -1;
     }
     else
     {
         frame_capture = cv::VideoCapture(argv[1]);
-        dspExecutable = argv[2];
-        strBufferSize = argv[3];
+		dspExecutable = argv[2];
+		strBuffersize = argv[3];
     }
 
 
@@ -49,7 +57,15 @@ int main(int argc, char ** argv)
     // instead of selection of object of interest using mouse
     cv::Rect rect(228, 367, 86, 58);
     cv::Mat frame;
-    frame_capture.read(frame);
+	//std::cout << "Value " << frame.channels() << std::endl;
+
+	//Step=1920 Height/rows=480 (frame_capture.get(CV_CAP_PROP_FRAME_HEIGHT)) Width/Columns=640 (frame_capture.get(CV_CAP_PROP_FRAME_WIDTH))
+
+	frame_capture.read(frame);
+	
+	bufferInit bufferSizes(frame, rect);
+
+	pool_notify_Init(dspExecutable, bufferSizes, strBuffersize); //Initiate shared pool
 
     MeanShift ms; // create meanshift obj
     ms.Init_target_frame(frame, rect); // init the meanshift
@@ -67,7 +83,6 @@ int main(int argc, char ** argv)
 #endif
 #endif
 
-    pool_notify_Init(dspExecutable, strBufferSize) ;
 
     perftime_t startTime = now();
     double totalTime = 0;
@@ -88,7 +103,7 @@ int main(int argc, char ** argv)
     int TotalFrames = 32;
     int fcount;
 
-    status = pool_notify_Execute(0);
+    status = pool_notify_Execute(ID_PROCESSOR, bufferSizes);
 
     for (fcount = 0; fcount < TotalFrames; ++fcount)
     {
@@ -127,7 +142,7 @@ int main(int argc, char ** argv)
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_STOP();
 #endif
-	pool_notify_Delete(0);
+	pool_notify_Delete(ID_PROCESSOR, bufferSizes);
 
     endTime = now();    
     totalTime = diffToNanoseconds(startTime, endTime, freq);

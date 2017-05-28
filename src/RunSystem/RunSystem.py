@@ -23,13 +23,16 @@ from terminaltables import AsciiTable
 
 LINE_MARKER = '@'
 
+#python ./RunSystem.py --key-file C:\Users\Gebruiker\Dropbox\erayanprivateopenssh --user lars --run --build --sendsource
+
 includes = {
-    'shared':{'project':'tracking-shared'},
+	#'dsp':{'project':'tracking-final-dsp'},
+    'final':{'project':'tracking-final'},
 }
 
 benchmarks = {
-    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},   
-    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},
+    'vanilla':{'project':'tracking-final', 'executable':'armMeanshiftExec','deps':[],'includes':['final'],'baseargs':['{basedir}/{testfile}', '~/esLAB/pool_notify.out', '851968'], 'usesdsp':True, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},   
+    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['final'],'baseargs':['{basedir}/{testfile}', '~/esLAB/pool_notify.out', '851968'], 'usesdsp':True, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},
 }
 
 reference_performance = {
@@ -193,7 +196,7 @@ class RunSystem(object):
             try:
                 k = paramiko.RSAKey.from_private_key_file(keyfile)
             except paramiko.PasswordRequiredException:
-                k = paramiko.RSAKey.from_private_key_file(keyfile,password=getpass.getpass(prompt='SSH keyfile password: '))
+                k = paramiko.RSAKey.from_private_key_file(keyfile,password="BergLadderPlantScoop")
         else:
             k = None
 
