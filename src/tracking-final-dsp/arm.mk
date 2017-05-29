@@ -12,7 +12,7 @@ DSPLINK := /data/bbToolChain/usr/local/share/bbframework/platform/beagle-linux/t
 
 
 #   ----------------------------------------------------------------------------
-#   Project name. 
+#   Project name.
 #   This variable can be used to set all source/BIOS/object filenames
 #   For clarity, in this example it sets only the .OUT .CMD and .MAP filenames
 #   ----------------------------------------------------------------------------
@@ -76,8 +76,8 @@ LIBS_D := $(LIBS)
 MAPFILE_D := $(OBJDIR_D)/$(MAPFILE)
 
 
-#--gcc -pr -os -on=2 -s -op=3 -al -mw --stack=0x3000 
-#-I${COMPILER_PATH}/../include -I${SYSROOT}/include -I${SYSROOT}/platform/${PLATFORM}/include 
+#--gcc -pr -os -on=2 -s -op=3 -al -mw --stack=0x3000
+#-I${COMPILER_PATH}/../include -I${SYSROOT}/include -I${SYSROOT}/platform/${PLATFORM}/include
 
 
 #   ----------------------------------------------------------------------------
@@ -91,23 +91,24 @@ LIBS_R := $(LIBS)
 MAPFILE_R := $(OBJDIR_R)/$(MAPFILE)
 
 #   ----------------------------------------------------------------------------
-#   Compiler common include directories 
+#   Compiler common include directories
 #   ----------------------------------------------------------------------------
-CINCLUDES := -I$(DSPLINK)/dsp/inc                             \
-             -I$(DSPLINK)/dsp/inc/DspBios                     \
-             -I$(DSPLINK)/dsp/inc/DspBios/5.XX                \
-             -I$(DSPLINK)/dsp/inc/C64XX                       \
-             -I$(DSPLINK)/dsp/inc/DspBios/5.XX/OMAP3530		 \
-             -I$(BASE_SABIOS)/packages/ti/bios/include        \
-             -I$(BASE_COMPILER)/include                       \
-             -I$(BASE_SABIOS)/packages/ti/rtdx/include/c6000  \
-             -I$(BASE_SABIOS)/packages/ti/psl/include         \
-              -I./
+CINCLUDES := -I$(DSPLINK)/dsp/inc                            \
+             -I$(DSPLINK)/dsp/inc/DspBios                    \
+             -I$(DSPLINK)/dsp/inc/DspBios/5.XX               \
+             -I$(DSPLINK)/dsp/inc/C64XX                      \
+             -I$(DSPLINK)/dsp/inc/DspBios/5.XX/OMAP3530      \
+             -I$(BASE_SABIOS)/packages/ti/bios/include       \
+             -I$(BASE_COMPILER)/include                      \
+             -I$(BASE_SABIOS)/packages/ti/rtdx/include/c6000 \
+             -I$(BASE_SABIOS)/packages/ti/psl/include        \
+             -I../tracking-shared                            \
+             -I./
 
 #             -I$(DSPLINK)/dsp/export/INCLUDE/DspBios/OMAPL1XX \
 #             -I$(DSPLINK)/dsp/inc/DspBios/6.XX/OMAPL1XXGEM    \
 #   ----------------------------------------------------------------------------
-#   Compiler common symbol definitions 
+#   Compiler common symbol definitions
 #   ----------------------------------------------------------------------------
 
 DEFS := 	-DHOSTED_IO 				\
@@ -147,7 +148,7 @@ LDINCLUDES := -i$(BASE_COMPILER)/lib                      \
 #   Linker library search path for Debug
 #   ----------------------------------------------------------------------------
 #LDINCLUDES_D := $(LDINCLUDES) -i$(DSPLINK)/dsp/export/BIN/DspBios/OMAPL1XX/OMAPL1XXGEM_0/DEBUG/
-# If the DSP/Link was rebuilt by the user, replace the line above 
+# If the DSP/Link was rebuilt by the user, replace the line above
 # with the one below to use the updated libraries
 LDINCLUDES_D := $(LDINCLUDES) -i$(DSPLINK)/dsp/BUILD/OMAP3530_0/EXPORT/DEBUG/
 
@@ -155,7 +156,7 @@ LDINCLUDES_D := $(LDINCLUDES) -i$(DSPLINK)/dsp/BUILD/OMAP3530_0/EXPORT/DEBUG/
 #   Linker library search path for Release
 #   ----------------------------------------------------------------------------
 #LDINCLUDES_R := $(LDINCLUDES) -i$(DSPLINK)/dsp/export/BIN/DspBios/OMAPL1XX/OMAPL1XXGEM_0/RELEASE/
-# If the DSP/Link was rebuilt by the user, replace the line above 
+# If the DSP/Link was rebuilt by the user, replace the line above
 # with the one below to use the updated libraries
 LDINCLUDES_R := $(LDINCLUDES) -i$(DSPLINK)/dsp/BUILD/OMAP3530_0/EXPORT/RELEASE/
 
@@ -174,7 +175,7 @@ $(BIOSSRC): $(BIOSTCF)
 	@$(BASE_TOOLCHAIN)/xcdtools/xdctools_3_16_01_27/$(TCONF) $(BFLAGS) $< 0
 
 #   ----------------------------------------------------------------------------
-#   Building Debug... 
+#   Building Debug...
 #   ----------------------------------------------------------------------------
 .PHONY: Debug
 Debug: $(BINDIR_D)/$(BIN)
@@ -190,7 +191,7 @@ $(OBJDIR_D)/%.obj : %.s62
 	@$(BASE_COMPILER)/bin/$(CC) $(ALL_DEBUG) $(DEFS) $(CFLAGS_D) $(CINCLUDES) -fr$(OBJDIR_D) $<
 
 #   ----------------------------------------------------------------------------
-#   Building Release... 
+#   Building Release...
 #   ----------------------------------------------------------------------------
 .PHONY: Release
 Release: $(BINDIR_R)/$(BIN)

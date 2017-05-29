@@ -3,6 +3,7 @@
 
 /*  ----------------------------------- DSP/BIOS Link                 */
 #include <dsplink.h>
+#include <util_global_dsp.h>
 
 
 /** ============================================================================
@@ -13,6 +14,7 @@
  */
 #define ID_PROCESSOR       0
 
+extern DataStruct *pool_notify_DataBuf;
 
 /** ============================================================================
  *  @func   pool_notify_Create
@@ -29,7 +31,7 @@
  *              Number of iterations a data buffer is transferred between
  *              GPP and DSP in string format.
  *  @arg    processorId
- *             Id of the DSP Processor. 
+ *             Id of the DSP Processor.
  *
  *  @ret    DSP_SOK
  *              Operation successfully completed.
@@ -50,10 +52,10 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, IN Char8 *strB
  *
  *  @desc   This function implements the execute phase for this application.
  *
- *  @arg    numIterations
+ *  @arg    numIterations //[c]: deprecated
  *              Number of times to send the message to the DSP.
- *  @arg    processorId
- *             Id of the DSP Processor. 
+ *  @arg    processorId   //[c]: Defined internally
+ *             Id of the DSP Processor.
  *
  *  @ret    DSP_SOK
  *              Operation successfully completed.
@@ -67,7 +69,8 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, IN Char8 *strB
  *  @see    pool_notify_Delete , pool_notify_Create
  *  ============================================================================
  */
-NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 processorId);
+// NORMAL_API DSP_STATUS pool_notify_Execute(void);
+NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 info);
 
 
 /** ============================================================================
@@ -79,8 +82,8 @@ NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 processorId);
  *          unconditionally. Actual applications may require stricter check
  *          against return values for robustness.
  *
- *  @arg    processorId
- *             Id of the DSP Processor. 
+ *  @arg    processorId   //[c]: Defined internally
+ *             Id of the DSP Processor.
  *
  *  @ret    DSP_SOK
  *              Operation successfully completed.
@@ -94,7 +97,7 @@ NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 processorId);
  *  @see    pool_notify_Create
  *  ============================================================================
  */
-NORMAL_API Void pool_notify_Delete(IN Uint8 processorId);
+NORMAL_API Void pool_notify_Delete(void);
 
 
 /** ============================================================================
@@ -111,7 +114,7 @@ NORMAL_API Void pool_notify_Delete(IN Uint8 processorId);
  *              Number of iterations a data buffer is transferred between
  *              GPP and DSP in string format.
  *  @arg    strProcessorId
- *             ID of the DSP Processor in string format. 
+ *             ID of the DSP Processor in string format.
  *
  *  @ret    None
  *

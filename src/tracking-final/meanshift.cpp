@@ -4,18 +4,26 @@
 */
 
 #include "meanshift.h"
-#ifdef __ARM_NEON__
-#include "neon_util.h"
+
+#include <util.h>
+
+#if defined __ARM_NEON__
+    #include "neon_util.h"
+#elif defined DSP
+    #include <util_global_dsp.h>
 #endif
 
 #ifdef TIMING
-#include "timing.h"
+    #include "timing.h"
 #endif
+
+#include "pool_notify.h"
+// DataStruct *pool_notify_DataBuf; // extern difined in pool_notify.h
 
 MeanShift::MeanShift()
 {
     cfg.MaxIter = 8;
-    cfg.num_bins = 16;
+    cfg.num_bins = NUM_BINS;
     cfg.pixel_range = 256;
     bin_width = cfg.pixel_range / cfg.num_bins;
 
@@ -27,7 +35,7 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
     target_Region = rect;
     this->kernel = cv::Mat(rect.height, (rect.width / 16 + 1) * 16, CV_32F, cv::Scalar(0));
     float normalized_C = 1 / Epanechnikov_kernel(kernel);
-#ifdef __ARM_NEON__
+#if defined __ARM_NEON__
     float32x4_t kernel_vec;
 
     for (int i = 0; i < kernel.rows; i++) {
@@ -71,6 +79,7 @@ float MeanShift::Epanechnikov_kernel(cv::Mat &kernel)
 #ifdef __ARM_NEON__
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
+    //TODO[c]: #magicnumber 16 = num_bins  or rect_width?
     cv::Mat pdf_model(3, 16, CV_32F, cv::Scalar(1e-10));
     cv::Vec3b *bin_values = new cv::Vec3b[(rect.width / 16 + 1) * 16];
 
@@ -105,6 +114,7 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 #else
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
+    //TODO[c]: #magicnumber 16 = num_bins  or rect_width?
     cv::Mat pdf_model(3, 16, CV_32F, cv::Scalar(1e-10));
 
     cv::Vec3f curr_pixel_value;
@@ -133,7 +143,7 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 }
 #endif
 
-#ifdef __ARM_NEON__
+#if defined __ARM_NEON__
 cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec)
 {
     int rows = rec.height;
@@ -173,8 +183,67 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
             }
             row_index++;
         }
-    } 
-    
+    }
+    return weight;
+}
+#elif defined DSP
+cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec)
+{
+    // DSP_STATUS status; //NOTE[c]: not checked, so not needed
+    // int rows = rec.height;
+    // int cols = rec.width;
+    // int row_index = rec.y;
+    // int col_index = rec.x;
+
+    static int frame_counter = 0;
+    cv::Mat weight(RECT_HEIGHT, RECT_WIDTH, CV_32F, cv::Scalar(1.0000));
+    //float multipliers[cfg.num_bins];
+
+    for (int k = 0; k < 3; k++) {
+
+        // Do this on DSP, so copy all the needed data into the DataStruct
+        // Do this on DSP, so copy all the needed data into the DataStruct
+        // for (int bin = 0; bin < cfg.num_bins; bin++) {
+        //     multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
+        // }
+        for (uint8_t bin = 0; bin < NUM_BINS; bin++) {
+        // printf("CalWeight-dsp() frame, k, bin =%d, %d, %d\n", frame_counter, k, bin);
+            pool_notify_DataBuf->target_model_row[bin] = target_model.at<float>(k, bin);
+            pool_notify_DataBuf->target_candidate_row[bin] = target_candidate.at<float>(k, bin);
+        }
+
+        //row_index = rec.y;
+
+        // for (int i = 0; i < rows; i++) {
+        //     col_index = rec.x;
+        //     for (int j = 0; j < cols; j++) {
+        //         int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
+        //         weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
+
+        //         col_index++;
+        //     }
+        //     row_index++;
+        // }
+
+        for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
+            for (uint8_t x = 0; x< RECT_WIDTH; x++) {
+                pool_notify_DataBuf->next_frame_rect[y*RECT_WIDTH+x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[k];
+            }
+        }
+
+        //DSP_execute(): waits with semaphore:
+        printf("pool_notify_Execute()\n");
+        pool_notify_Execute(1);
+        // printf("pool_notify_Execute() done\n");
+
+                printf("pool_notify_Execute() done: %f\n", pool_notify_DataBuf->weight[0]);
+        for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
+            for (uint8_t x = 0; x< RECT_WIDTH; x++) {
+                weight.at<float>(y, x) = pool_notify_DataBuf->weight[y*RECT_WIDTH+x];
+            }
+        }
+    }
+    frame_counter++;
     return weight;
 }
 #else
@@ -186,6 +255,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
     int col_index = rec.x;
     cv::Mat weight(rows, cols, CV_32F, cv::Scalar(1.0000));
     float multipliers[cfg.num_bins];
+
 
     for (int k = 0; k < 3; k++) {
         for (int bin = 0; bin < cfg.num_bins; bin++) {
@@ -228,7 +298,7 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         pdfTime += diffToNanoseconds(startTime, endTime, 0);
         startTime = now();
 #endif
-
+        printf("iteration =%d\n", iter);
         cv::Mat weight = CalWeight(next_frame, target_model, target_candidate, target_Region);
 
 #ifdef TIMING

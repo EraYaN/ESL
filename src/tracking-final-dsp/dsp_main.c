@@ -31,7 +31,7 @@
  *  @desc   Size of buffer to be used for data transfer.
  *  ============================================================================
  */
-Uint16 MPCSXFER_BufferSize ;
+Uint16 MPCSXFER_BufferSize;
 
 /** ============================================================================
  *  @name   MPCSXFER_NumIterations
@@ -39,7 +39,7 @@ Uint16 MPCSXFER_BufferSize ;
  *  @desc   Iterations of data transfer to be done by the application.
  *  ============================================================================
  */
-Uint32 MPCSXFER_NumIterations ;
+Uint32 MPCSXFER_NumIterations;
 
 #if defined (DSP_BOOTMODE_NOBOOT)
 /** ============================================================================
@@ -48,7 +48,7 @@ Uint32 MPCSXFER_NumIterations ;
  *  @desc   Flag to indicate to the DSPLINK_init.
  *  ============================================================================
  */
-volatile Uint32 DSPLINK_initFlag = 0xBABAC0C0 ;
+volatile Uint32 DSPLINK_initFlag = 0xBABAC0C0;
 
 #if defined (DM6446GEM)
 /** ============================================================================
@@ -233,7 +233,7 @@ volatile Uint32 DSPLINK_initFlag = 0xBABAC0C0 ;
  *  @desc   trace LOG_Obj used to do LOG_printf
  *  ============================================================================
  */
-extern LOG_Obj trace ;
+extern LOG_Obj trace;
 
 /** ============================================================================
  *  @func   atoi
@@ -253,7 +253,7 @@ extern LOG_Obj trace ;
  *  @see    None
  *  ============================================================================
  */
-extern int atoi (const char * str) ;
+extern int atoi (const char * str);
 
 
 #if defined (DSP_BOOTMODE_NOBOOT)
@@ -273,7 +273,7 @@ extern int atoi (const char * str) ;
  *  @see    None
  *  ----------------------------------------------------------------------------
  */
-static void HAL_initIsr (Ptr arg) ;
+static void HAL_initIsr (Ptr arg);
 #endif
 
 
@@ -293,7 +293,7 @@ static void HAL_initIsr (Ptr arg) ;
  *  @see    None
  *  ----------------------------------------------------------------------------
  */
-static Int Task () ;
+static Int Task(void);
 
 /** ============================================================================
  *  @func   main
@@ -303,17 +303,17 @@ static Int Task () ;
  *  @modif  None
  *  ============================================================================
  */
-Void main (Int argc, Char *argv [])
+Void main(Int argc, Char *argv [])
 {
 
     /* Initialize DSP/BIOS LINK. */
-    DSPLINK_init () ;
+    DSPLINK_init();
 
     /* Transfer size for data buffer given by GPP side */
-    MPCSXFER_BufferSize = DSPLINK_ALIGN (atoi (argv[0]), DSPLINK_BUF_ALIGN) ;
+    MPCSXFER_BufferSize = DSPLINK_ALIGN(atoi(argv[0]), DSPLINK_BUF_ALIGN);
 
     /* Creating task for MPCSXFER application */
-    TSK_create (Task, NULL, 0) ;
+    TSK_create(Task, NULL, 0);
 }
 
 
@@ -321,35 +321,32 @@ Void main (Int argc, Char *argv [])
  *  @func   Task
  *
  *  @desc   Task for TSK based MPCSXFER application.
- *
+ *uint32_t
  *  @modif  None
  *  ----------------------------------------------------------------------------
  */
-static Int Task ()
+static Int Task(void)
 {
-    Int status = SYS_OK ;
-    Task_TransferInfo * info ;
+    Int status = SYS_OK;
+    Task_TransferInfo *info;
 
-    /* Create Phase */
-    status = Task_create (&info) ;
+    // Create Phase
+    status = Task_create(&info);
 
-    /* Execute Phase */
-    if (status == SYS_OK) 
-	{
-        status = Task_execute (info) ;
-        if (status != SYS_OK) 
-		{
-            SET_FAILURE_REASON (status) ;
+    // Execute Phase
+    if (status == SYS_OK) {
+        status = Task_execute(info);
+        if (status != SYS_OK) {
+            SET_FAILURE_REASON(status);
         }
     }
 
-    /* Delete Phase */
-    status = Task_delete (info) ;
-    if (status != SYS_OK) 
-	{
-        SET_FAILURE_REASON (status) ;
+    // Delete Phase
+    status = Task_delete(info);
+    if (status != SYS_OK) {
+        SET_FAILURE_REASON(status);
     }
 
-    return status ;
+    return status;
 }
 

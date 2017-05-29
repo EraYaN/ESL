@@ -12,10 +12,14 @@
 #define VARIANT "vanilla"
 
 #include "pool_notify.h"
+#include <util_global_dsp.h>
+#include <util.h>
+#include <cstdio>
 
 
 int main(int argc, char ** argv)
 {
+        printf("welcome!\n");
 #ifdef ARMCC
 #ifdef USECYCLES
     double freq = get_frequency(true);;
@@ -29,25 +33,29 @@ int main(int argc, char ** argv)
     cv::VideoCapture frame_capture;
     char *dspExecutable = NULL;
     char *strBufferSize = NULL;
-    DSP_STATUS status;
 
-    if (argc < 4)
+        printf("strBufferSize = %d\n", sizeof(DataStruct));
+    if (argc < 3)
     {
         std::cout << "specifiy an input video file to track" << std::endl;
-        std::cout << "Usage:  ./" << argv[0] << "car.avi pool_notify.out buffer_size" << std::endl;
+        std::cout << "Usage:  ./" << argv[0] << "car.avi pool_notify.out" << std::endl;
         return -1;
     }
     else
     {
+        printf("parsing args!\n");
         frame_capture = cv::VideoCapture(argv[1]);
         dspExecutable = argv[2];
-        strBufferSize = argv[3];
+        printf("almost done parsing args!\n");
+        asprintf(&strBufferSize, "%d", sizeof(DataStruct));
+        printf("strBufferSize = %s\n",strBufferSize);
     }
+        printf("done parsing args!\n");
 
 
     // this is used for testing the car video
     // instead of selection of object of interest using mouse
-    cv::Rect rect(228, 367, 86, 58);
+    cv::Rect rect(228, 367, RECT_WIDTH, RECT_HEIGHT);
     cv::Mat frame;
     frame_capture.read(frame);
 
@@ -55,7 +63,7 @@ int main(int argc, char ** argv)
     ms.Init_target_frame(frame, rect); // init the meanshift
 
     int codec = CV_FOURCC('F', 'L', 'V', '1');
-    
+
     cv::VideoWriter writer("/tmp/tracking_result.avi", codec, 20, cv::Size(frame.cols, frame.rows));
     std::ofstream coordinatesfile;
     coordinatesfile.open("/tmp/tracking_result.coords");
@@ -67,8 +75,10 @@ int main(int argc, char ** argv)
 #endif
 #endif
 
-    pool_notify_Init(dspExecutable, strBufferSize) ;
+        printf("pool_notify_Init()\n");
+    pool_notify_Init(dspExecutable, strBufferSize);
 
+        printf("pool_notify_Init() done!\n");
     perftime_t startTime = now();
     double totalTime = 0;
     double kernelTime = 0;
@@ -88,10 +98,9 @@ int main(int argc, char ** argv)
     int TotalFrames = 32;
     int fcount;
 
-    status = pool_notify_Execute(0);
 
-    for (fcount = 0; fcount < TotalFrames; ++fcount)
-    {
+
+    for (fcount = 0; fcount < TotalFrames; ++fcount) {
         initStart = now();
         // read a frame
         int status = frame_capture.read(frame);
@@ -103,8 +112,8 @@ int main(int argc, char ** argv)
         // track object
 #if !defined(ARMCC) && defined(MCPROF)
         MCPROF_START();
-#endif        
-        cv::Rect ms_rect = ms.track(frame);        
+#endif
+        cv::Rect ms_rect = ms.track(frame);
 #if !defined(ARMCC) && defined(MCPROF)
         MCPROF_STOP();
 #endif
@@ -113,6 +122,7 @@ int main(int argc, char ** argv)
         cleanupStart = now();
         coordinatesfile << fcount << CSV_SEPARATOR << ms_rect.x << CSV_SEPARATOR << ms_rect.y << std::endl;
 
+        printf("writing to file fcount =%d\n", fcount);
         // mark the tracked object in frame
         cv::rectangle(frame, ms_rect, cv::Scalar(0, 0, 255), 3);
 
@@ -123,13 +133,14 @@ int main(int argc, char ** argv)
         cleanupEnd = now();
         cleanupTime += diffToNanoseconds(cleanupStart, cleanupEnd, freq);
     }
-	coordinatesfile.close();
+    coordinatesfile.close();
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_STOP();
 #endif
-	pool_notify_Delete(0);
 
-    endTime = now();    
+    pool_notify_Delete();
+
+    endTime = now();
     totalTime = diffToNanoseconds(startTime, endTime, freq);
 
     std::cout << "Processed " << fcount << " frames" << std::endl;
