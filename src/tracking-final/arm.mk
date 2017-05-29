@@ -4,7 +4,7 @@ CC=$(BASE_TOOLCHAIN)/bin/arm-none-linux-gnueabi-g++
 #CC=$(BASE_TOOLCHAIN)/bin/arm-linux-gnueabi-g++
 
 EXEC=armMeanshiftExec
-CPPSTD=c++0x
+CPPSTD=c++98
 
 SYSROOT=/data/rootfs
 #SYSROOT=/data/sysroot-glibc-linaro-2.21-2017.01-arm-linux-gnueabi
