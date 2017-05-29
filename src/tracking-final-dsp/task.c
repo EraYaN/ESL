@@ -17,8 +17,19 @@
 #include <pool_notify_config.h>
 #include <task.h>
 
+#define NUM_BINS 16
+#define MODELSIZE (NUM_BINS*3)
+
 extern Uint16 MPCSXFER_BufferSize ;
 
+
+unsigned char* frame;
+float * weight;
+float * model;
+int rectHeight;
+int rectWidth;
+int rectsize;
+int framesize;
 
 static Void Task_notify (Uint32 eventNo, Ptr arg, Ptr info) ;
 
@@ -96,23 +107,38 @@ Int Task_create (Task_TransferInfo ** infoPtr)
 	SEM_pend(&(info->notifySemObj), SYS_FOREVER);
 	SEM_pend(&(info->notifySemObj), SYS_FOREVER);
 
+	rectsize = rectHeight*rectWidth;
+
     return status ;
 }
 
-unsigned char* frame;
-float * weight;
-float * model;
-int framesize;
-int weightsize;
-float modelsize;
 
 void sum_dsp() 
 {
 	//Test function
 	weight[0] = frame[0] + model[0];
 	frame[0] = 1;
-	model[0] = frame[0] * 2;
 }
+
+/*void CalWeight()
+{
+	float multipliers[NUM_BINS];
+	int x, y, bin, curr_pixel;
+	static int counter = 0;
+
+	for (bin = 0; bin < NUM_BINS; bin++) {
+		multipliers[bin] = sqrt(buf->target_model_row[bin] / buf->target_candidate_row[bin]);
+	}
+
+	for (y = 0; y < rectHeight; y++) {
+		for (x = 0; x < rectWidth; x++) {
+			curr_pixel = buf->next_frame_rect[y*rectWidth + x];
+			buf->weight[y*rectWidth + x] = multipliers[curr_pixel >> 4];
+		}
+	}
+	// buf->weight[0] = 1.00 * counter++;
+
+}*/
 
 Int Task_execute (Task_TransferInfo * info)
 {
@@ -121,22 +147,20 @@ Int Task_execute (Task_TransferInfo * info)
 	SEM_pend (&(info->notifySemObj), SYS_FOREVER);
 
 	//invalidate cache
-    BCACHE_inv((Ptr)frame, framesize, TRUE) ;
-	BCACHE_inv((Ptr)model, modelsize, TRUE);
-	BCACHE_inv((Ptr)weight, weightsize, TRUE);
+    BCACHE_inv((Ptr)frame, framesize, TRUE);
+	BCACHE_inv((Ptr)model, MODELSIZE, TRUE);
+	BCACHE_inv((Ptr)weight, rectsize, TRUE);
 
 	//call the functionality to be performed by dsp
     sum_dsp();
 
 	//Writeback data
-	BCACHE_wbInv((Ptr)weight, weightsize, TRUE);
-	BCACHE_wbInv((Ptr)model, modelsize, TRUE);
-	BCACHE_wbInv((Ptr)frame, framesize, TRUE);
+	BCACHE_wbInv((Ptr)model, MODELSIZE, TRUE);
 
 	//notify that we are done
     NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO,(Uint32)0);
 	//notify the result
-    NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO,(Uint32)weight[0]);
+    NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO,(Uint32)1);
 
     return SYS_OK;
 }
@@ -182,13 +206,13 @@ static Void Task_notify (Uint32 eventNo, Ptr arg, Ptr info)
 		model = (float*)info;
 	}
 	if (count == 4) {
-		modelsize = (int)info;
+		rectHeight = (int)info;
 	}
 	if (count == 5) {
 		weight = (float*)info;
 	}
 	if (count == 6) {
-		weightsize = (int)info;
+		rectWidth = (int)info;
 	}
 
     SEM_post(&(mpcsInfo->notifySemObj));

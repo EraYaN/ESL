@@ -17,9 +17,12 @@
 inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
 {
 	frame = initframe.cols * initframe.rows;
-	region = rect.height * rect.width * sizeof(float);
+	rectHeight = rect.height;
+	rectWidth = rect.width;
+	region = rectHeight * rectWidth * sizeof(float);
 	frameAligned = DSPLINK_ALIGN(frame, DSPLINK_BUF_ALIGN);
 	regionAligned = DSPLINK_ALIGN(region, DSPLINK_BUF_ALIGN);
+	modelAligned = DSPLINK_ALIGN(48*sizeof(float), DSPLINK_BUF_ALIGN); //numBins*pixels
 }
 
 int main(int argc, char ** argv)
@@ -102,7 +105,6 @@ int main(int argc, char ** argv)
 #endif
     int TotalFrames = 32;
     int fcount;
-
     status = pool_notify_Execute(ID_PROCESSOR, bufferSizes);
 
     for (fcount = 0; fcount < TotalFrames; ++fcount)

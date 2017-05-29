@@ -46,6 +46,8 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
     }
 #endif
     target_model = pdf_representation(frame, target_Region);
+    memcpy((void*)poolModel, (void*)&target_model.at<float>(0, 0), 48 * sizeof(float));
+    printf("targetModel[1] = %f\n", target_model.at<float>(0, 1));
 }
 
 float MeanShift::Epanechnikov_kernel(cv::Mat &kernel)

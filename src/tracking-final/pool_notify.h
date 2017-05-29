@@ -36,8 +36,11 @@ class bufferInit
 public:
 	int frame;
 	int frameAligned;
+	int rectHeight;
+	int rectWidth;
 	int region;
 	int regionAligned;
+	int modelAligned;
 	bufferInit(cv::Mat frame, cv::Rect rect);
 };
 
