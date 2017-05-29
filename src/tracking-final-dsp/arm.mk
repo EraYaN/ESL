@@ -168,7 +168,9 @@ LDINCLUDES_R := $(LDINCLUDES) -i$(DSPLINK)/dsp/BUILD/OMAP3530_0/EXPORT/RELEASE/
 #   - The clean rule also removes all DSP/BIOS generated files
 #   ----------------------------------------------------------------------------
 .PHONY: all
-all: $(BIOSSRC) Debug Release
+# TODO[c]: DEBUG
+# all: $(BIOSSRC) Debug Release
+all: $(BIOSSRC) Release
 
 $(BIOSSRC): $(BIOSTCF)
 	@echo Building DSP/BIOS file...

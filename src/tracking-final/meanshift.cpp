@@ -195,8 +195,6 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
     // int row_index = rec.y;
     // int col_index = rec.x;
 
-
-    static int frame_counter = 0;
     cv::Mat weight(RECT_HEIGHT, RECT_WIDTH, CV_32F, cv::Scalar(1.0000));
     // float multipliers[cfg.num_bins];
     // int pixels[RECT_HEIGHT * RECT_WIDTH];
@@ -235,13 +233,10 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
         }
 
         //DSP_execute(): waits with semaphore:
-        if(VERBOSE_EXECUTE)printf("pool_notify_Execute(): %d\n", frame_counter);
+        if(VERBOSE_EXECUTE)printf("pool_notify_Execute():\n");
         
         pool_notify_Execute(1);
         // printf("pool_notify_Execute() done\n");
-
-// for comparison do/execute the old function as well:
-
 
 
         if(VERBOSE_EXECUTE) printf("pool_notify_Execute() done: %f\n", pool_notify_DataBuf->weight[0]);
@@ -252,7 +247,6 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
             }
         }
     }
-    frame_counter++;
     return weight;
 }
 #else

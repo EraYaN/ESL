@@ -106,23 +106,19 @@ int communicating = 1;
 
 void CalWeight()
 {
-    // float multipliers[NUM_BINS];
+    float multipliers[NUM_BINS];
     int x, y, bin, curr_pixel;
-    static int counter = 0;
 
     for (bin = 0; bin < NUM_BINS; bin++) {
-        buf->multipliers[bin] = sqrt(buf->target_model_row[bin] / buf->target_candidate_row[bin]);
+        multipliers[bin] = sqrt(buf->target_model_row[bin] / buf->target_candidate_row[bin]);
     }
 
     for (y = 0; y < RECT_HEIGHT; y++) {
         for (x = 0; x< RECT_WIDTH; x++) {
             curr_pixel = buf->next_frame_rect[y*RECT_WIDTH+x];
-            buf->pixels[y*RECT_WIDTH+x] = curr_pixel;
-            buf->weight[y*RECT_WIDTH+x] = buf->multipliers[curr_pixel>>4];
+            buf->weight[y*RECT_WIDTH+x] = multipliers[curr_pixel>>4];
         }
     }
-    // buf->weight[0] = 1.00 * counter++;
-
 }
 
 Int Task_execute(Task_TransferInfo * info)
