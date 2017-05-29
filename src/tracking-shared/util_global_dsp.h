@@ -11,6 +11,8 @@ typedef struct DataStruct
     float    target_model_row[NUM_BINS];                // bin*float with target_model
     float    target_candidate_row[NUM_BINS];            // bins*float with target_candidate
     float    weight[RECT_HEIGHT * RECT_WIDTH];          // cols*float with result/weights
+    float multipliers[NUM_BINS];
+    int pixels[RECT_HEIGHT * RECT_WIDTH];
 } DataStruct;
 
 #endif /* !defined (util_global_dsp_H) */

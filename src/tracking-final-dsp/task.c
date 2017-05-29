@@ -106,18 +106,19 @@ int communicating = 1;
 
 void CalWeight()
 {
-    float multipliers[NUM_BINS];
+    // float multipliers[NUM_BINS];
     int x, y, bin, curr_pixel;
     static int counter = 0;
 
     for (bin = 0; bin < NUM_BINS; bin++) {
-        multipliers[bin] = sqrt(buf->target_model_row[bin] / buf->target_candidate_row[bin]);
+        buf->multipliers[bin] = sqrt(buf->target_model_row[bin] / buf->target_candidate_row[bin]);
     }
 
     for (y = 0; y < RECT_HEIGHT; y++) {
         for (x = 0; x< RECT_WIDTH; x++) {
             curr_pixel = buf->next_frame_rect[y*RECT_WIDTH+x];
-            buf->weight[y*RECT_WIDTH+x] = multipliers[curr_pixel>>4];
+            buf->pixels[y*RECT_WIDTH+x] = curr_pixel;
+            buf->weight[y*RECT_WIDTH+x] = buf->multipliers[curr_pixel>>4];
         }
     }
     // buf->weight[0] = 1.00 * counter++;
@@ -129,6 +130,8 @@ Int Task_execute(Task_TransferInfo * info)
     //TODO[c]: not used anymore
     //int sum;
     // Uint16 k;
+
+    static int counter = 1;
 
     // for (k = 0; k < 3*32; k++) {
     while(1) {
@@ -146,10 +149,10 @@ Int Task_execute(Task_TransferInfo * info)
             BCACHE_wbInv((Ptr)buf, length, TRUE);
 
             //notify that we are done
-            NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO,(Uint32)0);
+            NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO, (Uint32)0);
 
             //notify the result
-            // NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO,(Uint32)88);
+            NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO, counter++);
             // }
             communicating--;
         }

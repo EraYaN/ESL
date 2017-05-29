@@ -528,10 +528,11 @@ STATIC Void pool_notify_Notify(Uint32 eventNo, Pvoid arg, Pvoid info)
     #endif
     // Post the semaphore.
     if ((int)info==0) { // DSP complete
-        printf("Result of DSP is in!\n");
+        if(VERBOSE_EXECUTE) printf("Result of DSP is in! \t ");
         sem_post(&sem);
     } else {            // DSP result is back
         // printf("Result on DSP is %d\n", (int)info);
-        printf("ERROR wrong result of DSP!\n");
+        if(VERBOSE_EXECUTE) printf("Result counter = %d\n", (int)info);
+        // printf("ERROR wrong result of DSP!\n");
     }
 }

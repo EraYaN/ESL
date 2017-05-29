@@ -10,5 +10,6 @@
 #define RECT_HEIGHT 58
 
 #define NUM_BINS 16
+#define VERBOSE_EXECUTE 0
 
 #endif /* UTIL_H_ */
