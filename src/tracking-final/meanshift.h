@@ -2,7 +2,9 @@
 #define MEANSHIFT_H
 #include <iostream>
 #include <math.h>
+#include <fstream>
 #include "util.h"
+#include "dynrange.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -15,9 +17,11 @@ private:
     cv::Mat target_model;
     cv::Rect target_Region;
     cv::Mat kernel;
+    std::ofstream dynrangefile;
 
 public:
     MeanShift();
+    ~MeanShift();
     void Init_target_frame(const cv::Mat &frame, const cv::Rect &rect);
     float Epanechnikov_kernel();
     cv::Mat pdf_representation(const cv::Mat &frame, const cv::Rect &rect);

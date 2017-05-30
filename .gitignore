@@ -393,3 +393,4 @@ script/**/*.jpg
 pkg/
 tracking_result.*
 *.disassembly.txt
+*.csv

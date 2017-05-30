@@ -7,7 +7,6 @@
 #ifdef __ARM_NEON__
 #include "neon_util.h"
 #endif
-
 #ifdef TIMING
 #include "timing.h"
 #endif
@@ -16,6 +15,16 @@ MeanShift::MeanShift()
 {
 #ifdef TIMING
     pdfTime = calWeightTime = nextRectTime = 0;
+#endif
+#ifdef WRITE_DYN_RANGE
+    dynrangefile.open("/tmp/dynrange.csv");
+    dynrangefile << "func" << CSV_SEPARATOR << "v" << std::endl;
+#endif
+}
+MeanShift::~MeanShift()
+{
+#ifdef WRITE_DYN_RANGE
+    dynrangefile.close();
 #endif
 }
 
@@ -55,14 +64,18 @@ float MeanShift::Epanechnikov_kernel()
     for (int i = 0; i < RECT_ROWS; i++) {
         for (int j = 0; j < RECT_COLS_PADDED; j++) {
             float x = static_cast<float>(i - RECT_ROWS / 2);
+            dynrange(dynrangefile,__FUNCTION__,x);
             float y = static_cast<float> (j - RECT_COLS_PADDED / 2);
+            dynrange(dynrangefile,__FUNCTION__,y);
             float norm_x = x*x / (RECT_ROWS*RECT_ROWS / 4) + y*y / (RECT_COLS_PADDED*RECT_COLS_PADDED / 4);
+            dynrange(dynrangefile,__FUNCTION__,norm_x);
             float result = norm_x < 1 ? (epanechnikov_cd*(1.0 - norm_x)) : 0;
+            dynrange(dynrangefile,__FUNCTION__,result);
             kernel.at<float>(i, j) = result;
+
             kernel_sum += result;
         }
     }
-
     return kernel_sum;
 }
 
@@ -95,15 +108,18 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
         //This one makes it go from 18.0x to 18.3x
         for (int j = 0; j < RECT_COLS; j++) {
             float kernel_val = kernel.at<float>(i, j);
+            dynrange(dynrangefile,__FUNCTION__,kernel_val);
             pdf_model.at<float>(0, bin_values[j][0]) += kernel_val;
             pdf_model.at<float>(1, bin_values[j][1]) += kernel_val;
             pdf_model.at<float>(2, bin_values[j][2]) += kernel_val;
+            dynrange(dynrangefile,__FUNCTION__,pdf_model.at<float>(0, bin_values[j][0]));
+            dynrange(dynrangefile,__FUNCTION__,pdf_model.at<float>(1, bin_values[j][1]));
+            dynrange(dynrangefile,__FUNCTION__,pdf_model.at<float>(2, bin_values[j][2]));
             col_index++;
         }
         row_index++;
         //address += RECT_NEXTCOL_OFFSET;
     }
-
     return pdf_model;
 }
 #else
@@ -142,6 +158,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
 {
     int row_index;
     int col_index;
+
     cv::Mat weight(RECT_ROWS, RECT_COLS, CV_32F, cv::Scalar(1.f));
     float32_t multipliers[CFG_NUM_BINS];
     float32x4_t model_vec, candidate_vec, multiplier_vec;
@@ -151,15 +168,19 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
         for (int bin = 0; bin < CFG_NUM_BINS; bin += 4) {
             model_vec = vld1q_f32((float32_t*)&target_model.ptr<float>(k)[bin]);
             candidate_vec = vld1q_f32((float32_t*)&target_candidate.ptr<float>(k)[bin]);
-
+            dynrange(dynrangefile,__FUNCTION__,model_vec);
+            dynrange(dynrangefile,__FUNCTION__,candidate_vec);
             // ->> fixed point? https://stackoverflow.com/a/1100591/7346781
             // The following calculates c = sqrt(a / b) = 1 / sqrt (b * 1 / a).
             // Calculate model reciprocal 1 / a.
             model_vec = vrecpeq_f32(model_vec);
-
+            dynrange(dynrangefile,__FUNCTION__,model_vec);
             // Perform division (by means of multiplication) b * 1 / a
             // and take reciprocal square root of result to obtain c.
-            multiplier_vec = vrsqrteq_f32(vmulq_f32(candidate_vec, model_vec));
+            multiplier_vec = vmulq_f32(candidate_vec, model_vec);
+            dynrange(dynrangefile,__FUNCTION__,multiplier_vec);
+            multiplier_vec = vrsqrteq_f32(multiplier_vec);
+            dynrange(dynrangefile,__FUNCTION__,multiplier_vec);
             vst1q_f32(&multipliers[bin], multiplier_vec);
         }
         
@@ -170,7 +191,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
             for (int j = 0; j < RECT_COLS; j++) {
                 uchar curr_pixel = (next_frame.data[address]);
                 weight.at<float>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
-
+                dynrange(dynrangefile,__FUNCTION__,weight.at<float>(i));
                 col_index++;
                 address += CFG_PIXEL_CHANNELS;
             }
@@ -178,7 +199,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
             address += RECT_NEXTCOL_OFFSET;
         }
     } 
-    
+
     return weight;
 }
 #else

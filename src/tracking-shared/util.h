@@ -1,8 +1,11 @@
 #if !defined (UTIL_H_)
 #define UTIL_H_
 
-#define CSV_SEPARATOR ','
-#define LINE_MARKER '@'
+#define CSV_SEPARATOR ","
+#define LINE_MARKER "@"
+
+#define REPORTPROGRESS
+#define PROGRESSFRAMES 1
 
 #define FRAME_COLS 640
 #define FRAME_ROWS 480

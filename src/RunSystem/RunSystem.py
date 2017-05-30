@@ -30,7 +30,7 @@ includes = {
 
 benchmarks = {
     'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},   
-    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},
+    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords', '/tmp/dynrange.csv']},
 }
 
 DISASSEMBLY_CMD = 'arm-linux-gnueabi-objdump ~/projects/{project}/{executable} --disassemble -M reg-names-gcc --demangle --endian=little --no-show-raw-insn --reloc'
@@ -76,41 +76,51 @@ def upload_files(sftp_client, local_dir, remote_dir):
         return
 
     local_dir = os.path.realpath(local_dir)
-
-    if not exists_remote(sftp_client, remote_dir):
-        #print('Attempting to create {} on the remote.'.format(remote_dir))
-        if mkdir_p(sftp_client,remote_dir):
-            print('Created {} on the remote.'.format(remote_dir))
-        else:
-            print('Could not create {} on the remote.'.format(remote_dir))    
+    try:
+        if not exists_remote(sftp_client, remote_dir):
+            print('Attempting to create {} on the remote.'.format(remote_dir))           
+            if mkdir_p(sftp_client,remote_dir):
+                print('Created {} on the remote.'.format(remote_dir))
+            else:
+                print('Could not create {} on the remote.'.format(remote_dir))
+    except Exception as e:
+        print("Upload_files checking and creating remote directory failed.")
+        raise e
 
     for root, dirs, files in os.walk(local_dir):
-        for dirname in dirs:   
-            local_path = os.path.join(root, dirname)
-            if is_ignored(local_path):
-                continue;
-            remote_path = posixpath.join(remote_dir,os.path.relpath(local_path, local_dir).replace(os.path.sep,posixpath.sep))
-            if not exists_remote(sftp_client, remote_path):
-                #print('Attempting to create {} on the
-                #remote.'.format(remote_path))
-                if mkdir_p(sftp_client,remote_path):
-                    print('Created {} on the remote.'.format(remote_path))
+        try:
+            for dirname in dirs:   
+                local_path = os.path.join(root, dirname)
+                if is_ignored(local_path):
+                    continue;
+                remote_path = posixpath.join(remote_dir,os.path.relpath(local_path, local_dir).replace(os.path.sep,posixpath.sep))
+                if not exists_remote(sftp_client, remote_path):
+                    #print('Attempting to create {} on the
+                    #remote.'.format(remote_path))
+                    if mkdir_p(sftp_client,remote_path):
+                        print('Created {} on the remote.'.format(remote_path))
+                    else:
+                        print('Could not create {} on the remote.'.format(remote_path))
+
+                #print('Recursing into {}.'.format(local_path))
+                #upload_files(sftp_client, local_path, remote_path)
+        except Exception as e:
+            print("Upload_files creating remote directories failed")
+            raise e
+        try:
+            for filename in files:
+                local_path = os.path.join(root, filename)            
+                if is_ignored(local_path):
+                    continue;
+                remote_path = posixpath.join(remote_dir,os.path.relpath(local_path, local_dir).replace(os.path.sep,posixpath.sep))
+                if stat.S_ISDIR(os.stat(local_path).st_mode):  
+                    print('Found directory?')                
                 else:
-                    print('Could not create {} on the remote.'.format(remote_path))
-
-            #print('Recursing into {}.'.format(local_path))
-            #upload_files(sftp_client, local_path, remote_path)
-
-        for filename in files:
-            local_path = os.path.join(root, filename)            
-            if is_ignored(local_path):
-                continue;
-            remote_path = posixpath.join(remote_dir,os.path.relpath(local_path, local_dir).replace(os.path.sep,posixpath.sep))
-            if stat.S_ISDIR(os.stat(local_path).st_mode):  
-                print('Found directory?')                
-            else:
-                print('Uploading {0} to {1}.'.format(local_path,remote_path))
-                sftp_client.put(local_path,remote_path)
+                    print('Uploading {0} to {1}.'.format(local_path,remote_path))
+                    sftp_client.put(local_path,remote_path)
+        except Exception as e:
+            print("Upload_files section sending files failed")
+            raise e
 
 def download_files(sftp_client, remote_dir, local_dir):
     if not exists_remote(sftp_client, remote_dir):
@@ -463,6 +473,7 @@ class RunSystem(object):
                 if line[0:1] == LINE_MARKER:
                     csv_data+=line[1:]
                 sys.stdout.write('#stdout {}'.format(line))
+
             for line in ssh_stderr: #read and store result in log file
                 if line[0:1] == LINE_MARKER:
                     csv_data+=line[1:]
@@ -471,7 +482,7 @@ class RunSystem(object):
             result = {}
             for testName,init_time,kernel_time,cleanup_time,total_time,fps in reader:
                 testName = '{}-{}'.format(testName, file)
-                result = {'testName':testName,'init_time':float(init_time),'kernel_time':float(kernel_time),'cleanup_time':float(cleanup_time),'total_time':float(total_time),'fps':float(fps)}
+                result = {'testName':testName,'init_time':float(init_time),'kernel_time':float(kernel_time),'cleanup_time':float(cleanup_time),'total_time':float(total_time),'fps':float(fps)}            
 
             result['error'] = 0
             if self.benchmark['output']:
@@ -482,6 +493,7 @@ class RunSystem(object):
                         formattedfilename = filename.format(**formatarguments)          
                     
                         local_path = formattedfilename.replace('~', '.').replace('/tmp', '.').replace(posixpath.sep, os.path.sep)
+                        print("Downloading file {}....".format(formattedfilename))
                         download_file(sftp, formattedfilename, local_path)
                         if os.path.splitext(formattedfilename)[1] == '.coords':
                             result['error'] += self.Verify(local_path)

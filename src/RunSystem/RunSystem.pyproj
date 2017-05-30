@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b5910841-d356-479b-ace6-f1676f8a4252</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>RunSystem.py</StartupFile>
+    <StartupFile>ProcessDynRangeFile.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -12,7 +12,7 @@
     <Name>RunSystem</Name>
     <RootNamespace>RunSystem</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>--benchmark final --files car.avi --number-of-runs 5 --sendsource --build --run</CommandLineArguments>
+    <CommandLineArguments>--file dynrange_2017-05-30.csv</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -24,6 +24,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ProcessDynRangeFile.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="RunSystem.py" />
     <Compile Include="RunSystemMat.py" />
   </ItemGroup>

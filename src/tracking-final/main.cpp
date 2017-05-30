@@ -8,7 +8,6 @@
 #include "markers.h"
 #endif
 
-#define PROGRESSFRAMES 10
 #define VARIANT "final"
 
 int main(int argc, char ** argv)
