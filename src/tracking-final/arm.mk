@@ -70,7 +70,8 @@ send: $(EXEC)
 
 .PHONY: clean all
 clean:
-	rm -rf $(OUTDIR) $(EXEC) tracking_result.avi *~
+	rm -rf $(OUTDIR) $(EXEC) *~
+    rm -rf /tmp/tracking_result.avi /tmp/tracking_result.coords /tmp/dynrange.csv
 	
 info:
 	echo $(SRC)
