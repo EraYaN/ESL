@@ -86,6 +86,7 @@ int main(int argc, char ** argv)
     perftime_t poolInitEnd;
 
     printf("regionAligned = %d, modelAligned = %d, frameAligned = %d\n", bufferSizes.regionAligned, bufferSizes.modelAligned, bufferSizes.frameAligned);
+    printf("regionOver = %d, modelOver = %d, frameOver = %d\n", bufferSizes.regionAligned-bufferSizes.region, 48 * sizeof(float) - bufferSizes.modelAligned, bufferSizes.frame - bufferSizes.frameAligned);
 
     asprintf(&strBufferSize, "%d", 2 * (bufferSizes.modelAligned) + (bufferSizes.regionAligned) + (bufferSizes.frameAligned));
     printf("strBufferSize = %s\n", strBufferSize);

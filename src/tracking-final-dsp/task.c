@@ -115,23 +115,32 @@ int communicating = 1;
     return sum;
 }*/
 
+
 void CalWeight(unsigned char *restrict frame, float *restrict weight, float *restrict candidate, float *restrict model)
 {
     float multipliers[NUM_BINS];
-    int x, y, bin, curr_pixel;
+    int x=0, y=0, xy=0, bin;
+    unsigned char curr_pixel;
 
 #pragma MUST_ITERATE(NUM_BINS, NUM_BINS,)
+#pragma UNROLL(NUM_BINS)
     for (bin = 0; bin < NUM_BINS; bin++) {
-        multipliers[bin] = sqrt(model[bin] / candidate[bin]);
+        multipliers[bin] = sqrt(model[bin]/candidate[bin]);
     }
 
-#pragma MUST_ITERATE(RECT_HEIGHT, RECT_HEIGHT,)
-    for (y = 0; y < RECT_HEIGHT; y++) {
-#pragma MUST_ITERATE(RECT_WIDTH, RECT_WIDTH,)
-        for (x = 0; x< RECT_WIDTH; x++) {
-            curr_pixel = frame[y*RECT_WIDTH+x];
-            weight[y*RECT_WIDTH+x] = multipliers[curr_pixel>>4];
+    _nassert((int)frame % 8 == 0); // input1 is 64-bit aligned
+    _nassert((int)weight % 8 == 0); // input2 is 64-bit aligned
+    _nassert((int)multipliers % 8 == 0); // output is 64-bit aligned
+#pragma MUST_ITERATE(RECT_HEIGHT*RECT_WIDTH, RECT_HEIGHT*RECT_WIDTH,)
+    for (xy = 0; xy < RECT_HEIGHT*RECT_WIDTH; xy++) {
+        curr_pixel = frame[y*RECT_WIDTH+x];
+        weight[y*RECT_WIDTH+x] = multipliers[curr_pixel>>4];
+        if (++x == RECT_WIDTH)
+        {
+            x = 0;
+            y = y + 1;
         }
+        
     }
 }
 
