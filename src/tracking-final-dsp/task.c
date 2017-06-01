@@ -128,9 +128,6 @@ void CalWeight(unsigned char *restrict frame, float *restrict weight, float *res
         multipliers[bin] = sqrt(model[bin]/candidate[bin]);
     }
 
-    _nassert((int)frame % 8 == 0); // input1 is 64-bit aligned
-    _nassert((int)weight % 8 == 0); // input2 is 64-bit aligned
-    _nassert((int)multipliers % 8 == 0); // output is 64-bit aligned
 #pragma MUST_ITERATE(RECT_HEIGHT*RECT_WIDTH, RECT_HEIGHT*RECT_WIDTH,)
     for (xy = 0; xy < RECT_HEIGHT*RECT_WIDTH; xy++) {
         curr_pixel = frame[y*RECT_WIDTH+x];
