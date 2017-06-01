@@ -186,7 +186,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
     }
     return weight;
 }
-#elif defined DSP
+//#elif defined DSP
 cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec)
 {
     // DSP_STATUS status; //NOTE[c]: not checked, so not needed
@@ -199,20 +199,19 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
     // float multipliers[cfg.num_bins];
     // int pixels[RECT_HEIGHT * RECT_WIDTH];
 
-    //memcpy((void*)poolModel, (void*)&target_model.at<float>(0, 0), 48 * sizeof(float));
-    //memcpy((void*)poolCandidate, (void*)&target_candidate.at<float>(0, 0), 48 * sizeof(float));
-    for (int k = 0; k < 3; k++) {
+    memcpy((void*)poolModel, (void*)&target_model.at<float>(0, 0), 48 * sizeof(float));
+    memcpy((void*)poolCandidate, (void*)&target_candidate.at<float>(0, 0), 48 * sizeof(float));
 
         // Do this on DSP, so copy all the needed data into the DataStruct
         // for (int bin = 0; bin < cfg.num_bins; bin++) {
         //     multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
         // }
 
-        for (uint8_t bin = 0; bin < NUM_BINS; bin++) {
+        /*for (uint8_t bin = 0; bin < NUM_BINS; bin++) {
             // printf("CalWeight-dsp() frame, k, bin =%d, %d, %d\n", frame_counter, k, bin);
             poolModel[bin] = target_model.at<float>(k, bin);
             poolCandidate[bin] = target_candidate.at<float>(k, bin);
-        }
+        }*/
 
         //printf("poolModel:%f\n", poolModel[5]);
         //printf("poolCandidate:%df\n", poolCandidate[8]);
@@ -233,7 +232,9 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
 
         for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
             for (uint8_t x = 0; x< RECT_WIDTH; x++) {
-                poolFrame[y*RECT_WIDTH+x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[k];
+                poolFrame[y*RECT_WIDTH+x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[0];
+                poolFrame[y*RECT_WIDTH+x + RECT_HEIGHT*RECT_WIDTH] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[1]
+                poolFrame[y*RECT_WIDTH + x + 2*RECT_HEIGHT*RECT_WIDTH] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[2]
             }
         }
 
@@ -248,10 +249,9 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
 
         for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
             for (uint8_t x = 0; x< RECT_WIDTH; x++) {
-                weight.at<float>(y, x) *= poolWeight[y*RECT_WIDTH+x];
+                weight.at<float>(y, x) *= (poolWeight[y*RECT_WIDTH+x] * poolWeight[y*RECT_WIDTH + x + RECT_HEIGHT*RECT_WIDTH] * poolWeight[y*RECT_WIDTH + x + 2*RECT_HEIGHT*RECT_WIDTH]);
             }
         }
-    }
     return weight;
 }
 #else

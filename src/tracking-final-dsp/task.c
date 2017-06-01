@@ -103,7 +103,8 @@ Int Task_create(Task_TransferInfo ** infoPtr)
 }
 
 // unsigned char* buf;
-int communicating = 1;
+int communicating=0;
+int compdfrep=0;
 
 //TODO[c]: not used anymore
 /*int sum_dsp() 
@@ -119,27 +120,54 @@ int communicating = 1;
 void CalWeight(unsigned char *restrict frame, float *restrict weight, float *restrict candidate, float *restrict model)
 {
     float multipliers[NUM_BINS];
-    int x=0, y=0, xy=0, bin;
+    int x=0, y=0, xyz=0, bin, z=0;
     unsigned char curr_pixel;
 
 #pragma MUST_ITERATE(NUM_BINS, NUM_BINS,)
 #pragma UNROLL(NUM_BINS)
-    for (bin = 0; bin < NUM_BINS; bin++) {
+    for (bin = 0; bin < (NUM_BINS*3); bin++) {
         multipliers[bin] = sqrt(model[bin]/candidate[bin]);
     }
 
-#pragma MUST_ITERATE(RECT_HEIGHT*RECT_WIDTH, RECT_HEIGHT*RECT_WIDTH,)
-    for (xy = 0; xy < RECT_HEIGHT*RECT_WIDTH; xy++) {
-        curr_pixel = frame[y*RECT_WIDTH+x];
-        weight[y*RECT_WIDTH+x] = multipliers[curr_pixel>>4];
+#pragma MUST_ITERATE(RECT_SIZE*3, RECT_SIZE*3,)
+    for (xyz = 0; xyz < RECT_SIZE*3; xyz++) {
+        curr_pixel = frame[y*RECT_WIDTH+x + z * RECT_SIZE];
+        weight[y*RECT_WIDTH+x] = multipliers[curr_pixel>>4 + z*NUM_BINS];
         if (++x == RECT_WIDTH)
         {
             x = 0;
             y = y + 1;
         }
+        if (y == RECT_HEIGHT)
+        {
+            y = 0;
+            z = z + 1;
+        }
         
     }
 }
+
+/*void pdf_representation(unsigned char *restrict frame, float *restrict candidate)
+{
+    unsigned char curr_pixel_value;
+    float bin_value;
+
+
+    for (int i = 0; i < RECT_HEIGHT; i++) {
+        col_index = rect.x;
+        for (int j = 0; j < RECT_WIDTH; j++) {
+            curr_pixel_value = frame.at<cv::Vec3b>(row_index, col_index);
+            bin_value[0] = (curr_pixel_value[0] / bin_width);
+            bin_value[1] = (curr_pixel_value[1] / bin_width);
+            bin_value[2] = (curr_pixel_value[2] / bin_width);
+            pdf_model.at<float>(0, bin_value[0]) += kernel.at<float>(i, j);
+            pdf_model.at<float>(1, bin_value[1]) += kernel.at<float>(i, j);
+            pdf_model.at<float>(2, bin_value[2]) += kernel.at<float>(i, j);
+            col_index++;
+        }
+        row_index++;
+    }
+}*/
 
 Int Task_execute(Task_TransferInfo * info)
 {
@@ -151,9 +179,14 @@ Int Task_execute(Task_TransferInfo * info)
 
     // for (k = 0; k < 3*32; k++) {
     while(1) {
+
+        SEM_pend(&(info->notifySemObj), SYS_FOREVER);
+        if (compdfrep)
+        {
+            compdfrep--;
+        }
         if(communicating){
             //wait for semaphore
-            SEM_pend(&(info->notifySemObj), SYS_FOREVER);
 
             //invalidate cache
             BCACHE_inv((Ptr)frame, RECT_SIZE, TRUE);
@@ -223,7 +256,11 @@ static Void Task_notify(Uint32 eventNo, Ptr arg, Ptr info)
     }
     else if (count>4) {
         // communicating = ((count -3) == (int)info);
-        communicating += (int)info;
+        if ((int)info == 1)
+            communicating++;
+
+        if ((int)info == 2)
+            compdfrep++;
     }
 
     SEM_post(&(mpcsInfo->notifySemObj));

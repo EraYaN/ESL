@@ -33,8 +33,8 @@ inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
 {
     rectHeight = rect.height;
     rectWidth = rect.width;
-    frame = rectHeight*rectWidth;
-    region = frame * sizeof(float);
+    frame = rectHeight*rectWidth*3;
+    region = frame * sizeof(float)*3;
     frameAligned = DSPLINK_ALIGN(frame, DSPLINK_BUF_ALIGN);
     regionAligned = DSPLINK_ALIGN(region, DSPLINK_BUF_ALIGN);
     modelAligned = DSPLINK_ALIGN(48 * sizeof(float), DSPLINK_BUF_ALIGN); //numBins*pixels
