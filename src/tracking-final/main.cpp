@@ -16,10 +16,34 @@
 #include <util.h>
 #include <cstdio>
 
+void enable_runfast()
+{
+    static const unsigned int x = 0x04086060;
+    static const unsigned int y = 0x03000000;
+    int r;
+    asm volatile("fmrx     %0, fpscr          \n\t"
+                 "and      %0, %0, %1         \n\t"
+                 "orr      %0, %0, %2         \n\t"
+                 "fmxr     fpscr, %0          \n\t"
+        : "=r"(r)
+        : "r"(x), "r"(y));
+}
+
+inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
+{
+    rectHeight = rect.height;
+    rectWidth = rect.width;
+    frame = rectHeight*rectWidth;
+    region = frame * sizeof(float);
+    frameAligned = DSPLINK_ALIGN(frame, DSPLINK_BUF_ALIGN);
+    regionAligned = DSPLINK_ALIGN(region, DSPLINK_BUF_ALIGN);
+    modelAligned = DSPLINK_ALIGN(48 * sizeof(float), DSPLINK_BUF_ALIGN); //numBins*pixels
+}
 
 int main(int argc, char ** argv)
 {
-        printf("welcome!\n");
+    printf("welcome!\n");
+
 #ifdef ARMCC
 #ifdef USECYCLES
     double freq = get_frequency(true);;
@@ -29,12 +53,12 @@ int main(int argc, char ** argv)
 #else
     double freq = 1;
 #endif
+    //enable_runfast();
 
     cv::VideoCapture frame_capture;
     char *dspExecutable = NULL;
     char *strBufferSize = NULL;
 
-        printf("strBufferSize = %d\n", sizeof(DataStruct));
     if (argc < 3)
     {
         std::cout << "specifiy an input video file to track" << std::endl;
@@ -46,9 +70,6 @@ int main(int argc, char ** argv)
         printf("parsing args!\n");
         frame_capture = cv::VideoCapture(argv[1]);
         dspExecutable = argv[2];
-        printf("almost done parsing args!\n");
-        asprintf(&strBufferSize, "%d", sizeof(DataStruct));
-        printf("strBufferSize = %s\n",strBufferSize);
     }
         printf("done parsing args!\n");
 
@@ -59,8 +80,21 @@ int main(int argc, char ** argv)
     cv::Mat frame;
     frame_capture.read(frame);
 
-    MeanShift ms; // create meanshift obj
-    ms.Init_target_frame(frame, rect); // init the meanshift
+    bufferInit bufferSizes(frame, rect);
+
+    perftime_t poolInitStart;
+    perftime_t poolInitEnd;
+
+    printf("regionAligned = %d, modelAligned = %d, frameAligned = %d\n", bufferSizes.regionAligned, bufferSizes.modelAligned, bufferSizes.frameAligned);
+
+    asprintf(&strBufferSize, "%d", 2 * (bufferSizes.modelAligned) + (bufferSizes.regionAligned) + (bufferSizes.frameAligned));
+    printf("strBufferSize = %s\n", strBufferSize);
+
+    printf("Entering pool_notify_Init()\n");
+    poolInitStart = now();
+    pool_notify_Init(dspExecutable, bufferSizes, strBufferSize);;
+    poolInitEnd = now();
+    printf("pool_notify_Init() done, time = %fs!\n", diffToNanoseconds(poolInitStart, poolInitEnd, freq) / 1e9);
 
     int codec = CV_FOURCC('F', 'L', 'V', '1');
 
@@ -74,11 +108,8 @@ int main(int argc, char ** argv)
     init_perfcounters(1, 0);
 #endif
 #endif
+    
 
-        printf("pool_notify_Init()\n");
-    pool_notify_Init(dspExecutable, strBufferSize);
-
-        printf("pool_notify_Init() done!\n");
     perftime_t startTime = now();
     double totalTime = 0;
     double kernelTime = 0;
@@ -91,6 +122,9 @@ int main(int argc, char ** argv)
     perftime_t cleanupStart;
     perftime_t cleanupEnd;
     perftime_t endTime;
+
+    MeanShift ms; // create meanshift obj
+    ms.Init_target_frame(frame, rect); // init the meanshift
 
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_START();
@@ -121,8 +155,6 @@ int main(int argc, char ** argv)
         kernelTime += diffToNanoseconds(kernelStart, kernelEnd, freq);
         cleanupStart = now();
         coordinatesfile << fcount << CSV_SEPARATOR << ms_rect.x << CSV_SEPARATOR << ms_rect.y << std::endl;
-
-        printf("writing to file fcount =%d\n", fcount);
         // mark the tracked object in frame
         cv::rectangle(frame, ms_rect, cv::Scalar(0, 0, 255), 3);
 
@@ -138,7 +170,7 @@ int main(int argc, char ** argv)
     MCPROF_STOP();
 #endif
 
-    pool_notify_Delete();
+    pool_notify_Delete(ID_PROCESSOR, bufferSizes);
 
     endTime = now();
     totalTime = diffToNanoseconds(startTime, endTime, freq);

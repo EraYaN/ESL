@@ -62,7 +62,7 @@ BFLAGS := -Dconfig.importPath="$(BASE_SABIOS)/packages; \
 #   ----------------------------------------------------------------------------
 #   All common compiler and linker flags
 #   ----------------------------------------------------------------------------
-ALL_CFLAGS := -q -pdr -pdv -pden -ml3 -mv6400+ --disable:sploop $(CFLAGS)
+ALL_CFLAGS := -q -pdr -pdv -pden -mv6400+ --disable:sploop $(CFLAGS)
 ALL_LDFLAGS := -z -c -q -x $(LDFLAGS)
 
 #   ----------------------------------------------------------------------------
@@ -83,7 +83,7 @@ MAPFILE_D := $(OBJDIR_D)/$(MAPFILE)
 #   ----------------------------------------------------------------------------
 #   Compiler and Linker options for Release
 #   ----------------------------------------------------------------------------
-CFLAGS_R := -o3 $(ALL_CFLAGS)
+CFLAGS_R := -o3 -s -mw -mt $(ALL_CFLAGS)
 OBJDIR_R := Release
 BINDIR_R := $(OBJDIR_R)
 OBJS_R := $(CSRCS:%.c=$(OBJDIR_R)/%.obj) $(ASRCS:%.s62=$(OBJDIR_R)/%.obj)

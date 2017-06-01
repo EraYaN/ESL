@@ -18,8 +18,16 @@
 #include <task.h>
 
 #include <util.h>
-#include <util_global_dsp.h>
+#include <util_global_dsp.h> 
 #include <math.h>
+
+
+unsigned char* frame;
+float * weight;
+float * model;
+float * candidate;
+int weightsize;
+int modelsize;
 
 extern Uint16 MPCSXFER_BufferSize;
 
@@ -79,10 +87,15 @@ Int Task_create(Task_TransferInfo ** infoPtr)
         }
     }
 
+    modelsize = 48 * sizeof(float);
+    weightsize = RECT_SIZE * sizeof(float);
+
     /*
      *  Wait for the event callback from the GPP-side to post the semaphore
      *  indicating receipt of the data buffer pointer and image width and height.
      */
+    SEM_pend(&(info->notifySemObj), SYS_FOREVER);
+    SEM_pend(&(info->notifySemObj), SYS_FOREVER);
     SEM_pend(&(info->notifySemObj), SYS_FOREVER);
     SEM_pend(&(info->notifySemObj), SYS_FOREVER);
 
@@ -90,8 +103,6 @@ Int Task_create(Task_TransferInfo ** infoPtr)
 }
 
 // unsigned char* buf;
-DataStruct* buf;
-int length;
 int communicating = 1;
 
 //TODO[c]: not used anymore
@@ -104,19 +115,22 @@ int communicating = 1;
     return sum;
 }*/
 
-void CalWeight()
+void CalWeight(unsigned char *restrict frame, float *restrict weight, float *restrict candidate, float *restrict model)
 {
     float multipliers[NUM_BINS];
     int x, y, bin, curr_pixel;
 
+#pragma MUST_ITERATE(NUM_BINS, NUM_BINS,)
     for (bin = 0; bin < NUM_BINS; bin++) {
-        multipliers[bin] = sqrt(buf->target_model_row[bin] / buf->target_candidate_row[bin]);
+        multipliers[bin] = sqrt(model[bin] / candidate[bin]);
     }
 
+#pragma MUST_ITERATE(RECT_HEIGHT, RECT_HEIGHT,)
     for (y = 0; y < RECT_HEIGHT; y++) {
+#pragma MUST_ITERATE(RECT_WIDTH, RECT_WIDTH,)
         for (x = 0; x< RECT_WIDTH; x++) {
-            curr_pixel = buf->next_frame_rect[y*RECT_WIDTH+x];
-            buf->weight[y*RECT_WIDTH+x] = multipliers[curr_pixel>>4];
+            curr_pixel = frame[y*RECT_WIDTH+x];
+            weight[y*RECT_WIDTH+x] = multipliers[curr_pixel>>4];
         }
     }
 }
@@ -136,13 +150,16 @@ Int Task_execute(Task_TransferInfo * info)
             SEM_pend(&(info->notifySemObj), SYS_FOREVER);
 
             //invalidate cache
-            BCACHE_inv((Ptr)buf, length, TRUE);
+            BCACHE_inv((Ptr)frame, RECT_SIZE, TRUE);
+            BCACHE_inv((Ptr)model, modelsize, TRUE);
+            BCACHE_inv((Ptr)weight, weightsize, TRUE);
+            BCACHE_inv((Ptr)candidate, modelsize, TRUE);
 
             //call the functionality to be performed by dsp
             //sum = sum_dsp();
-            CalWeight();
+            CalWeight(frame, weight, candidate, model);
 
-            BCACHE_wbInv((Ptr)buf, length, TRUE);
+            BCACHE_wbInv((Ptr)weight, weightsize, TRUE);
 
             //notify that we are done
             NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO, (Uint32)0);
@@ -181,16 +198,24 @@ Int Task_delete(Task_TransferInfo * info)
 static Void Task_notify(Uint32 eventNo, Ptr arg, Ptr info)
 {
     static int count = 0;
-    Task_TransferInfo * mpcsInfo = (Task_TransferInfo *) arg;
+    Task_TransferInfo * mpcsInfo = (Task_TransferInfo *)arg;
 
-    (Void) eventNo; /* To avoid compiler warning. */
+    (Void)eventNo; /* To avoid compiler warning. */
 
     count++;
-    if (count==1) {
-        buf =(DataStruct*)info;
-    } else if (count==2) {
-        length = (int)info;
-    } else if (count>2) {
+    if (count == 1) {
+        frame = (unsigned char*)info;
+    }
+    if (count == 2) {
+        model = (float*)info;
+    }
+    if (count == 3) {
+        weight = (float*)info;
+    }
+    if (count == 4) {
+        candidate = (float *)info;
+    }
+    else if (count>4) {
         // communicating = ((count -3) == (int)info);
         communicating += (int)info;
     }

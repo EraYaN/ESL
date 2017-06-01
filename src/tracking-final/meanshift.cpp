@@ -199,18 +199,23 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
     // float multipliers[cfg.num_bins];
     // int pixels[RECT_HEIGHT * RECT_WIDTH];
 
+    //memcpy((void*)poolModel, (void*)&target_model.at<float>(0, 0), 48 * sizeof(float));
+    //memcpy((void*)poolCandidate, (void*)&target_candidate.at<float>(0, 0), 48 * sizeof(float));
     for (int k = 0; k < 3; k++) {
 
         // Do this on DSP, so copy all the needed data into the DataStruct
         // for (int bin = 0; bin < cfg.num_bins; bin++) {
         //     multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
         // }
+
         for (uint8_t bin = 0; bin < NUM_BINS; bin++) {
-        // printf("CalWeight-dsp() frame, k, bin =%d, %d, %d\n", frame_counter, k, bin);
-            pool_notify_DataBuf->target_model_row[bin] = target_model.at<float>(k, bin);
-            pool_notify_DataBuf->target_candidate_row[bin] = target_candidate.at<float>(k, bin);
+            // printf("CalWeight-dsp() frame, k, bin =%d, %d, %d\n", frame_counter, k, bin);
+            poolModel[bin] = target_model.at<float>(k, bin);
+            poolCandidate[bin] = target_candidate.at<float>(k, bin);
         }
 
+        //printf("poolModel:%f\n", poolModel[5]);
+        //printf("poolCandidate:%df\n", poolCandidate[8]);
 
         // row_index = rec.y;
         // for (int i = 0; i < rows; i++) {
@@ -228,22 +233,22 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
 
         for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
             for (uint8_t x = 0; x< RECT_WIDTH; x++) {
-                pool_notify_DataBuf->next_frame_rect[y*RECT_WIDTH+x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[k];
+                poolFrame[y*RECT_WIDTH+x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[k];
             }
         }
 
         //DSP_execute(): waits with semaphore:
-        if(VERBOSE_EXECUTE)printf("pool_notify_Execute():\n");
+        //printf("pool_notify_Execute():\n");
         
         pool_notify_Execute(1);
         // printf("pool_notify_Execute() done\n");
 
 
-        if(VERBOSE_EXECUTE) printf("pool_notify_Execute() done: %f\n", pool_notify_DataBuf->weight[0]);
+        if(VERBOSE_EXECUTE) printf("pool_notify_Execute() done: %f\n", poolWeight[0]);
 
         for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
             for (uint8_t x = 0; x< RECT_WIDTH; x++) {
-                weight.at<float>(y, x) *= pool_notify_DataBuf->weight[y*RECT_WIDTH+x];
+                weight.at<float>(y, x) *= poolWeight[y*RECT_WIDTH+x];
             }
         }
     }
@@ -301,7 +306,7 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         pdfTime += diffToNanoseconds(startTime, endTime, 0);
         startTime = now();
 #endif
-        // printf("iteration =%d\n", iter);
+        //printf("iteration =%d\n", iter);
         cv::Mat weight = CalWeight(next_frame, target_model, target_candidate, target_Region);
 
 #ifdef TIMING
