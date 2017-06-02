@@ -1,0 +1,28 @@
+%!TEX program = xelatex
+%!TEX spellcheck = en_GB
+\documentclass[final]{article}
+\input{../../.library/preamble.tex}
+\input{../../.library/style.tex}
+\addbibresource{../../.library/bibliography.bib}
+\begin{document}
+\section{Comparison}
+\label{sec:comparison}
+In \cref{fig:comparison} the four implementation speed-up results are shown
+An important thing to note is that if one uses the DSP, the GPP can do work at the same time.
+The current implementation is a blocking operation on the GPP.
+In this specific application it does not act as a pure accelerator but more as a way to offload the work to a secondary processing unit.
+The DSP will also perform better if multiple matrices are streamed to the DSP so that the message queue is always full.
+This way the DSP setup is done only once.
+The NEON implementation is the fastest, at 20x speed-up. %TODO verify
+Code complexity-wise the NEON implementation gives the most speed-up for the least amount of complexity increase.
+Even by simply looking at the memory layout and implementation we can reach a 3x speed-up in the Optimised implementation.
+
+\begin{figure}
+\centering
+\setlength\figureheight{0.4\textwidth}
+\setlength\figurewidth{0.8\textwidth}
+\subimport{resources/}{comparison.tikz}
+\caption{The speed-up of all implementations from \cref{sec:implementations}}
+\label{fig:comparison}
+\end{figure}
+\end{document}

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
 class DynRangeProcessor(object):
-    NUM_BINS = 10
+    NUM_BINS = 50
     FUNCTION_HEADER = 'func'
     VALUE_HEADER = 'v'
 

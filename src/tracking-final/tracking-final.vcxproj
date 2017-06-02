@@ -39,7 +39,7 @@
     <RemoteBuildCommandLine>make -f arm.mk -C $(RemoteProjectDir)</RemoteBuildCommandLine>
     <RemoteReBuildCommandLine>make rebuild -f arm.mk -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
     <RemoteCleanCommandLine>make clean -f arm.mk -C $(RemoteProjectDir)</RemoteCleanCommandLine>
-    <RemoteBuildOutputs>$(RemoteProjectDir)/pcMeanshiftExec</RemoteBuildOutputs>
+    <RemoteBuildOutputs>$(RemoteProjectDir)/armMeanshiftExec</RemoteBuildOutputs>
     <NMakePreprocessorDefinitions>ARMCC;__ARM_NEON__</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -47,7 +47,7 @@
     <RemoteBuildCommandLine>make -f arm.mk -C $(RemoteProjectDir)</RemoteBuildCommandLine>
     <RemoteReBuildCommandLine>make rebuild -f arm.mk -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
     <RemoteCleanCommandLine>make clean -f arm.mk -C $(RemoteProjectDir)</RemoteCleanCommandLine>
-    <RemoteBuildOutputs>$(RemoteProjectDir)/pcMeanshiftExec</RemoteBuildOutputs>
+    <RemoteBuildOutputs>$(RemoteProjectDir)/armMeanshiftExec</RemoteBuildOutputs>
     <NMakePreprocessorDefinitions>ARMCC;__ARM_NEON__</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemGroup>
