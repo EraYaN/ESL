@@ -23,13 +23,20 @@ private:
     cv::Mat kernel;
     std::ofstream dynrangefile;
 
-
 public:
     MeanShift();
     ~MeanShift();
     void Init_target_frame(const cv::Mat &frame, const cv::Rect &rect);
     float Epanechnikov_kernel();
     cv::Mat pdf_representation(const cv::Mat &frame, const cv::Rect &rect);
+#ifdef __ARM_NEON__
+    cv::Mat CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
+#endif
+#ifdef DSP
+    cv::Mat CalWeightDSP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
+#endif
+    cv::Mat CalWeightCPU(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
+
     cv::Mat CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
     cv::Rect track(const cv::Mat &next_frame);
 #ifdef TIMING

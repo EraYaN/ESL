@@ -162,7 +162,7 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 #endif
 
 #ifdef __ARM_NEON__
-cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
+cv::Mat MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
 {
     int row_index;
     int col_index;
@@ -208,8 +208,9 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
         }
     }
 }
-#elif defined DSP
-cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
+#endif
+#ifdef DSP
+cv::Mat MeanShift::CalWeightDSP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
 {
     // DSP_STATUS status; //NOTE[c]: not checked, so not needed
     // int rows = rec.height;
@@ -276,8 +277,8 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
     }
     return weight;
 }
-#else
-cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
+#endif
+cv::Mat MeanShift::CalWeightCPU(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
 {
     int rows = rec.height;
     int cols = rec.width;
@@ -307,7 +308,16 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
 
     return weight;
 }
+cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
+{
+#ifdef DSP
+    return CalWeightDSP(next_frame, target_candidate, rec);
+#elif defined __ARM_NEON__
+    return CalWeightNEON(next_frame, target_candidate, rec);
+#else
+    return CalWeightCPU(next_frame, target_candidate, rec);
 #endif
+}
 
 cv::Rect MeanShift::track(const cv::Mat &next_frame)
 {

@@ -87,9 +87,12 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	-fno-omit-frame-pointer			\
 	-mapcs							\
 	-mabi=aapcs-linux				\
+    -mfpu=neon                      \
 	-mfloat-abi=softfp				\
+    -ftree-vectorize                \
 	-ffast-math						\
 	-std=$(CPPSTD)					\
+    -DDSP                           \
 	--sysroot=$(SYSROOT)
 
 all: checkdirs $(EXEC)
