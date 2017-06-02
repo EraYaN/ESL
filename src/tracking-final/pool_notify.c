@@ -483,9 +483,31 @@ NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 info)
     //TODO[lars]: these 2 functions can be removed?!
 
     NOTIFY_notify(processorId, pool_notify_IPS_ID, pool_notify_IPS_EVENTNO, info);
-    sem_wait(&sem);
     // #endif
     //TODO[c]: timingprintf("Sum execution time %lld us.\n", get_usec() - start);
+
+    return status;
+}
+
+/** ============================================================================
+*  @func   pool_notify_Wait
+*
+*  @desc   This function implements the execute phase for this application.
+*
+*  @modif  None
+*  ============================================================================
+*/
+// NORMAL_API DSP_STATUS pool_notify_Wait(void)
+NORMAL_API DSP_STATUS pool_notify_Wait()
+{
+    Uint8 processorId = 0;
+    DSP_STATUS status = DSP_SOK;
+
+#ifdef DEBUG
+    printf("Entered pool_notify_Wait ()\n");
+#endif
+
+    sem_wait(&sem);
 
     return status;
 }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26430.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "matrix-dsp", "matrix-dsp\matrix-dsp.vcxproj", "{97876A9A-8EF6-4D67-ABF6-A360DC9CB8BF}"
 EndProject
@@ -54,9 +54,13 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tracking-final", "tracking-final\tracking-final.vcxproj", "{E3794D56-E12C-42CD-9BD6-A055F0BEEE9D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F7E3D506-4C60-4250-ACE9-24EF6FD179BB} = {F7E3D506-4C60-4250-ACE9-24EF6FD179BB}
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0} = {97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tracking-final-dsp", "tracking-final-dsp\tracking-final-dsp.vcxproj", "{97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F7E3D506-4C60-4250-ACE9-24EF6FD179BB} = {F7E3D506-4C60-4250-ACE9-24EF6FD179BB}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -159,9 +163,11 @@ Global
 		{E3794D56-E12C-42CD-9BD6-A055F0BEEE9D}.Release|x64.ActiveCfg = Release|x64
 		{E3794D56-E12C-42CD-9BD6-A055F0BEEE9D}.Release|x64.Build.0 = Release|x64
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0}.Debug|Beagle.ActiveCfg = Debug|x64
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0}.Debug|Beagle.Build.0 = Debug|x64
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0}.Debug|x64.ActiveCfg = Debug|x64
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0}.Debug|x64.Build.0 = Debug|x64
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0}.Release|Beagle.ActiveCfg = Release|x64
+		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0}.Release|Beagle.Build.0 = Release|x64
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0}.Release|x64.ActiveCfg = Release|x64
 		{97876A9A-8EF6-4D67-ABF6-A360DC9CB8C0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection

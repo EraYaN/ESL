@@ -30,12 +30,12 @@ public:
     float Epanechnikov_kernel();
     cv::Mat pdf_representation(const cv::Mat &frame, const cv::Rect &rect);
 #ifdef __ARM_NEON__
-    cv::Mat CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
+    void CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, int k);
 #endif
 #ifdef DSP
-    cv::Mat CalWeightDSP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
+    void CalWeightDSP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, int k);
 #endif
-    cv::Mat CalWeightCPU(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
+    void CalWeightCPU(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, int k);
 
     cv::Mat CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
     cv::Rect track(const cv::Mat &next_frame);

@@ -93,6 +93,8 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
 */
 NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 info);
 
+NORMAL_API DSP_STATUS pool_notify_Wait();
+
 NORMAL_API DSP_STATUS pool_notify_Setup();
 
 
