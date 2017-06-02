@@ -4,15 +4,24 @@
 */
 
 #include "meanshift.h"
-#ifdef __ARM_NEON__
-#include "neon_util.h"
+
+#include <util.h>
+
+#if defined __ARM_NEON__
+    #include "neon_util.h"
+#elif defined DSP
+    #include <util_global_dsp.h>
 #endif
 #ifdef TIMING
-#include "timing.h"
+    #include "timing.h"
 #endif
+
+#include "pool_notify.h"
+// DataStruct *pool_notify_DataBuf; // extern difined in pool_notify.h
 
 MeanShift::MeanShift()
 {
+
 #ifdef TIMING
     pdfTime = calWeightTime = nextRectTime = 0;
 #endif
@@ -50,7 +59,6 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
         }
     }
 #endif
-
     target_model = pdf_representation(frame, target_Region);
 }
 
@@ -59,7 +67,7 @@ float MeanShift::Epanechnikov_kernel()
     int h = RECT_ROWS;
     int w = RECT_COLS_PADDED;
 
-    float epanechnikov_cd = 0.1f*PI*h*w;
+    float epanechnikov_cd = 0.1*PI*h*w;
     float kernel_sum = 0.0;
     for (int i = 0; i < RECT_ROWS; i++) {
         for (int j = 0; j < RECT_COLS_PADDED; j++) {
@@ -198,12 +206,78 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
             row_index++;
             address += RECT_NEXTCOL_OFFSET;
         }
-    } 
+    }
+}
+#elif defined DSP
+cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
+{
+    // DSP_STATUS status; //NOTE[c]: not checked, so not needed
+    // int rows = rec.height;
+    // int cols = rec.width;
+    // int row_index = rec.y;
+    // int col_index = rec.x;
 
+    cv::Mat weight(RECT_ROWS, RECT_COLS, CV_32F, cv::Scalar(1.0000));
+    // float multipliers[cfg.num_bins];
+    // int pixels[RECT_HEIGHT * RECT_COLS];
+
+    //memcpy((void*)poolModel, (void*)&target_model.at<float>(0, 0), 48 * sizeof(float));
+    //memcpy((void*)poolCandidate, (void*)&target_candidate.at<float>(0, 0), 48 * sizeof(float));
+    for (int k = 0; k < 3; k++) {
+
+        // Do this on DSP, so copy all the needed data into the DataStruct
+        // for (int bin = 0; bin < cfg.num_bins; bin++) {
+        //     multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
+        // }
+
+        for (uint8_t bin = 0; bin < CFG_NUM_BINS; bin++) {
+            // printf("CalWeight-dsp() frame, k, bin =%d, %d, %d\n", frame_counter, k, bin);
+            poolModel[bin] = target_model.at<float>(k, bin);
+            poolCandidate[bin] = target_candidate.at<float>(k, bin);
+        }
+
+        //printf("poolModel:%f\n", poolModel[5]);
+        //printf("poolCandidate:%df\n", poolCandidate[8]);
+
+        // row_index = rec.y;
+        // for (int i = 0; i < rows; i++) {
+        //     col_index = rec.x;
+        //     for (int j = 0; j < cols; j++) {
+        //         int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
+        //         pixels[i*RECT_COLS+j] = curr_pixel;
+        //         weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
+
+        //         col_index++;
+        //     }
+        //     row_index++;
+        // }
+
+
+        for (uint8_t y = 0; y < RECT_ROWS; y++) {
+            for (uint8_t x = 0; x< RECT_COLS; x++) {
+                poolFrame[y*RECT_COLS+x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[k];
+            }
+        }
+
+        //DSP_execute(): waits with semaphore:
+        //printf("pool_notify_Execute():\n");
+        
+        pool_notify_Execute(1);
+        // printf("pool_notify_Execute() done\n");
+
+
+        if(VERBOSE_EXECUTE) printf("pool_notify_Execute() done: %f\n", poolWeight[0]);
+
+        for (uint8_t y = 0; y < RECT_ROWS; y++) {
+            for (uint8_t x = 0; x< RECT_COLS; x++) {
+                weight.at<float>(y, x) *= poolWeight[y*RECT_COLS+x];
+            }
+        }
+    }
     return weight;
 }
 #else
-cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec)
+cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
 {
     int rows = rec.height;
     int cols = rec.width;
@@ -211,6 +285,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
     int col_index = rec.x;
     cv::Mat weight(rows, cols, CV_32F, cv::Scalar(1.0000));
     float multipliers[CFG_NUM_BINS];
+
 
     for (int k = 0; k < 3; k++) {
         for (int bin = 0; bin < CFG_NUM_BINS; bin++) {

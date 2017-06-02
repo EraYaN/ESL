@@ -15,12 +15,12 @@ SRC_DIR				:= $(addprefix ../,$(MODULES))
 OUTDIR				:= ./out/x64
 BUILD_DIR			:= $(addprefix $(OUTDIR)/,$(MODULES))
 
-SRC				    := $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
+SRC					:= $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
 OBJ					:= $(patsubst ../%.cpp,$(OUTDIR)/%.o,$(SRC))
 
 MODULES_INCLUDES	:= $(addprefix -I../,$(MODULES))
 
-INCLUDES			+= $(MODULES_INCLUDES) 
+INCLUDES			+= $(MODULES_INCLUDES)
 
 INCLUDES					:= $(sort $(INCLUDES))
 

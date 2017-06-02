@@ -47,6 +47,7 @@
     <ClInclude Include="dynrange.h" />
     <ClInclude Include="timing.h" />
     <ClInclude Include="util.h" />
+    <ClInclude Include="util_global_dsp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="timing.cpp" />

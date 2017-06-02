@@ -53,6 +53,7 @@
   <ItemGroup>
     <ClInclude Include="meanshift.h" />
     <ClInclude Include="neon_util.h" />
+    <ClInclude Include="pool_notify.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="arm.mk" />
@@ -61,6 +62,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="meanshift.cpp" />
+    <ClCompile Include="pool_notify.c" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

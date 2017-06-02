@@ -4,62 +4,117 @@
 #include <fstream>
 #include "util.h"
 
-#if !defined(ARMCC) && defined(MCPROF)
+#ifndef ARMCC
 #include "markers.h"
 #endif
 
 #define VARIANT "final"
 
+#include "pool_notify.h"
+#include <util_global_dsp.h>
+#include <util.h>
+#include <cstdio>
+
+void enable_runfast()
+{
+    static const unsigned int x = 0x04086060;
+    static const unsigned int y = 0x03000000;
+    int r;
+    asm volatile("fmrx     %0, fpscr          \n\t"
+                 "and      %0, %0, %1         \n\t"
+                 "orr      %0, %0, %2         \n\t"
+                 "fmxr     fpscr, %0          \n\t"
+        : "=r"(r)
+        : "r"(x), "r"(y));
+}
+
+inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
+{
+    rectHeight = rect.height;
+    rectWidth = rect.width;
+    frame = rectHeight*rectWidth;
+    region = frame * sizeof(float);
+    frameAligned = DSPLINK_ALIGN(frame, DSPLINK_BUF_ALIGN);
+    regionAligned = DSPLINK_ALIGN(region, DSPLINK_BUF_ALIGN);
+    modelAligned = DSPLINK_ALIGN(48 * sizeof(float), DSPLINK_BUF_ALIGN); //numBins*pixels
+}
+
 int main(int argc, char ** argv)
 {
+    printf("welcome!\n");
+
 #ifdef ARMCC
 #ifdef USECYCLES
-    double freq = get_frequency(true);;
+    double freq = get_frequency(true);
 #else
     double freq = 1;
 #endif
 #else
     double freq = 1;
 #endif
+    //enable_runfast();
+
     cv::VideoCapture frame_capture;
-    if (argc < 2)
+    char *dspExecutable = NULL;
+    char *strBufferSize = NULL;
+
+    if (argc < 3)
     {
         std::cout << "specifiy an input video file to track" << std::endl;
-        std::cout << "Usage:  ./" << argv[0] << " car.avi" << std::endl;
+        std::cout << "Usage:  ./" << argv[0] << "car.avi pool_notify.out" << std::endl;
         return -1;
     }
     else
     {
+        printf("parsing args!\n");
         frame_capture = cv::VideoCapture(argv[1]);
+        dspExecutable = argv[2];
     }
+        printf("done parsing args!\n");
+
 
     // this is used for testing the car video
     // instead of selection of object of interest using mouse
+
     cv::Rect rect(228, 367, RECT_COLS, RECT_ROWS);
     //cv::Rect rect(1300, 300, 900, 700);
+
     cv::Mat frame;
     frame_capture.read(frame);
 
-    if (frame.cols < 10 || frame.rows < 10) {
-        std::cout << "Input video could not be loaded, or is too small. 10x10 pixel is the minimum." << std::endl;
-        return 1;
-    }
+    bufferInit bufferSizes(frame, rect);
 
-    MeanShift ms; // creat meanshift obj
-    ms.Init_target_frame(frame, rect); // init the meanshift
+    perftime_t poolInitStart;
+    perftime_t poolInitEnd;
+
+    printf("regionAligned = %d, modelAligned = %d, frameAligned = %d\n", bufferSizes.regionAligned, bufferSizes.modelAligned, bufferSizes.frameAligned);
+    printf("regionOver = %d, modelOver = %d, frameOver = %d\n", bufferSizes.regionAligned-bufferSizes.region, 48 * sizeof(float) - bufferSizes.modelAligned, bufferSizes.frame - bufferSizes.frameAligned);
+
+    asprintf(&strBufferSize, "%d", 2 * (bufferSizes.modelAligned) + (bufferSizes.regionAligned) + (bufferSizes.frameAligned));
+    printf("strBufferSize = %s\n", strBufferSize);
+
+    printf("Entering pool_notify_Init()\n");
+    poolInitStart = now();
+    pool_notify_Init(dspExecutable, bufferSizes, strBufferSize);;
+    poolInitEnd = now();
+    printf("pool_notify_Init() done, time = %fs!\n", diffToNanoseconds(poolInitStart, poolInitEnd, freq) / 1e9);
 
     int codec = CV_FOURCC('F', 'L', 'V', '1'); //Slow and playable
     //int codec = CV_FOURCC('Y', 'V', '1', '2'); //Fast and somewhat playable, saves a full second
     //int codec = 0x00000000; //Fast and playable, saves a full second
+
     cv::VideoWriter writer("/tmp/tracking_result.avi", codec, 20, cv::Size(frame.cols, frame.rows));
     std::ofstream coordinatesfile;
     coordinatesfile.open("/tmp/tracking_result.coords");
     coordinatesfile << "f" << CSV_SEPARATOR << "x" << CSV_SEPARATOR << "y" << std::endl;
+
 #ifdef ARMCC
 #ifdef USECYCLES
     init_perfcounters(1, 0);
 #endif
 #endif
+    
+
     perftime_t startTime = now();
     double totalTime = 0;
     double kernelTime = 0;
@@ -73,26 +128,31 @@ int main(int argc, char ** argv)
     perftime_t cleanupEnd;
     perftime_t endTime;
 
+    MeanShift ms; // create meanshift obj
+    ms.Init_target_frame(frame, rect); // init the meanshift
+
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_START();
 #endif
     int TotalFrames = 32;
     int fcount;
-    for (fcount = 0; fcount < TotalFrames; ++fcount)
-    {
+
+
+
+    for (fcount = 0; fcount < TotalFrames; ++fcount) {
         initStart = now();
         // read a frame
         int status = frame_capture.read(frame);
         if (0 == status) break;
 
-        initEnd = now();
+		initEnd = now();
         initTime += diffToNanoseconds(initStart, initEnd, freq);
         kernelStart = now();
         // track object
 #if !defined(ARMCC) && defined(MCPROF)
         MCPROF_START();
-#endif        
-        cv::Rect ms_rect = ms.track(frame);        
+#endif
+        cv::Rect ms_rect = ms.track(frame);
 #if !defined(ARMCC) && defined(MCPROF)
         MCPROF_STOP();
 #endif
@@ -116,7 +176,10 @@ int main(int argc, char ** argv)
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_STOP();
 #endif
-    endTime = now();    
+
+    pool_notify_Delete(ID_PROCESSOR, bufferSizes);
+
+    endTime = now();
     totalTime = diffToNanoseconds(startTime, endTime, freq);
 
     std::cout << "Processed " << fcount << " frames" << std::endl;
@@ -133,6 +196,7 @@ int main(int argc, char ** argv)
     std::cout << "Press enter to quit." << std::endl;
     std::cin.get();
 #endif
+
     return 0;
 }
 

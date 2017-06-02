@@ -14,6 +14,7 @@
 
 #define RECT_ROWS 58
 #define RECT_COLS 86
+#define RECT_SIZE RECT_COLS*RECT_ROWS
 #define RECT_ROWSx3 174
 #define RECT_COLSx3 258
 #define RECT_COLS_PADDED 96 //((RECT_COLS / 16 + 1) * 16)
@@ -28,5 +29,7 @@
 #define CFG_PIXEL_CHANNELS 3
 #define CFG_BIN_WIDTH 16 // (CFG_PIXEL_RANGE/CFG_BIN_WIDTH)
 #define CFG_PDF_SCALAR_OFFSET 0.f //cv::Scalar(1e-10f)
+
+#define VERBOSE_EXECUTE 0
 
 #endif /* UTIL_H_ */
