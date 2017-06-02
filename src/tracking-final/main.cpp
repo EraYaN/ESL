@@ -191,6 +191,11 @@ int main(int argc, char ** argv)
     std::cout << "CalWeight time: " << ms.calWeightTime / 1e9 << std::endl;
     std::cout << "Next Rect time: " << ms.nextRectTime / 1e9 << std::endl;
 #endif
+#ifdef TIMING2
+    std::cout << "DSP time (ms): " << ms.pdfTime / 1e6 << std::endl;
+    std::cout << "NEON time (ms): " << ms.calWeightTime / 1e6 << std::endl;
+    std::cout << "FINAL time (ms): " << ms.nextRectTime / 1e6 << std::endl;
+#endif
 
 #if !defined(ARMCC)
     std::cout << "Press enter to quit." << std::endl;

@@ -12,7 +12,7 @@
 #elif defined DSP
 #include <util_global_dsp.h>
 #endif
-#ifdef TIMING
+#if defined(TIMING) || defined(TIMING2)
 #include "timing.h"
 #endif
 
@@ -22,7 +22,7 @@
 MeanShift::MeanShift()
 {
 
-#ifdef TIMING
+#if defined(TIMING) || defined(TIMING2)
     pdfTime = calWeightTime = nextRectTime = 0;
 #endif
 #ifdef WRITE_DYN_RANGE
@@ -291,18 +291,39 @@ void MeanShift::CalWeightCPU(const cv::Mat &next_frame, cv::Mat &target_candidat
 }
 cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
 {
+#ifdef TIMING2
+    perftime_t startTime, endTime;
+#endif
     cv::Mat weight(RECT_ROWS, RECT_COLS, CV_32F, cv::Scalar(1.0000));   
-    cv::Mat weightDSP(RECT_ROWS, RECT_COLS, CV_32F, cv::Scalar(1.0000));
+    //cv::Mat weightDSP(RECT_ROWS, RECT_COLS, CV_32F, cv::Scalar(1.0000));
 #ifdef DSP
-    CalWeightDSP(next_frame, target_candidate, rec, weightDSP, 0);
-#elif defined __ARM_NEON__
+#ifdef TIMING2
+    startTime = now();
+#endif
+    CalWeightDSP(next_frame, target_candidate, rec, weight, 0);
+#endif
+#ifdef TIMING2
+    //pool_notify_Wait();
+    endTime = now();
+    pdfTime += diffToNanoseconds(startTime, endTime, 0);
+    startTime = now();
+#endif
+#if defined __ARM_NEON__
     CalWeightNEON(next_frame, target_candidate, rec, weight, 1);
     CalWeightNEON(next_frame, target_candidate, rec, weight, 2);
 #else
     CalWeightCPU(next_frame, target_candidate, rec, weight, 1);
     CalWeightCPU(next_frame, target_candidate, rec, weight, 2);
 #endif
-      
+
+#ifdef TIMING2
+    endTime = now();
+    calWeightTime += diffToNanoseconds(startTime, endTime, 0);
+    startTime = now();
+#endif
+#ifndef TIMING2
+    pool_notify_Wait();
+#endif
     pool_notify_Wait();
     for (uint8_t y = 0; y < RECT_ROWS; y++) {
             for (uint8_t x = 0; x < RECT_COLS; x++) {
@@ -314,7 +335,10 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
             weight.at<float>(y, x) *= weightDSP.at<float>(y, x);
         }
     }*/
-
+#ifdef TIMING2
+    endTime = now();
+    nextRectTime += diffToNanoseconds(startTime, endTime, 0);
+#endif
     return weight;
 }
 

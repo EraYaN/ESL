@@ -39,7 +39,7 @@ public:
 
     cv::Mat CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
     cv::Rect track(const cv::Mat &next_frame);
-#ifdef TIMING
+#if defined(TIMING) || defined(TIMING2)
     double pdfTime;
     double calWeightTime;
     double nextRectTime;

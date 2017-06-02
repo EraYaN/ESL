@@ -92,7 +92,7 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
     -ftree-vectorize                \
 	-ffast-math						\
 	-std=$(CPPSTD)					\
-    -DDSP                           \
+    -DDSP -DTIMING2                 \
 	--sysroot=$(SYSROOT)
 
 all: checkdirs $(EXEC)
