@@ -509,8 +509,8 @@ class RunSystem(object):
             print(e)
             return False
         finally:
-            if sftp:
-                sftp.close()
+            if sftp_build:
+                sftp_build.close()
         return True
 
     def Verify(self, file):
