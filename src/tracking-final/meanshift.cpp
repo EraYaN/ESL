@@ -322,7 +322,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
     startTime = now();
 #endif
 #ifndef TIMING2
-    pool_notify_Wait();
+    //pool_notify_Wait();
 #endif
     pool_notify_Wait();
     for (uint8_t y = 0; y < RECT_ROWS; y++) {
