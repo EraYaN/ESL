@@ -88,6 +88,7 @@ float MeanShift::Epanechnikov_kernel()
 }
 
 #ifdef __ARM_NEON__
+//NEON implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
     cv::Mat pdf_model(3, 16, CV_32F, CFG_PDF_SCALAR_OFFSET);
@@ -131,6 +132,7 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     return pdf_model;
 }
 #else
+//Original implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
     cv::Mat pdf_model(3, 16, CV_32F, cv::Scalar(1e-10));
@@ -162,6 +164,7 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 #endif
 
 #ifdef __ARM_NEON__
+//Neon implementation of CalWeight
 void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, int k)
 {
     int row_index;
@@ -209,59 +212,30 @@ void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candida
 }
 #endif
 #ifdef DSP
+//DSP implementation of CalWeight
 void MeanShift::CalWeightDSP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, int k)
-{
-    //memcpy((void*)poolModel, (void*)&target_model.at<float>(0, 0), 48 * sizeof(float));
-    //memcpy((void*)poolCandidate, (void*)&target_candidate.at<float>(0, 0), 48 * sizeof(float));
-    //for (int k = 0; k < 3; k++) {
+{ 
+    //Transfer target_model and target_candidate to shared memory pool
+    for (uint8_t bin = 0; bin < CFG_NUM_BINS; bin++) {
+        poolModel[bin] = target_model.at<float>(k, bin);
+        poolCandidate[bin] = target_candidate.at<float>(k, bin);
+    }
 
-        // Do this on DSP, so copy all the needed data into the DataStruct
-        // for (int bin = 0; bin < cfg.num_bins; bin++) {
-        //     multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
-        // }
-
-        for (uint8_t bin = 0; bin < CFG_NUM_BINS; bin++) {
-            // printf("CalWeight-dsp() frame, k, bin =%d, %d, %d\n", frame_counter, k, bin);
-            poolModel[bin] = target_model.at<float>(k, bin);
-            poolCandidate[bin] = target_candidate.at<float>(k, bin);
+    //Transfer one colour of the target area of the frame to shared memory
+    for (uint8_t y = 0; y < RECT_ROWS; y++) {
+        for (uint8_t x = 0; x < RECT_COLS; x++) {
+            poolFrame[y*RECT_COLS + x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[k];
         }
+    }
 
-        //printf("poolModel:%f\n", poolModel[5]);
-        //printf("poolCandidate:%df\n", poolCandidate[8]);
-
-        // row_index = rec.y;
-        // for (int i = 0; i < rows; i++) {
-        //     col_index = rec.x;
-        //     for (int j = 0; j < cols; j++) {
-        //         int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
-        //         pixels[i*RECT_COLS+j] = curr_pixel;
-        //         weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
-
-        //         col_index++;
-        //     }
-        //     row_index++;
-        // }
+    pool_notify_Execute(1);
 
 
-        for (uint8_t y = 0; y < RECT_ROWS; y++) {
-            for (uint8_t x = 0; x < RECT_COLS; x++) {
-                poolFrame[y*RECT_COLS + x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[k];
-            }
-        }
-
-        //DSP_execute(): waits with semaphore:
-        //printf("pool_notify_Execute():\n");
-
-        pool_notify_Execute(1);
-        // printf("pool_notify_Execute() done\n");
-
-
-        if (VERBOSE_EXECUTE) printf("pool_notify_Execute() done: %f\n", poolWeight[0]);
-
-        
-    //}
+    if (VERBOSE_EXECUTE) printf("pool_notify_Execute() done: %f\n", poolWeight[0]);
 }
 #endif
+
+//Original calweight implementation
 void MeanShift::CalWeightCPU(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, int k)
 {
     int rows = rec.height;

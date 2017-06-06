@@ -28,6 +28,7 @@ void enable_runfast()
         : "r"(x), "r"(y));
 }
 
+//Constructor for bufferInit class. Calculates all required buffer sizes for memory allocation
 inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
 {
     rectHeight = rect.height;
@@ -36,7 +37,7 @@ inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
     region = frame * sizeof(float);
     frameAligned = DSPLINK_ALIGN(frame, DSPLINK_BUF_ALIGN);
     regionAligned = DSPLINK_ALIGN(region, DSPLINK_BUF_ALIGN);
-    modelAligned = DSPLINK_ALIGN(48 * sizeof(float), DSPLINK_BUF_ALIGN); //numBins*pixels
+    modelAligned = DSPLINK_ALIGN(48 * sizeof(float), DSPLINK_BUF_ALIGN);
 }
 
 int main(int argc, char ** argv)
@@ -87,11 +88,8 @@ int main(int argc, char ** argv)
     perftime_t poolInitStart;
     perftime_t poolInitEnd;
 
-    printf("regionAligned = %d, modelAligned = %d, frameAligned = %d\n", bufferSizes.regionAligned, bufferSizes.modelAligned, bufferSizes.frameAligned);
-    printf("regionOver = %d, modelOver = %d, frameOver = %d\n", bufferSizes.regionAligned-bufferSizes.region, 48 * sizeof(float) - bufferSizes.modelAligned, bufferSizes.frame - bufferSizes.frameAligned);
-
+    //Total buffersize
     asprintf(&strBufferSize, "%d", 2 * (bufferSizes.modelAligned) + (bufferSizes.regionAligned) + (bufferSizes.frameAligned));
-    printf("strBufferSize = %s\n", strBufferSize);
 
     printf("Entering pool_notify_Init()\n");
     poolInitStart = now();

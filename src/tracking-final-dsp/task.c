@@ -21,7 +21,7 @@
 #include <util_global_dsp.h> 
 #include <math.h>
 
-
+//Declaration of pointers to shared memory
 unsigned char* frame;
 float * weight;
 float * model;
@@ -87,6 +87,7 @@ Int Task_create(Task_TransferInfo ** infoPtr)
         }
     }
 
+    //Calculation of sizes of shared memory
     modelsize = 48 * sizeof(float);
     weightsize = RECT_SIZE * sizeof(float);
 
@@ -102,18 +103,8 @@ Int Task_create(Task_TransferInfo ** infoPtr)
     return status;
 }
 
-// unsigned char* buf;
-int communicating = 1;
 
-//TODO[c]: not used anymore
-/*int sum_dsp() 
-{
-    int sum = 0,i;
-    for (i=0;i<length;i++) {
-       sum = sum + buf[i];
-    }
-    return sum;
-}*/
+int communicating = 1;
 
 
 void CalWeight(unsigned char *restrict frame, float *restrict weight, float *restrict candidate, float *restrict model)
@@ -122,12 +113,14 @@ void CalWeight(unsigned char *restrict frame, float *restrict weight, float *res
     int x=0, y=0, xy=0, bin;
     unsigned char curr_pixel;
 
+    //Calculation of multipliers with forced unenrolling pragma's
 #pragma MUST_ITERATE(CFG_NUM_BINS, CFG_NUM_BINS,)
 #pragma UNROLL(CFG_NUM_BINS)
     for (bin = 0; bin < CFG_NUM_BINS; bin++) {
         multipliers[bin] = sqrt(model[bin]/candidate[bin]);
     }
 
+    //Calculation of weights with coalesced loops for software pipelining.
 #pragma MUST_ITERATE(RECT_SIZE, RECT_SIZE,)
     for (xy = 0; xy < RECT_SIZE; xy++) {
         curr_pixel = frame[y*RECT_COLS+x];
@@ -143,13 +136,10 @@ void CalWeight(unsigned char *restrict frame, float *restrict weight, float *res
 
 Int Task_execute(Task_TransferInfo * info)
 {
-    //TODO[c]: not used anymore
-    //int sum;
-    // Uint16 k;
 
     static int counter = 1;
 
-    // for (k = 0; k < 3*32; k++) {
+
     while(1) {
         if(communicating){
             //wait for semaphore
@@ -162,9 +152,9 @@ Int Task_execute(Task_TransferInfo * info)
             BCACHE_inv((Ptr)candidate, modelsize, TRUE);
 
             //call the functionality to be performed by dsp
-            //sum = sum_dsp();
             CalWeight(frame, weight, candidate, model);
 
+            //Writeback to shared memory
             BCACHE_wbInv((Ptr)weight, weightsize, TRUE);
 
             //notify that we are done
