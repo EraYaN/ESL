@@ -12,6 +12,7 @@ import socket
 import time
 import getpass
 import stat
+import time
 import math
 import re
 from operator import itemgetter
@@ -29,8 +30,9 @@ includes = {
 }
 
 benchmarks = {
-    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},   
-    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords', '/tmp/dynrange.csv']},
+    'vanilla':{'project':'tracking', 'executable':'armMeanshiftExec','deps':[],'includes':['shared'],'baseargs':['{basedir}/{testfile}'], 'usesdsp':False, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords']},
+    'dspcore':{'project':'tracking-final-dsp', 'executable':'pool_notify.out', 'deps':[], 'includes':['shared'],'baseargs':[],'sizearg':True, 'usesdsp':True, 'output':[]},
+    'final':{'project':'tracking-final', 'executable':'armMeanshiftExec', 'deps':['dspcore'],'includes':['shared'],'baseargs':['{basedir}/{testfile} {basedir}/{depname}'], 'usesdsp':True, 'output':['/tmp/tracking_result.avi', '/tmp/tracking_result.coords', '/tmp/dynrange.csv']},
 }
 
 DISASSEMBLY_CMD = 'arm-linux-gnueabi-objdump ~/projects/{project}/{executable} --disassemble -M reg-names-gcc --demangle --endian=little --no-show-raw-insn --reloc'
@@ -183,7 +185,7 @@ def mkdir_p(sftp, remote_directory):
 class RunSystem(object):
 
     REF_FILE = 'car.avi.refs-coords'
-    MUTEX_FILE = '/tmp/run-system.pid'
+    MUTEX_FILE = '/tmp/mutex/run-system.pid'
     MUTEX_TIMEOUT = 20
     MUTEX_INTERVAL = 1
     LOCAL_BASE_DIR = '..'
@@ -234,7 +236,8 @@ class RunSystem(object):
         self.beagle_board.connect('192.168.0.202', port=22, username='root',password='', sock=channel)
 
         # Get Build home dir.
-        output, _, _ = self.BuildExecute('echo ~')
+        print("Getting home directory path on BuildServer")
+        output, tmp1, tmp2 = self.BuildExecute('echo ~')
         self.BUILD_BASE_DIR = self.BUILD_BASE_DIR.replace('~',output.strip())
 
     def Disconnect(self):        
@@ -256,8 +259,8 @@ class RunSystem(object):
             # output
             contents = io.StringIO()
             error = io.StringIO()
-
-            while not build_channel.exit_status_ready() or build_channel.recv_ready() or build_channel.recv_stderr_ready():
+            time.sleep(0.25)
+            while (not build_channel.exit_status_ready()) or build_channel.recv_ready() or build_channel.recv_stderr_ready():
                 if build_channel.recv_ready():
                     data = build_channel.recv(1024)
                     #print "Indside stdout"
@@ -271,7 +274,7 @@ class RunSystem(object):
                     while error_buff:
                         error.write(error_buff.decode("utf-8"))
                         sys.stderr.write(error_buff.decode("utf-8"))
-                        error_buff = build_channel.recv_stderr(1024)
+                        error_buff = build_channel.recv_stderr(1024)            
 
             exit_status = build_channel.recv_exit_status()
 
@@ -311,7 +314,9 @@ class RunSystem(object):
             build_dir = '{0}/{1}'.format(self.BUILD_BASE_DIR,self.benchmark['project'])
             upload_files(sftp,local_dir,build_dir)
         except Exception as e:
-            print(e)
+            import traceback
+            sys.stderr.write("Exception: {}\n".format(e))
+            traceback.print_exc(file=sys.stderr)
             return False
         finally:
             if sftp:
@@ -322,14 +327,14 @@ class RunSystem(object):
         if not self.build_server or not self.beagle_board:
             raise NotConnectedError('Please make sure the class made a successfull connection to the build server and the development board.')
         
-        for dep in self.benchmark['deps']:
-            dep_bench = benchmarks[dep['project']]
+        for bench in self.benchmark['deps']:
+            dep_bench = benchmarks[bench]
             print("Cleaning dependency {project}.".format(**dep_bench))
             out,error,exit_code = self.BuildExecute("make clean -C ~/projects/{project} -f arm.mk".format(**dep_bench))            
             print("Building dependency {project}.".format(**dep_bench))
             out,error,exit_code = self.BuildExecute("make all -C ~/projects/{project} -f arm.mk".format(**dep_bench))            
             if exit_code != 0:
-                print('Dependency {0} build failed with exit code {1}'.format(dep,exit_code))
+                print('Dependency {0} build failed with exit code {1}'.format(bench,exit_code))
                 return False
 
         print("Cleaning {project}.".format(**self.benchmark))
@@ -393,7 +398,7 @@ class RunSystem(object):
                 pid = int(file.readline().strip())
                 user = file.readline().strip()                
                 file.close()
-                if not os.path.exists("/proc/{}".format(pid)): 
+                if not exists_remote(sftp,"/proc/{}".format(pid)): 
                     self.ResetMutexLock(sftp)
                     print('Mutex lock acquired from {} by {}, the process already quit.'.format(pid,user))
                     return True
@@ -410,7 +415,7 @@ class RunSystem(object):
         try:
             pid = os.getpid()
             file = sftp.file(self.MUTEX_FILE, "w", -1)
-            file.chmod(stat.S_IRUSR|stat.S_IRGRP|stat.S_IROTH|stat.S_IWUSR|stat.S_IWGRP|stat.S_IWOTH)
+            file.chmod(stat.S_IRUSR|stat.S_IRGRP|stat.S_IROTH|stat.S_IWUSR|stat.S_IWGRP|stat.S_IWOTH|stat.S_IXUSR|stat.S_IXGRP|stat.S_IXOTH)
             file.write("{}\n".format(pid))
             file.write("{}\n".format(getpass.getuser()))
             file.flush()
@@ -443,8 +448,10 @@ class RunSystem(object):
         
         try: 
             sftp_build = self.build_server.open_sftp()
+            print("Waiting for Mutex Lock....")
             if not self.WaitForMutexLock(sftp_build):
                 return False
+            print("Setting for Mutex Lock....")
             if not self.SetMutexLock(sftp_build):
                 return False
             if self.benchmark['usesdsp']:
@@ -506,7 +513,9 @@ class RunSystem(object):
                 return False
             return True
         except Exception as e:
-            print(e)
+            import traceback
+            sys.stderr.write("Exception: {}\n".format(e))
+            traceback.print_exc(file=sys.stderr)
             return False
         finally:
             if sftp_build:
