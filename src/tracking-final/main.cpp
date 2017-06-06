@@ -111,7 +111,7 @@ int main(int argc, char ** argv)
     poolInitEnd = now();
     DEBUGP("pool_notify_Init() done, time = " << diffToNanoseconds(poolInitStart, poolInitEnd, freq) / 1e9 << " s!");
 #endif
-    std::cout << "Setting up video writer..." << std::endl;
+    DEBUGP("Setting up video writer..." << std::endl);
     int codec = CV_FOURCC('F', 'L', 'V', '1'); //Slow and playable
     //int codec = CV_FOURCC('Y', 'V', '1', '2'); //Fast and somewhat playable, saves a full second
     //int codec = 0x00000000; //Fast and playable, saves a full second

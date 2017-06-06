@@ -12,6 +12,7 @@
 #elif defined DSP
 #include <util_global_dsp.h>
 #endif
+
 #if defined(TIMING) || defined(TIMING2)
 #include "timing.h"
 #endif
@@ -19,23 +20,28 @@
 #include "pool_notify.h"
 // DataStruct *pool_notify_DataBuf; // extern difined in pool_notify.h
 
+
 MeanShift::MeanShift()
 {
 
 #if defined(TIMING) || defined(TIMING2)
     pdfTime = calWeightTime = nextRectTime = 0;
 #endif
+
 #ifdef WRITE_DYN_RANGE
     dynrangefile.open("/tmp/dynrange.csv");
     dynrangefile << "func" << CSV_SEPARATOR << "v" << std::endl;
 #endif
 }
+
+
 MeanShift::~MeanShift()
 {
 #ifdef WRITE_DYN_RANGE
     dynrangefile.close();
 #endif
 }
+
 
 void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
 {
@@ -62,6 +68,7 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
     target_model = pdf_representation(frame, target_Region);
 }
 
+
 float MeanShift::Epanechnikov_kernel()
 {
     int h = RECT_ROWS;
@@ -86,6 +93,7 @@ float MeanShift::Epanechnikov_kernel()
     }
     return kernel_sum;
 }
+
 
 #ifdef __ARM_NEON__
 //NEON implementation of pdf_representation
@@ -163,8 +171,9 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 }
 #endif
 
+
 #ifdef __ARM_NEON__
-//Neon implementation of CalWeight
+// GPP + NEON implementation of CalWeight
 void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, int k)
 {
     int row_index;
@@ -211,8 +220,10 @@ void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candida
     //}
 }
 #endif
+
+
 #ifdef DSP
-//DSP implementation of CalWeight
+// DSP implementation of CalWeight
 void MeanShift::CalWeightDSP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, int k)
 { 
     //Transfer target_model and target_candidate to shared memory pool
@@ -221,7 +232,6 @@ void MeanShift::CalWeightDSP(const cv::Mat &next_frame, cv::Mat &target_candidat
         poolCandidate[bin] = target_candidate.at<float>(k, bin);
     }
 
-    //Transfer one colour of the target area of the frame to shared memory
     for (uint8_t y = 0; y < RECT_ROWS; y++) {
         for (uint8_t x = 0; x < RECT_COLS; x++) {
             poolFrame[y*RECT_COLS + x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[k];
@@ -230,12 +240,12 @@ void MeanShift::CalWeightDSP(const cv::Mat &next_frame, cv::Mat &target_candidat
 
     pool_notify_Execute(1);
 
-
     if (VERBOSE_EXECUTE) printf("pool_notify_Execute() done: %f\n", poolWeight[0]);
 }
 #endif
 
-//Original calweight implementation
+
+// GPP implementation of CalWeight
 void MeanShift::CalWeightCPU(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, int k)
 {
     int rows = rec.height;
@@ -244,45 +254,48 @@ void MeanShift::CalWeightCPU(const cv::Mat &next_frame, cv::Mat &target_candidat
     int col_index = rec.x;
     float multipliers[CFG_NUM_BINS];
 
+    for (int bin = 0; bin < CFG_NUM_BINS; bin++) {
+        multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
+    }
 
-    //for (int k = 0; k < 3; k++) {
-        for (int bin = 0; bin < CFG_NUM_BINS; bin++) {
-            multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
+    row_index = rec.y;
+    for (int i = 0; i < rows; i++) {
+        col_index = rec.x;
+        for (int j = 0; j < cols; j++) {
+            int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
+            weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
+
+            col_index++;
         }
-
-        row_index = rec.y;
-        for (int i = 0; i < rows; i++) {
-            col_index = rec.x;
-            for (int j = 0; j < cols; j++) {
-                int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
-                weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
-
-                col_index++;
-            }
-            row_index++;
-        }
-    //}
+        row_index++;
+    }
 }
+
+
+// Main CalWeight function
 cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
 {
 #ifdef TIMING2
     perftime_t startTime, endTime;
 #endif
+
     cv::Mat weight(RECT_ROWS, RECT_COLS, CV_32F, cv::Scalar(1.0000));   
-    //cv::Mat weightDSP(RECT_ROWS, RECT_COLS, CV_32F, cv::Scalar(1.0000));
-#ifdef DSP
+
 #ifdef TIMING2
     startTime = now();
 #endif
+
+#ifdef DSP
     CalWeightDSP(next_frame, target_candidate, rec, weight, 0);
 #endif
+
 #ifdef TIMING2
-    //pool_notify_Wait();
     endTime = now();
     pdfTime += diffToNanoseconds(startTime, endTime, 0);
     startTime = now();
 #endif
-#if defined __ARM_NEON__
+
+#ifdef __ARM_NEON__
 #ifndef DSP
     CalWeightNEON(next_frame, target_candidate, rec, weight, 0);
 #endif
@@ -301,32 +314,54 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
     calWeightTime += diffToNanoseconds(startTime, endTime, 0);
     startTime = now();
 #endif
+
 #ifndef TIMING2
     //pool_notify_Wait();
 #endif
+
 #ifdef DSP
+
     pool_notify_Wait();
+
+#ifdef __ARM_NEON__
+    float32_t* weight_ptr;
+    float32x4_t weight_vec, poolWeight_vec;
+    for (int i = 0; i < RECT_COLS * RECT_ROWS; i += 4) {
+        weight_ptr = (float32_t*)&weight.data[i];
+        weight_vec = vld1q_f32(weight_ptr);
+        poolWeight_vec = vld1q_f32((float32_t*)&poolWeight[i]);
+        weight_vec = vmulq_f32(weight_vec, poolWeight_vec);
+
+        vst1q_f32(weight_ptr, weight_vec);
+    }
+#else
     for (uint8_t y = 0; y < RECT_ROWS; y++) {
-            for (uint8_t x = 0; x < RECT_COLS; x++) {
-                weight.at<float>(y, x) *= poolWeight[y*RECT_COLS + x];
-            }
+        for (uint8_t x = 0; x < RECT_COLS; x++) {
+            weight.at<float>(y, x) *= poolWeight[y*RECT_COLS + x];
+        }
     }
 #endif
+#endif
+
 #ifdef TIMING2
     endTime = now();
     nextRectTime += diffToNanoseconds(startTime, endTime, 0);
 #endif
+
     return weight;
 }
+
 
 cv::Rect MeanShift::track(const cv::Mat &next_frame)
 {
     cv::Rect next_rect;
+
 #ifdef TIMING
     perftime_t startTime, endTime;
 #endif
 
     for (int iter = 0; iter < CFG_MAX_ITER; iter++) {
+
 #ifdef TIMING
         startTime = now();
 #endif
@@ -386,7 +421,6 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         nextRectTime += diffToNanoseconds(startTime, endTime, 0);
 #endif
         }
-
 
     return next_rect;
 }
