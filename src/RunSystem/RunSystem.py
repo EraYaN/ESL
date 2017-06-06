@@ -543,6 +543,10 @@ class RunSystem(object):
             for f,x,y in reader:
                 res.append({'f':int(f),'x':int(x),'y':int(y)})
 
+        if len(res) == 0:
+            print('There are no data points in the verification file... Run must have had an error.')
+            return
+
         if len(res) > len(ref):
             print('There are more data points in the verification file then in the reference file.')
 
@@ -663,6 +667,7 @@ if __name__ == '__main__':
     parser.add_argument('--port', action="store", help='SSH Port',default=34522)
     parser.add_argument('--sendsource', action="store_true", help='Should we upload the source to the BuildServer')
     parser.add_argument('--build', action="store_true", help='Should we build the executable for the BeagleBoard')
+    parser.add_argument('--disassemble', action="store_true", help='Should we get the disassembly, requires --build.')
     parser.add_argument('--run', action="store_true", help='Should we run the executable on the BeagleBoard')
     parser.add_argument('--files', action="store", help='The test files to use in this run.', default='car.avi')
     parser.add_argument('--number-of-runs', action="store", type=int, help='The number of runs to do.', default=1)
@@ -682,10 +687,10 @@ if __name__ == '__main__':
                 if not rs.Build():
                     print('Build Failed.')
                     exit(2)
-
-                if not rs.Disassemble("{0}-{2}-{1}.disassembly.txt".format(opts.benchmark,opts.files.replace(',','_'),opts.variant)):
-                    print('Disassemble Failed.')
-                    exit(5)
+                if opts.disassemble:
+                    if not rs.Disassemble("{0}-{2}-{1}.disassembly.txt".format(opts.benchmark,opts.files.replace(',','_'),opts.variant)):
+                        print('Disassemble Failed.')
+                        exit(5)
 
                 if not rs.SendExec():
                     print('SendExec Failed.')

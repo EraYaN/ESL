@@ -283,9 +283,15 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
     startTime = now();
 #endif
 #if defined __ARM_NEON__
+#ifndef DSP
+    CalWeightNEON(next_frame, target_candidate, rec, weight, 0);
+#endif
     CalWeightNEON(next_frame, target_candidate, rec, weight, 1);
     CalWeightNEON(next_frame, target_candidate, rec, weight, 2);
 #else
+#ifndef DSP
+    CalWeightCPU(next_frame, target_candidate, rec, weight, 0);
+#endif
     CalWeightCPU(next_frame, target_candidate, rec, weight, 1);
     CalWeightCPU(next_frame, target_candidate, rec, weight, 2);
 #endif
@@ -298,17 +304,14 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
 #ifndef TIMING2
     //pool_notify_Wait();
 #endif
+#ifdef DSP
     pool_notify_Wait();
     for (uint8_t y = 0; y < RECT_ROWS; y++) {
             for (uint8_t x = 0; x < RECT_COLS; x++) {
                 weight.at<float>(y, x) *= poolWeight[y*RECT_COLS + x];
             }
     }
-    /*for (uint8_t y = 0; y < RECT_ROWS; y++) {
-        for (uint8_t x = 0; x < RECT_COLS; x++) {
-            weight.at<float>(y, x) *= weightDSP.at<float>(y, x);
-        }
-    }*/
+#endif
 #ifdef TIMING2
     endTime = now();
     nextRectTime += diffToNanoseconds(startTime, endTime, 0);

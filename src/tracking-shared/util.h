@@ -5,7 +5,11 @@
 #define LINE_MARKER "@"
 
 #define REPORTPROGRESS
+#ifdef DEBUGPRINT
 #define PROGRESSFRAMES 1
+#else
+#define PROGRESSFRAMES 10
+#endif
 
 #define FRAME_COLS 640
 #define FRAME_ROWS 480
@@ -31,5 +35,12 @@
 #define CFG_PDF_SCALAR_OFFSET 0.f //cv::Scalar(1e-10f)
 
 #define VERBOSE_EXECUTE 0
+
+#ifdef DEBUGPRINT
+#define DEBUGP(x) do { std::cout << x << std::endl; } while (0)
+#else 
+#define DEBUGP(x) do { } while (0)
+#endif
+
 
 #endif /* UTIL_H_ */

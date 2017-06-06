@@ -50,9 +50,9 @@ int main(int argc, char ** argv)
     ms.Init_target_frame(frame, rect); // init the meanshift
 
     int codec = CV_FOURCC('F', 'L', 'V', '1');
-    cv::VideoWriter writer("tracking_result.avi", codec, 20, cv::Size(frame.cols, frame.rows));
+    cv::VideoWriter writer("/tmp/tracking_result.avi", codec, 20, cv::Size(frame.cols, frame.rows));
     std::ofstream coordinatesfile;
-    coordinatesfile.open("tracking_result.coords");
+    coordinatesfile.open("/tmp/tracking_result.coords");
     coordinatesfile << "f" << CSV_SEPARATOR << "x" << CSV_SEPARATOR << "y" << std::endl;
 #ifdef ARMCC
 #ifdef USECYCLES

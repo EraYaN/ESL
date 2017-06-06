@@ -10,12 +10,14 @@
 
 #define VARIANT "final"
 
+#ifdef DSP
 #include "pool_notify.h"
 #include <util_global_dsp.h>
+#endif
 #include <util.h>
-#include <cstdio>
+//#include <cstdio>
 
-void enable_runfast()
+/*void enable_runfast()
 {
     static const unsigned int x = 0x04086060;
     static const unsigned int y = 0x03000000;
@@ -26,8 +28,9 @@ void enable_runfast()
                  "fmxr     fpscr, %0          \n\t"
         : "=r"(r)
         : "r"(x), "r"(y));
-}
+}*/
 
+#ifdef DSP
 //Constructor for bufferInit class. Calculates all required buffer sizes for memory allocation
 inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
 {
@@ -39,10 +42,17 @@ inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
     regionAligned = DSPLINK_ALIGN(region, DSPLINK_BUF_ALIGN);
     modelAligned = DSPLINK_ALIGN(48 * sizeof(float), DSPLINK_BUF_ALIGN);
 }
+#endif
 
 int main(int argc, char ** argv)
 {
-    printf("welcome!\n");
+    std::cout << "Starting..." << std::endl;
+#ifdef DSP
+    std::cout << "DSP support enabled." << std::endl;
+#endif
+#ifdef __ARM_NEON__
+    std::cout << "NEON support enabled." << std::endl;
+#endif
 
 #ifdef ARMCC
 #ifdef USECYCLES
@@ -57,7 +67,9 @@ int main(int argc, char ** argv)
 
     cv::VideoCapture frame_capture;
     char *dspExecutable = NULL;
+#ifdef DSP    
     char *strBufferSize = NULL;
+#endif
 
     if (argc < 3)
     {
@@ -67,11 +79,12 @@ int main(int argc, char ** argv)
     }
     else
     {
-        printf("parsing args!\n");
+        DEBUGP("Parsing arguments...");
         frame_capture = cv::VideoCapture(argv[1]);
         dspExecutable = argv[2];
     }
-        printf("done parsing args!\n");
+
+    DEBUGP("Parsed arguments.");
 
 
     // this is used for testing the car video
@@ -79,10 +92,11 @@ int main(int argc, char ** argv)
 
     cv::Rect rect(228, 367, RECT_COLS, RECT_ROWS);
     //cv::Rect rect(1300, 300, 900, 700);
-
+    DEBUGP("Reading frist frame...");
     cv::Mat frame;
     frame_capture.read(frame);
 
+#ifdef DSP
     bufferInit bufferSizes(frame, rect);
 
     perftime_t poolInitStart;
@@ -91,17 +105,19 @@ int main(int argc, char ** argv)
     //Total buffersize
     asprintf(&strBufferSize, "%d", 2 * (bufferSizes.modelAligned) + (bufferSizes.regionAligned) + (bufferSizes.frameAligned));
 
-    printf("Entering pool_notify_Init()\n");
+    DEBUGP("Entering pool_notify_Init()");
     poolInitStart = now();
-    pool_notify_Init(dspExecutable, bufferSizes, strBufferSize);;
+    pool_notify_Init(dspExecutable, bufferSizes, strBufferSize);
     poolInitEnd = now();
-    printf("pool_notify_Init() done, time = %fs!\n", diffToNanoseconds(poolInitStart, poolInitEnd, freq) / 1e9);
-
+    DEBUGP("pool_notify_Init() done, time = " << diffToNanoseconds(poolInitStart, poolInitEnd, freq) / 1e9 << " s!");
+#endif
+    std::cout << "Setting up video writer..." << std::endl;
     int codec = CV_FOURCC('F', 'L', 'V', '1'); //Slow and playable
     //int codec = CV_FOURCC('Y', 'V', '1', '2'); //Fast and somewhat playable, saves a full second
     //int codec = 0x00000000; //Fast and playable, saves a full second
 
     cv::VideoWriter writer("/tmp/tracking_result.avi", codec, 20, cv::Size(frame.cols, frame.rows));
+    DEBUGP("Setting up verification file output...");
     std::ofstream coordinatesfile;
     coordinatesfile.open("/tmp/tracking_result.coords");
     coordinatesfile << "f" << CSV_SEPARATOR << "x" << CSV_SEPARATOR << "y" << std::endl;
@@ -135,10 +151,11 @@ int main(int argc, char ** argv)
     int TotalFrames = 32;
     int fcount;
 
-
+    DEBUGP("Starting main loop...");
 
     for (fcount = 0; fcount < TotalFrames; ++fcount) {
         initStart = now();
+        DEBUGP("Reading frame...");
         // read a frame
         int status = frame_capture.read(frame);
         if (0 == status) break;
@@ -150,6 +167,7 @@ int main(int argc, char ** argv)
 #if !defined(ARMCC) && defined(MCPROF)
         MCPROF_START();
 #endif
+        DEBUGP("Tracking...");
         cv::Rect ms_rect = ms.track(frame);
 #if !defined(ARMCC) && defined(MCPROF)
         MCPROF_STOP();
@@ -157,11 +175,14 @@ int main(int argc, char ** argv)
         kernelEnd = now();
         kernelTime += diffToNanoseconds(kernelStart, kernelEnd, freq);
         cleanupStart = now();
+        DEBUGP("Writing results...");
         coordinatesfile << fcount << CSV_SEPARATOR << ms_rect.x << CSV_SEPARATOR << ms_rect.y << std::endl;
         // mark the tracked object in frame
+        DEBUGP("Drawing rectangle...");
         cv::rectangle(frame, ms_rect, cv::Scalar(0, 0, 255), 3);
 
         // write the frame
+        DEBUGP("Writing video frame...");
         writer << frame;
 #ifdef REPORTPROGRESS
         if (fcount % PROGRESSFRAMES == 0)
@@ -174,8 +195,9 @@ int main(int argc, char ** argv)
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_STOP();
 #endif
-
+#ifdef DSP
     pool_notify_Delete(ID_PROCESSOR, bufferSizes);
+#endif
 
     endTime = now();
     totalTime = diffToNanoseconds(startTime, endTime, freq);

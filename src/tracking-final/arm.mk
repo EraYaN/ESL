@@ -20,7 +20,7 @@ LIBS=-lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video 
 #   Compiler symbol definitions
 #   ----------------------------------------------------------------------------
 DEFS :=        -DARMCC               \
-               -DDSP               \
+               -DDSP                 \
                -DOS_LINUX            \
                -DMAX_DSPS=1          \
                -DMAX_PROCESSORS=2    \
@@ -92,7 +92,6 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
     -ftree-vectorize                \
 	-ffast-math						\
 	-std=$(CPPSTD)					\
-    -DDSP -DTIMING2                 \
 	--sysroot=$(SYSROOT)
 
 all: checkdirs $(EXEC)
