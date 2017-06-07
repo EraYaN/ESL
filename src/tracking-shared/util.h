@@ -51,8 +51,6 @@
 
 
 #include <stdint.h>
-
-
 #ifdef FIXEDPOINT
 typedef int32_t basetype_t;
 
@@ -72,7 +70,7 @@ typedef int32_t basetype_t;
 #define F_P_RANGE F_P_UPPER
 
 //all (rest is unused)
-#define F_RANGE 180.f //Everything clipped to this. (barring overflows)
+#define F_RANGE 2.f //Everything clipped to this. (barring overflows)
 
 #else
 typedef float basetype_t;

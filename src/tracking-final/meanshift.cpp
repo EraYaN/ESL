@@ -64,13 +64,12 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
     DEBUGP("Init target frame started...");
     target_Region = rect;
     //cv::Mat floatkernel = cv::Mat(RECT_ROWS, RECT_COLS_PADDED, CV_32F, cv::Scalar(0));
-    this->kernel = cv::Mat(RECT_ROWS, RECT_COLS_PADDED, CV_BASETYPE, cv::Scalar(0));
+    this->kernel = cv::Mat(RECT_ROWS, RECT_COLS_PADDED, CV_32F, cv::Scalar(0.f));
 
     float normalized_C = 1 / Epanechnikov_kernel();
-
+    DEBUGP("normalized_C: " << normalized_C);
 #ifdef __ARM_NEON__
     float32x4_t kernel_vec;
-
     for (int i = 0; i < RECT_ROWS; i++) {
         for (int j = 0; j < RECT_COLS_PADDED; j += 4) {
             kernel_vec = vld1q_f32((float32_t*)&kernel.ptr<basetype_t>(i)[j]);
@@ -79,14 +78,22 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
         }
     }
 #else
-    DEBUGP("Normalizing kernel...");
+    for (int i = 0; i < kernel.rows; i++) {
+        for (int j = 0; j < kernel.cols; j++) {            
+            kernel.at<float>(i, j) *= normalized_C;   
+            dynrange(dynrangefile, __FUNCTION__, kernel.at<float>(i, j));
+        }
+    }
+#endif
+#ifdef FIXEDPOINT
+    cv::Mat floatkernel = this->kernel;
+    this->kernel = cv::Mat(RECT_ROWS, RECT_COLS_PADDED, CV_BASETYPE);
+
     for (int i = 0; i < kernel.rows; i++) {
         for (int j = 0; j < kernel.cols; j++) {
-#ifdef FIXEDPOINT
-            kernel.at<basetype_t>(i, j) = to_fixed(to_float(kernel.at<basetype_t>(i, j),F_RANGE) * normalized_C,F_RANGE);
-#else
-            kernel.at<basetype_t>(i, j) = floatkernel.at<basetype_t>(i, j) * normalized_C;
-#endif
+            
+            kernel.at<basetype_t>(i, j) = to_fixed(floatkernel.at<float>(i, j),F_RANGE);
+            dynrange(dynrangefile, __FUNCTION__, kernel.at<basetype_t>(i, j));
         }
     }
 #endif
@@ -106,15 +113,12 @@ float MeanShift::Epanechnikov_kernel()
     float kernel_sum = 0.0;
     for (int i = 0; i < RECT_ROWS; i++) {
         float x = static_cast<float>(i - RECT_ROWS / 2);
-        dynrange(dynrangefile, __FUNCTION__, x);
         for (int j = 0; j < RECT_COLS_PADDED; j++) {            
             float y = static_cast<float> (j - RECT_COLS_PADDED / 2);
-            dynrange(dynrangefile, __FUNCTION__, y);
             float norm_x = x*x / (RECT_ROWS*RECT_ROWS / 4) + y*y / (RECT_COLS_PADDED*RECT_COLS_PADDED / 4);
-            dynrange(dynrangefile, __FUNCTION__, norm_x);
             float result = norm_x < 1 ? (epanechnikov_cd*(1.0 - norm_x)) : 0;
             dynrange(dynrangefile, __FUNCTION__, result);
-            kernel.at<basetype_t>(i, j) = result;
+            kernel.at<float>(i, j) = result;
             kernel_sum += result;
         }
     }
