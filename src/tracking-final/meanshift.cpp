@@ -137,9 +137,6 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     }
     return pdf_model;
 }
-<<<<<<< HEAD
-
-=======
 #elif defined DSP
 // DSP implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
@@ -169,7 +166,6 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 
     return pdf_model;
 }
->>>>>>> daf8d91c35420858e4e6508741d39d89beddb212
 #else
 //Original implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
