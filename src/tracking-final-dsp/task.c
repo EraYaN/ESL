@@ -26,8 +26,10 @@ unsigned char* frame;
 float * weight;
 float * model;
 float * candidate;
+float *kernel;
 int weightsize;
 int modelsize;
+int kernelsize;
 
 extern Uint16 MPCSXFER_BufferSize;
 
@@ -90,6 +92,7 @@ Int Task_create(Task_TransferInfo ** infoPtr)
     //Calculation of sizes of shared memory
     modelsize = 48 * sizeof(float);
     weightsize = RECT_SIZE * sizeof(float);
+    kernelsize = RECT_SIZE * sizeof(float);
 
     /*
      *  Wait for the event callback from the GPP-side to post the semaphore
@@ -103,9 +106,31 @@ Int Task_create(Task_TransferInfo ** infoPtr)
     return status;
 }
 
+int communicating_calweight = 0;
+int communicating_pdf = 0;
 
-int communicating = 1;
+void pdf_representation(unsigned char *restrict frame, float *restrict weight, float *restrict kernel)
+{
+    int x, y, bin;
+    int curr_pixel_value;
+    int bin_value;
 
+    //init/clear the result array
+    for (bin = 0; bin < CFG_NUM_BINS; bin++) {
+        weight[bin] = 0;
+    }
+
+    for (y = 0; y < RECT_ROWS; y++) {
+        for (x = 0; x < RECT_COLS; x++) {
+            curr_pixel_value = frame[y*RECT_COLS+x];
+
+            // TODO[c]: do shift instead if div
+            bin_value = (curr_pixel_value / 16);
+            // bin_value = (curr_pixel_value >> 4);
+            weight[bin_value] += kernel[y*RECT_COLS+x];
+        }
+    }
+}
 
 void CalWeight(unsigned char *restrict frame, float *restrict weight, float *restrict candidate, float *restrict model)
 {
@@ -139,17 +164,17 @@ Int Task_execute(Task_TransferInfo * info)
 
     static int counter = 1;
 
-
     while(1) {
-        if(communicating){
-            //wait for semaphore
-            SEM_pend(&(info->notifySemObj), SYS_FOREVER);
+        //wait for semaphore
+        SEM_pend(&(info->notifySemObj), SYS_FOREVER);
 
+        if (communicating_calweight){
             //invalidate cache
             BCACHE_inv((Ptr)frame, RECT_SIZE, TRUE);
             BCACHE_inv((Ptr)model, modelsize, TRUE);
             BCACHE_inv((Ptr)weight, weightsize, TRUE);
             BCACHE_inv((Ptr)candidate, modelsize, TRUE);
+            // BCACHE_inv((Ptr)kernel, kernelsize, TRUE); //not needed by calweight
 
             //call the functionality to be performed by dsp
             CalWeight(frame, weight, candidate, model);
@@ -162,8 +187,30 @@ Int Task_execute(Task_TransferInfo * info)
 
             //notify the result
             NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO, counter++);
-            // }
-            communicating--;
+
+            communicating_calweight--;
+        } else if(communicating_pdf){
+            //invalidate cache
+            BCACHE_inv((Ptr)frame, RECT_SIZE, TRUE);
+            // BCACHE_inv((Ptr)model, modelsize, TRUE); //not needed by pdf_rep
+            BCACHE_inv((Ptr)weight, weightsize, TRUE); //TODO[c], only first NUM_BIN elements needed
+            // BCACHE_inv((Ptr)candidate, modelsize, TRUE); //not needed by pdf_rep
+            BCACHE_inv((Ptr)kernel, kernelsize, TRUE);
+
+            //call the functionality to be performed by dsp
+            pdf_representation(frame, weight, kernel);
+
+            // TODO[c]: for pdf_rep, only the first 16 elements are changed, so can optimize for this
+            //Writeback to shared memory
+            BCACHE_wbInv((Ptr)weight, weightsize, TRUE);
+
+            //notify that we are done
+            NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO, (Uint32)0);
+
+            //notify the result
+            NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO, counter++);
+
+            communicating_pdf--;
         }
     }
     return SYS_OK;
@@ -201,19 +248,20 @@ static Void Task_notify(Uint32 eventNo, Ptr arg, Ptr info)
     count++;
     if (count == 1) {
         frame = (unsigned char*)info;
-    }
-    if (count == 2) {
+    } else if (count == 2) {
         model = (float*)info;
-    }
-    if (count == 3) {
+    } else if (count == 3) {
         weight = (float*)info;
-    }
-    if (count == 4) {
+    } else if (count == 4) {
         candidate = (float *)info;
-    }
-    else if (count>4) {
-        // communicating = ((count -3) == (int)info);
-        communicating += (int)info;
+    } else if (count == 5) {
+        kernel = (float *)info;
+    } else if (count > 5) {
+        if ((int)info == CALWEIGHT) {
+            communicating_calweight++;
+        } else if ((int)info == PDF_REPRESENTATION) {
+            communicating_pdf++;
+        }
     }
 
     SEM_post(&(mpcsInfo->notifySemObj));
