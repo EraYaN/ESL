@@ -40,6 +40,7 @@ inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
     region = frame * sizeof(float);
     frameAligned = DSPLINK_ALIGN(frame, DSPLINK_BUF_ALIGN);
     regionAligned = DSPLINK_ALIGN(region, DSPLINK_BUF_ALIGN);
+    //TODO[c] \#magicnumber 48
     modelAligned = DSPLINK_ALIGN(48 * sizeof(float), DSPLINK_BUF_ALIGN);
 }
 #endif
@@ -103,7 +104,7 @@ int main(int argc, char ** argv)
     perftime_t poolInitEnd;
 
     //Total buffersize
-    asprintf(&strBufferSize, "%d", 2 * (bufferSizes.modelAligned) + (bufferSizes.regionAligned) + (bufferSizes.frameAligned));
+    asprintf(&strBufferSize, "%d", 2 * (bufferSizes.modelAligned) + 2 * (bufferSizes.regionAligned) + (bufferSizes.frameAligned));
 
     DEBUGP("Entering pool_notify_Init()");
     poolInitStart = now();

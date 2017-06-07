@@ -137,7 +137,39 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     }
     return pdf_model;
 }
+<<<<<<< HEAD
 
+=======
+#elif defined DSP
+// DSP implementation of pdf_representation
+cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
+{
+    cv::Mat pdf_model(3, NUM_BINS, CV_32F, cv::Scalar(1e-10));
+
+    for (uint8_t y = 0; y < RECT_ROWS; y++) {
+        for (uint8_t x = 0; x < RECT_COLS; x++) {
+            poolKernel[y*RECT_COLS+x] = kernel.at<float>(y,x);
+        }
+    }
+
+    for (int k = 0; k < 3; k++) {
+        for (uint8_t y = 0; y < RECT_ROWS; y++) {
+            for (uint8_t x = 0; x < RECT_COLS; x++) {
+                poolFrame[y * RECT_COLS + x] = frame.at<cv::Vec3b>(rect.y + y, rect.x + x)[k];
+            }
+        }
+
+        pool_notify_Execute(1);
+        pool_notify_Wait();
+
+        for (uint8_t bin = 0; bin < NUM_BINS; bin++) {
+            pdf_model.at<float>(k, bin) = poolWeight[bin];
+        }
+    }
+
+    return pdf_model;
+}
+>>>>>>> daf8d91c35420858e4e6508741d39d89beddb212
 #else
 //Original implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)

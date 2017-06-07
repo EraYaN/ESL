@@ -5,6 +5,10 @@
 
 #include <util.h>
 
+// different DSP operations
+#define CALWEIGHT          0
+#define PDF_REPRESENTATION 1
+
 typedef struct DataStruct
 {
     uint32_t next_frame_rect[RECT_SIZE]; // cols*float with next_frame
