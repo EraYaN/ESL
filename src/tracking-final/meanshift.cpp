@@ -92,7 +92,7 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
     for (int i = 0; i < kernel.rows; i++) {
         for (int j = 0; j < kernel.cols; j++) {
             
-            kernel.at<basetype_t>(i, j) = to_fixed(floatkernel.at<float>(i, j),F_RANGE);
+            kernel.at<basetype_t>(i, j) = to_fixed(floatkernel.at<float>(i, j), F_E_RANGE);
             dynrange(dynrangefile, __FUNCTION__, kernel.at<basetype_t>(i, j));
         }
     }
@@ -221,12 +221,12 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
             bin_value[2] = (curr_pixel_value[2] / CFG_BIN_WIDTH);
             //DEBUGP("PDF Representation main loop 3.1...");
             //DEBUGP("PDF Representation main loop 3.1 value: " << bin_value[0]);
-            pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j);
+            pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j) * (F_E_RANGE / F_P_RANGE);
             //DEBUGP("PDF Representation main loop 3.2...");
             //DEBUGP("PDF Representation main loop 3.2 value: " << kernel.at<basetype_t>(i, j));
-            pdf_model.at<basetype_t>(0, bin_value[1]) += kernel.at<basetype_t>(i, j);
+            pdf_model.at<basetype_t>(0, bin_value[1]) += kernel.at<basetype_t>(i, j) * (F_E_RANGE / F_P_RANGE);
             //DEBUGP("PDF Representation main loop 3.3...");
-            pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j);
+            pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j) * (F_E_RANGE / F_P_RANGE);
             col_index++;
         }
         row_index++;
@@ -328,12 +328,16 @@ void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidat
     DEBUGP("Calculating multipliers...");
     for (int bin = 0; bin < CFG_NUM_BINS; bin++) {        
         basetype_t val = target_candidate.at<basetype_t>(k, bin);
+#ifdef FIXEDPOINT
         if (val == 0) {
-            multipliers[bin] = static_cast<basetype_t>(F_RANGE);
+            multipliers[bin] = static_cast<basetype_t>(F_C_RANGE);
         }
         else {
-            multipliers[bin] = static_cast<basetype_t>((fastsqrt(target_model.at<basetype_t>(k, bin) / target_candidate.at<basetype_t>(k, bin))));
+            multipliers[bin] = to_fixed(sqrt(to_float(target_model.at<basetype_t>(k, bin), F_P_RANGE) / to_float(target_candidate.at<basetype_t>(k, bin), F_P_RANGE)),F_C_RANGE);
         }
+#else
+        multipliers[bin] = static_cast<basetype_t>(sqrt(target_model.at<basetype_t>(k, bin) / target_candidate.at<basetype_t>(k, bin)));
+#endif
     }
 
 #ifdef DSP

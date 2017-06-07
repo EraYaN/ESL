@@ -54,23 +54,23 @@
 #ifdef FIXEDPOINT
 typedef int32_t basetype_t;
 
-//Epanechnikov kernel
-#define F_E_UPPER 180.f
-#define F_E_LOWER -F_E_UPPER // -50
+//Epanechnikov kernel (Range from 0.000457363 to 0)
+#define F_E_UPPER 1/512.f
+#define F_E_LOWER -F_E_UPPER
 #define F_E_RANGE F_E_UPPER
 
 //CalWeight
-#define F_C_UPPER 2000.f
+#define F_C_UPPER 2048.f
 #define F_C_LOWER -F_C_UPPER // -8
 #define F_C_RANGE F_C_UPPER
 
 //pdf_representation
-#define F_P_UPPER 0.1f
+#define F_P_UPPER 1/8.f
 #define F_P_LOWER -F_P_UPPER // -0.1f
 #define F_P_RANGE F_P_UPPER
 
-//all (rest is unused)
-#define F_RANGE 2.f //Everything clipped to this. (barring overflows)
+//all
+#define F_RANGE 2000.f //Everything clipped to this. (barring overflows)
 
 #else
 typedef float basetype_t;
