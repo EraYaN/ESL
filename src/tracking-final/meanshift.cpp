@@ -43,52 +43,78 @@ MeanShift::~MeanShift()
 }
 
 
+int fastsqrt(int _number) {
+    float number = _number;
+
+    float x2 = number * 0.5F;
+    float y = number;
+    long i = *(long*)&y;
+    //i = (long)0x5fe6ec85e7de30da - (i >> 1);
+    i = 0x5f3759df - (i >> 1);
+    y = *(float*)&i;
+
+    y = y * (1.5F - (x2*y*y));
+    y = y * (1.5F - (x2*y*y)); // let's be precise
+
+    return static_cast<int>(1 / y + 0.5f);
+}
+
 void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
 {
+    DEBUGP("Init target frame started...");
     target_Region = rect;
-    this->kernel = cv::Mat(RECT_ROWS, RECT_COLS_PADDED, CV_32F, cv::Scalar(0));
+    //cv::Mat floatkernel = cv::Mat(RECT_ROWS, RECT_COLS_PADDED, CV_32F, cv::Scalar(0));
+    this->kernel = cv::Mat(RECT_ROWS, RECT_COLS_PADDED, CV_BASETYPE, cv::Scalar(0));
+
     float normalized_C = 1 / Epanechnikov_kernel();
+
 #ifdef __ARM_NEON__
     float32x4_t kernel_vec;
 
     for (int i = 0; i < RECT_ROWS; i++) {
         for (int j = 0; j < RECT_COLS_PADDED; j += 4) {
-            kernel_vec = vld1q_f32((float32_t*)&kernel.ptr<float>(i)[j]);
+            kernel_vec = vld1q_f32((float32_t*)&kernel.ptr<basetype_t>(i)[j]);
             kernel_vec = vmulq_n_f32(kernel_vec, normalized_C);
-            vst1q_f32((float32_t*)&kernel.ptr<float>(i)[j], kernel_vec);
+            vst1q_f32((float32_t*)&kernel.ptr<basetype_t>(i)[j], kernel_vec);
         }
     }
 #else
+    DEBUGP("Normalizing kernel...");
     for (int i = 0; i < kernel.rows; i++) {
         for (int j = 0; j < kernel.cols; j++) {
-            kernel.at<float>(i, j) *= normalized_C;
+#ifdef FIXEDPOINT
+            kernel.at<basetype_t>(i, j) = to_fixed(to_float(kernel.at<basetype_t>(i, j),F_RANGE) * normalized_C,F_RANGE);
+#else
+            kernel.at<basetype_t>(i, j) = floatkernel.at<basetype_t>(i, j) * normalized_C;
+#endif
         }
     }
 #endif
-
+    DEBUGP("Calculating first pdf model...");
     target_model = pdf_representation(frame, target_Region);
+    DEBUGP("Init target frame done.");
 }
 
 
 float MeanShift::Epanechnikov_kernel()
 {
+    DEBUGP("Making kernel...");
     int h = RECT_ROWS;
     int w = RECT_COLS_PADDED;
 
     float epanechnikov_cd = 0.1*PI*h*w;
     float kernel_sum = 0.0;
     for (int i = 0; i < RECT_ROWS; i++) {
-        for (int j = 0; j < RECT_COLS_PADDED; j++) {
-            float x = static_cast<float>(i - RECT_ROWS / 2);
-            dynrange(dynrangefile, __FUNCTION__, x);
+        float x = static_cast<float>(i - RECT_ROWS / 2);
+        dynrange(dynrangefile, __FUNCTION__, x);
+        for (int j = 0; j < RECT_COLS_PADDED; j++) {            
             float y = static_cast<float> (j - RECT_COLS_PADDED / 2);
             dynrange(dynrangefile, __FUNCTION__, y);
             float norm_x = x*x / (RECT_ROWS*RECT_ROWS / 4) + y*y / (RECT_COLS_PADDED*RECT_COLS_PADDED / 4);
             dynrange(dynrangefile, __FUNCTION__, norm_x);
             float result = norm_x < 1 ? (epanechnikov_cd*(1.0 - norm_x)) : 0;
             dynrange(dynrangefile, __FUNCTION__, result);
-            kernel.at<float>(i, j) = result;
-
+            kernel.at<basetype_t>(i, j) = result;
             kernel_sum += result;
         }
     }
@@ -100,7 +126,7 @@ float MeanShift::Epanechnikov_kernel()
 //NEON implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
-    cv::Mat pdf_model(3, 16, CV_32F, CFG_PDF_SCALAR_OFFSET);
+    cv::Mat pdf_model(3, 16, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
     cv::Vec3b *bin_values = new cv::Vec3b[RECT_COLS_PADDED];
 
     int row_index = rect.y;
@@ -141,7 +167,7 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 // DSP implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
-    cv::Mat pdf_model(3, NUM_BINS, CV_32F, cv::Scalar(1e-10));
+    cv::Mat pdf_model(3, NUM_BINS, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
 
     for (uint8_t y = 0; y < RECT_ROWS; y++) {
         for (uint8_t x = 0; x < RECT_COLS; x++) {
@@ -170,30 +196,38 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 //Original implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
-    cv::Mat pdf_model(3, 16, CV_32F, cv::Scalar(1e-10));
+    DEBUGP("PDF Representation started...");
+    cv::Mat pdf_model(3, 16, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
 
     cv::Vec3f curr_pixel_value;
     cv::Vec3f bin_value;
 
     int row_index = rect.y;
     int col_index = rect.x;
-
+    DEBUGP("PDF Representation main loop...");
     for (int i = 0; i < rect.height; i++) {
         col_index = rect.x;
 
         for (int j = 0; j < rect.width; j++) {
+            //DEBUGP("PDF Representation main loop 1...");
             curr_pixel_value = frame.at<cv::Vec3b>(row_index, col_index);
+            //DEBUGP("PDF Representation main loop 2...");
             bin_value[0] = (curr_pixel_value[0] / CFG_BIN_WIDTH);
             bin_value[1] = (curr_pixel_value[1] / CFG_BIN_WIDTH);
             bin_value[2] = (curr_pixel_value[2] / CFG_BIN_WIDTH);
-            pdf_model.at<float>(0, bin_value[0]) += kernel.at<float>(i, j);
-            pdf_model.at<float>(1, bin_value[1]) += kernel.at<float>(i, j);
-            pdf_model.at<float>(2, bin_value[2]) += kernel.at<float>(i, j);
+            //DEBUGP("PDF Representation main loop 3.1...");
+            //DEBUGP("PDF Representation main loop 3.1 value: " << bin_value[0]);
+            pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j);
+            //DEBUGP("PDF Representation main loop 3.2...");
+            //DEBUGP("PDF Representation main loop 3.2 value: " << kernel.at<basetype_t>(i, j));
+            pdf_model.at<basetype_t>(0, bin_value[1]) += kernel.at<basetype_t>(i, j);
+            //DEBUGP("PDF Representation main loop 3.3...");
+            pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j);
             col_index++;
         }
         row_index++;
     }
-
+    DEBUGP("PDF Representation returning...");
     return pdf_model;
 }
 #endif
@@ -286,27 +320,34 @@ void MeanShift::CalWeightGPP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_cand
 void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
 #endif
 {
-    float multipliers[CFG_NUM_BINS];
-
-    for (int bin = 0; bin < CFG_NUM_BINS; bin++) {
-        multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
+    basetype_t multipliers[CFG_NUM_BINS];
+    DEBUGP("Calculating multipliers...");
+    for (int bin = 0; bin < CFG_NUM_BINS; bin++) {        
+        basetype_t val = target_candidate.at<basetype_t>(k, bin);
+        if (val == 0) {
+            multipliers[bin] = static_cast<basetype_t>(F_RANGE);
+        }
+        else {
+            multipliers[bin] = static_cast<basetype_t>((fastsqrt(target_model.at<basetype_t>(k, bin) / target_candidate.at<basetype_t>(k, bin))));
+        }
     }
 
 #ifdef DSP
     for (int i = 0; i < RECT_ROWS; i++) {
         for (int j = 0; j < RECT_COLS; j++) {
             int curr_pixel = bgr[k][i*RECT_COLS + j];
-            weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
+            weight.at<basetype_t>(i, j) *= multipliers[curr_pixel >> 4];
         }
     }
 #else
+    DEBUGP("Calculating weights...");
     int col_index;
     int row_index = rec.y;
     for (int i = 0; i < RECT_ROWS; i++) {
         col_index = rec.x;
         for (int j = 0; j < RECT_COLS; j++) {
             int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
-            weight.at<float>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
+            weight.at<basetype_t>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
 
             col_index++;
         }
@@ -323,7 +364,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv
     perftime_t startTime, endTime;
 #endif
 
-    cv::Mat weight(RECT_ROWS, RECT_COLS, CV_32F, cv::Scalar(1.0000));
+    cv::Mat weight(RECT_ROWS, RECT_COLS, CV_BASETYPE, CFG_WEIGHT_SCALAR_OFFSET);
 
 #ifdef TIMING2
     startTime = now();
@@ -468,7 +509,7 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         pdfTime += diffToNanoseconds(startTime, endTime, 0);
         startTime = now();
 #endif
-
+        DEBUGP("Calling CalWeight...");
         cv::Mat weight = CalWeight(next_frame, target_candidate, target_Region);
 
 #ifdef TIMING

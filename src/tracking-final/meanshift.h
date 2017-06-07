@@ -5,6 +5,7 @@
 #include <fstream>
 #include "util.h"
 #include "dynrange.h"
+#include "FixedPointTools.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>

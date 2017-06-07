@@ -20,7 +20,8 @@ LIBS=-lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video 
 #   Compiler symbol definitions
 #   ----------------------------------------------------------------------------
 DEFS :=        -DARMCC               \
-               -DDSP                 \
+               -DFIXEDPOINT          \
+               -DDEBUGPRINT3          \
                -DOS_LINUX            \
                -DMAX_DSPS=1          \
                -DMAX_PROCESSORS=2    \
@@ -87,7 +88,6 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	-fno-omit-frame-pointer			\
 	-mapcs							\
 	-mabi=aapcs-linux				\
-    -mfpu=neon                      \
 	-mfloat-abi=softfp				\
     -ftree-vectorize                \
 	-ffast-math						\
