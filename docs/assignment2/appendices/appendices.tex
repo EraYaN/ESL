@@ -17,67 +17,20 @@
 
 \section{MCProf Result}\label{app:appendix-mcprof-result}
 
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.7]{resources/callgraphAll.pdf}
-\caption{Call graph produced by MCprof profiling.}
-\label{fig:callgraphall}
-\end{figure}
-
-\section{Results}\label{app:results}
-\begin{table}[H]
-\centering
-\caption{Matrix multiplication times in ms}
-\label{tab:results}
-\begin{tabular}{rrrr}
-\toprule
-Naive & Optimised & NEON & DSP \\
-\midrule
-	0.0092 & 0.01220 & 0.006000 & 0.6318\\
-	0.0366 & 0.02140 & 0.006200 & 0.6743\\
-	0.2896 & 0.08830 & 0.03050 & 1.0285\\
-	2.5969 & 0.6225 & 0.1190 & 2.661\\
-	19.1834 & 4.8216 & 0.8881 & 15.1887\\
-	170.9487 & 41.2506 & 7.8889 & - \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Matrix multiplication speed-ups}
-\label{tab:results2}
-\begin{tabular}{rrrr}
-\toprule
-Optimised & NEON & DSP \\
-\midrule
-0.75 & 1.53 & 0.0145 \\
-1.71 & 5.90 & 0.0542 \\
-3.27 & 9.49 & 0.2815 \\
-4.17 & 21.8 & 0.9759 \\
-3.97 & 21.6 & 1.263 \\
-4.14 & 21.6 & 11.39 \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 \section{Personal Analysis}\label{app:appendix-personal-analysis}
 
 \subsection{Casper}
-Seeing the profiling output, the multiplication is the main thing to optimise. One of the implementations might be to send the matrix to the DSP and do the calculation there. For further optimisations, you can try different communication methods, i.e. sending a single column and row or sending whole matrices.
+
 
 \subsection{Erwin}
-NEON should be the fastest, based on experience from an earlier course with SIMD on the Intel platform.
-A DSP is not terribly fast with matrix multiplications.
-After running the profiling tool, the one function was the function to optimize as expected.
-The DSP should really be used for streaming data, doing the init and setup for a one off is not worth the overhead.
+
 
 \subsection{Lars}
-The profiling tool showed that by far the matMult function was the one to optimize, this is quite obvious because there is only one function.
-This was fairly trivial but it was required to do, because the process is extremely useful for the next assignment. Message passing to the DSP is quite complex, so unless it provides a significant performance gain, the effort might not be worth it.
+
 
 \subsection{Robin}
-Previous experience with SSE SIMD instructions imply high performance for NEON SIMD matrix multiplications. Matrix multiplication is not the best possible fit for DSP, so this is unlikely to result in high speed-ups, at the cost of much code complexity. The naive implementation does not optimise for caching and memory locality, which should provide an easily obtainable performance gain.
+
 
 \end{appendices}
 \end{document}
