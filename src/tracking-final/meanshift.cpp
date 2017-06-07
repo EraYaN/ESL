@@ -18,7 +18,7 @@
 #endif
 
 #include "pool_notify.h"
-// DataStruct *pool_notify_DataBuf; // extern difined in pool_notify.h
+// DataStruct *pool_notify_DataBuf; // extern defined in pool_notify.h
 
 
 MeanShift::MeanShift()
@@ -65,6 +65,7 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
         }
     }
 #endif
+
     target_model = pdf_representation(frame, target_Region);
 }
 
@@ -104,41 +105,39 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 
     int row_index = rect.y;
     int col_index;
-    //int address = row_index*(FRAME_COLSx3) + rect.x * 3;
 
     for (int i = 0; i < RECT_ROWS; i++) {
         col_index = rect.x;
         for (int j = 0; j < rect.width; j += 16) {
             uint8x16x3_t pixels = vld3q_u8(&frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
-            //std::cout << static_cast<int>(frame.ptr<cv::Vec3b>(row_index)[col_index][0]) << ", " << static_cast<int>(frame.data[address]) << std::endl;
-            //uint8x16x3_t pixels = vld3q_u8(&frame.data[address]);
+
             pixels.val[0] = vshrq_n_u8(pixels.val[0], CFG_2LOG_NUM_BINS);
             pixels.val[1] = vshrq_n_u8(pixels.val[1], CFG_2LOG_NUM_BINS);
             pixels.val[2] = vshrq_n_u8(pixels.val[2], CFG_2LOG_NUM_BINS);
             vst3q_u8(&bin_values[j][0], pixels);
+
             col_index += 16;
-            //address += CFG_PIXEL_CHANNELSx16;
         }
-        //address += rect.width % 16;
         col_index = rect.x;
 
-        //This one makes it go from 18.0x to 18.3x
         for (int j = 0; j < RECT_COLS; j++) {
             float kernel_val = kernel.at<float>(i, j);
             dynrange(dynrangefile, __FUNCTION__, kernel_val);
+
             pdf_model.at<float>(0, bin_values[j][0]) += kernel_val;
             pdf_model.at<float>(1, bin_values[j][1]) += kernel_val;
             pdf_model.at<float>(2, bin_values[j][2]) += kernel_val;
+
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(0, bin_values[j][0]));
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(1, bin_values[j][1]));
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(2, bin_values[j][2]));
             col_index++;
         }
         row_index++;
-        //address += RECT_NEXTCOL_OFFSET;
     }
     return pdf_model;
 }
+
 #else
 //Original implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
@@ -172,47 +171,10 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 #endif
 
 
-#ifdef __ARM_NEON__
-// GPP + NEON implementation of CalWeight
-void MeanShift::CalWeightNEON(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
-{
-    float32_t multipliers[CFG_NUM_BINS];
-    float32x4_t model_vec, candidate_vec, multiplier_vec;
-
-    for (int bin = 0; bin < CFG_NUM_BINS; bin += 4) {
-        model_vec = vld1q_f32((float32_t*)&target_model.ptr<float>(k)[bin]);
-        candidate_vec = vld1q_f32((float32_t*)&target_candidate.ptr<float>(k)[bin]);
-        dynrange(dynrangefile, __FUNCTION__, model_vec);
-        dynrange(dynrangefile, __FUNCTION__, candidate_vec);
-        // ->> fixed point? https://stackoverflow.com/a/1100591/7346781
-        // The following calculates c = sqrt(a / b) = 1 / sqrt (b * 1 / a).
-        // Calculate model reciprocal 1 / a.
-        model_vec = vrecpeq_f32(model_vec);
-        dynrange(dynrangefile, __FUNCTION__, model_vec);
-        // Perform division (by means of multiplication) b * 1 / a
-        // and take reciprocal square root of result to obtain c.
-        multiplier_vec = vmulq_f32(candidate_vec, model_vec);
-        dynrange(dynrangefile, __FUNCTION__, multiplier_vec);
-        multiplier_vec = vrsqrteq_f32(multiplier_vec);
-        dynrange(dynrangefile, __FUNCTION__, multiplier_vec);
-        vst1q_f32(&multipliers[bin], multiplier_vec);
-    }
-
-    for (int i = 0; i < RECT_ROWS; i++) {
-        for (int j = 0; j < RECT_COLS; j++) {
-            uchar curr_pixel = bgr[k][i*RECT_COLS + j];
-            weight.at<float>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
-            dynrange(dynrangefile, __FUNCTION__, weight.at<float>(i));
-        }
-    }
-}
-#endif
-
-
 #ifdef DSP
 // DSP implementation of CalWeight
 void MeanShift::CalWeightDSP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
-{ 
+{
     //Transfer target_model and target_candidate to shared memory pool
     for (uint8_t bin = 0; bin < CFG_NUM_BINS; bin++) {
         poolModel[bin] = target_model.at<float>(k, bin);
@@ -228,8 +190,73 @@ void MeanShift::CalWeightDSP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_cand
 #endif
 
 
-// GPP implementation of CalWeight
-void MeanShift::CalWeightCPU(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
+#ifdef __ARM_NEON__
+#ifdef DSP
+// GPP + NEON implementation of CalWeight, when using the DSP
+void MeanShift::CalWeightNEON(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
+#else
+// GPP + NEON implementation of CalWeight, when NOT using the DSP
+void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
+#endif
+{
+    float32_t multipliers[CFG_NUM_BINS];
+    float32x4_t model_vec, candidate_vec, multiplier_vec;
+
+    for (int bin = 0; bin < CFG_NUM_BINS; bin += 4) {
+        model_vec = vld1q_f32((float32_t*)&target_model.ptr<float>(k)[bin]);
+        candidate_vec = vld1q_f32((float32_t*)&target_candidate.ptr<float>(k)[bin]);
+        dynrange(dynrangefile, __FUNCTION__, model_vec);
+        dynrange(dynrangefile, __FUNCTION__, candidate_vec);
+
+        // The following calculates c = sqrt(a / b) = 1 / sqrt (b * 1 / a).
+        // Calculate model reciprocal 1 / a.
+        model_vec = vrecpeq_f32(model_vec);
+        dynrange(dynrangefile, __FUNCTION__, model_vec);
+
+        // Perform division (by means of multiplication) b * 1 / a
+        // and take reciprocal square root of result to obtain c.
+        multiplier_vec = vmulq_f32(candidate_vec, model_vec);
+        dynrange(dynrangefile, __FUNCTION__, multiplier_vec);
+        multiplier_vec = vrsqrteq_f32(multiplier_vec);
+        dynrange(dynrangefile, __FUNCTION__, multiplier_vec);
+
+        vst1q_f32(&multipliers[bin], multiplier_vec);
+    }
+
+#ifdef DSP
+    for (int i = 0; i < RECT_ROWS; i++) {
+        for (int j = 0; j < RECT_COLS; j++) {
+            uchar curr_pixel = bgr[k][i*RECT_COLS + j];
+            weight.at<float>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
+            dynrange(dynrangefile, __FUNCTION__, weight.at<float>(i));
+        }
+    }
+#else
+    int row_index = rec.y;
+    int address = row_index*(FRAME_COLSx3)+rec.x * 3 + k;
+
+    for (int i = 0; i < RECT_ROWS; i++) {
+        for (int j = 0; j < RECT_COLS; j++) {
+            uchar curr_pixel = (next_frame.data[address]);
+            weight.at<float>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
+            dynrange(dynrangefile, __FUNCTION__, weight.at<float>(i));
+            address += CFG_PIXEL_CHANNELS;
+        }
+        row_index++;
+        address += RECT_NEXTCOL_OFFSET;
+    }
+#endif
+}
+#endif
+
+
+#ifdef DSP
+// GPP implementation of CalWeight, when using the DSP
+void MeanShift::CalWeightGPP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
+#else
+// GPP implementation of CalWeight, when NOT using the DSP
+void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
+#endif
 {
     float multipliers[CFG_NUM_BINS];
 
@@ -237,17 +264,32 @@ void MeanShift::CalWeightCPU(const uchar bgr[3][RECT_SIZE], cv::Mat &target_cand
         multipliers[bin] = static_cast<float>((sqrt(target_model.at<float>(k, bin) / target_candidate.at<float>(k, bin))));
     }
 
+#ifdef DSP
     for (int i = 0; i < RECT_ROWS; i++) {
         for (int j = 0; j < RECT_COLS; j++) {
             int curr_pixel = bgr[k][i*RECT_COLS + j];
             weight.at<float>(i, j) *= multipliers[curr_pixel >> 4];
         }
     }
+#else
+    int col_index;
+    int row_index = rec.y;
+    for (int i = 0; i < RECT_ROWS; i++) {
+        col_index = rec.x;
+        for (int j = 0; j < RECT_COLS; j++) {
+            int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
+            weight.at<float>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
+
+            col_index++;
+        }
+        row_index++;
+    }
+#endif
 }
 
 
-// Main CalWeight function
-cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec)
+// Main CalWeight function when NOT using DSP
+cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv::Rect &rec)
 {
 #ifdef TIMING2
     perftime_t startTime, endTime;
@@ -255,48 +297,13 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
 
     cv::Mat weight(RECT_ROWS, RECT_COLS, CV_32F, cv::Scalar(1.0000));
 
-    // Split (de-interleave) the current rect in to BGR.
-    int col_index, row_index;
-    uchar bgr[3][RECT_SIZE];
-
-#ifdef __ARM_NEON__
-    uint8x8x3_t pixels;
-
-    row_index = rec.y;
-    for (int i = 0; i < RECT_ROWS; i++) {
-        col_index = rec.x;
-        for (int j = 0; j < RECT_COLS; j+=8) {
-            // We would prefer to load 16x3 pixels at a time, but the compiler does not let us.
-            pixels = vld3_u8(&next_frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
-            
-            vst1_u8(&bgr[0][i*RECT_COLS + j], pixels.val[0]);
-            vst1_u8(&bgr[1][i*RECT_COLS + j], pixels.val[1]);
-            vst1_u8(&bgr[2][i*RECT_COLS + j], pixels.val[2]);
-
-            col_index+=8;
-        }
-        row_index++;
-    }
-#else
-    row_index = rec.y;
-    for (int i = 0; i < RECT_ROWS; i++) {
-        col_index = rec.x;
-        for (int j = 0; j < RECT_COLS; j++) {
-            bgr[0][i*RECT_COLS + j] = next_frame.at<cv::Vec3b>(row_index, col_index)[0];
-            bgr[1][i*RECT_COLS + j] = next_frame.at<cv::Vec3b>(row_index, col_index)[1];
-            bgr[2][i*RECT_COLS + j] = next_frame.at<cv::Vec3b>(row_index, col_index)[2];
-
-            col_index++;
-        }
-        row_index++;
-    }
-#endif
-
 #ifdef TIMING2
     startTime = now();
 #endif
 
 #ifdef DSP
+    uchar bgr[3][RECT_SIZE];
+    split(frame, rec, bgr);
     CalWeightDSP(bgr, target_candidate, rec, weight, 0);
 #endif
 
@@ -307,17 +314,27 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
 #endif
 
 #ifdef __ARM_NEON__
+
 #ifndef DSP
-    CalWeightNEON(bgr, target_candidate, rec, weight, 0);
-#endif
+    CalWeightNEON(frame, target_candidate, rec, weight, 0);
+    CalWeightNEON(frame, target_candidate, rec, weight, 1);
+    CalWeightNEON(frame, target_candidate, rec, weight, 2);
+#else
     CalWeightNEON(bgr, target_candidate, rec, weight, 1);
     CalWeightNEON(bgr, target_candidate, rec, weight, 2);
-#else
-#ifndef DSP
-    CalWeightCPU(bgr, target_candidate, rec, weight, 0);
 #endif
-    CalWeightCPU(bgr, target_candidate, rec, weight, 1);
-    CalWeightCPU(bgr, target_candidate, rec, weight, 2);
+
+#else
+
+#ifndef DSP
+    CalWeightGPP(frame, target_candidate, rec, weight, 0);
+    CalWeightGPP(frame, target_candidate, rec, weight, 1);
+    CalWeightGPP(frame, target_candidate, rec, weight, 2);
+#else
+    CalWeightGPP(bgr, target_candidate, rec, weight, 1);
+    CalWeightGPP(bgr, target_candidate, rec, weight, 2);
+#endif
+
 #endif
 
 #ifdef TIMING2
@@ -362,6 +379,46 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidat
     return weight;
 }
 
+#ifdef DSP
+// Split (de-interleave) the current rect in to BGR and calculate bins.
+void MeanShift::split(const cv::Mat &frame, cv::Rect &rect, uchar bgr[3][RECT_SIZE])
+{
+    int col_index, row_index;
+
+#ifdef __ARM_NEON__
+    uint8x16x3_t pixels;
+
+    row_index = rect.y;
+    for (int i = 0; i < RECT_ROWS; i++) {
+        col_index = rect.x;
+        for (int j = 0; j < rect.width; j += 16) {
+            pixels = vld3q_u8(&frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
+
+            vst1q_u8(&bgr[0][i*RECT_COLS + j], pixels.val[0]);
+            vst1q_u8(&bgr[1][i*RECT_COLS + j], pixels.val[1]);
+            vst1q_u8(&bgr[2][i*RECT_COLS + j], pixels.val[2]);
+
+            col_index += 16;
+        }
+        row_index++;
+    }
+#else
+    row_index = rec.y;
+    for (int i = 0; i < RECT_ROWS; i++) {
+        col_index = rec.x;
+        for (int j = 0; j < RECT_COLS; j++) {
+            bgr[0][i*RECT_COLS + j] = next_frame.at<cv::Vec3b>(row_index, col_index)[0];
+            bgr[1][i*RECT_COLS + j] = next_frame.at<cv::Vec3b>(row_index, col_index)[1];
+            bgr[2][i*RECT_COLS + j] = next_frame.at<cv::Vec3b>(row_index, col_index)[2];
+
+            col_index++;
+        }
+        row_index++;
+    }
+#endif
+}
+#endif
+
 
 cv::Rect MeanShift::track(const cv::Mat &next_frame)
 {
@@ -372,7 +429,6 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
 #endif
 
     for (int iter = 0; iter < CFG_MAX_ITER; iter++) {
-
 #ifdef TIMING
         startTime = now();
 #endif
