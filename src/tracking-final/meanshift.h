@@ -5,6 +5,7 @@
 #include <fstream>
 #include "util.h"
 #include "dynrange.h"
+#include "FixedPointTools.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -29,16 +30,28 @@ public:
     void Init_target_frame(const cv::Mat &frame, const cv::Rect &rect);
     float Epanechnikov_kernel();
     cv::Mat pdf_representation(const cv::Mat &frame, const cv::Rect &rect);
+    cv::Mat CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
+
+#ifdef DSP
+    void split(const cv::Mat &frame, cv::Rect &rect, uchar bgr[3][RECT_SIZE]);
+    void CalWeightGPP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
+    void CalWeightDSP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
+
 #ifdef __ARM_NEON__
     void CalWeightNEON(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
 #endif
-#ifdef DSP
-    void CalWeightDSP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
-#endif
-    void CalWeightCPU(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
 
-    cv::Mat CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
+#else
+    void CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
+
+#ifdef __ARM_NEON__
+    void CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
+#endif
+
+#endif
+
     cv::Rect track(const cv::Mat &next_frame);
+
 #if defined(TIMING) || defined(TIMING2)
     double pdfTime;
     double calWeightTime;

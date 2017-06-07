@@ -37,11 +37,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeIncludeSearchPath>$(SolutionDir)includes\opencv;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\usr;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux\2.6.18;$(SolutionDir)includes\codesourcery\arm-none-linux-gnueabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
-    <NMakePreprocessorDefinitions>ARMCC;__ARM_NEON__</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>ARMCC;__ARM_NEON__;FIXEDPOINT</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeIncludeSearchPath>$(SolutionDir)includes\opencv;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\usr;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux\2.6.18;$(SolutionDir)includes\codesourcery\arm-none-linux-gnueabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
-    <NMakePreprocessorDefinitions>ARMCC;__ARM_NEON__</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>ARMCC;__ARM_NEON__;FIXEDPOINT</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemGroup>
     <ClInclude Include="dynrange.h" />

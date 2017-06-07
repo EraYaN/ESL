@@ -525,10 +525,10 @@ class RunSystem(object):
     def Verify(self, file):
         if not os.path.exists(file):
             print('Verification file does not exist.')
-            return
+            return -1
         if not os.path.exists(self.REF_FILE):
             print('Reference file does not exist.')
-            return
+            return -1
         ref = []
         res = []
         with open(self.REF_FILE, 'r') as f:
@@ -545,7 +545,7 @@ class RunSystem(object):
 
         if len(res) == 0:
             print('There are no data points in the verification file... Run must have had an error.')
-            return
+            return -1
 
         if len(res) > len(ref):
             print('There are more data points in the verification file then in the reference file.')
