@@ -397,6 +397,24 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv
     CalWeightNEON(frame, target_candidate, rec, weight, 1);
     CalWeightNEON(frame, target_candidate, rec, weight, 2);
 #else
+    
+   /*
+   CalWeightNEON(frame, target_candidate, rec, weight, 0);
+   pool_notify_Wait(); // remove the one below
+   for (int i = 0; i < RECT_SIZE; i++) {
+        if ((float)weight.data[i * 4] == 0 && (float)poolWeight[i] == 0)
+            continue;
+        if ((float)weight.data[i * 4] < (float)poolWeight[i]) {
+            DEBUGP(i << ": DSP value was higher than NEON value. " << (float)weight.data[i * 4] << " < " << (float)poolWeight[i]);
+        }
+        else if ((float)weight.data[i * 4] > (float)poolWeight[i]) {
+            DEBUGP(i << ": DSP value was lower than NEON value. " << (float)weight.data[i * 4] << " > " << (float)poolWeight[i]);
+        }
+        else {
+            DEBUGP(i << ": DSP value was the same as NEON value. " << (float)weight.data[i * 4] << " == " << (float)poolWeight[i]);
+        }
+    }*/
+    
     CalWeightNEON(bgr, target_candidate, rec, weight, 1);
     CalWeightNEON(bgr, target_candidate, rec, weight, 2);
 #endif
@@ -420,10 +438,6 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv
     startTime = now();
 #endif
 
-#ifndef TIMING2
-    //pool_notify_Wait();
-#endif
-
 #ifdef DSP
 
     pool_notify_Wait();
@@ -440,11 +454,14 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv
         vst1q_f32(weight_ptr, weight_vec);
     }
 #else
-    for (uint8_t y = 0; y < RECT_ROWS; y++) {
+    for (int i = 0; i < RECT_SIZE; i++) {
+        weight.data[i * 4] *= (float32_t)poolWeight[i];
+    }
+    /*for (uint8_t y = 0; y < RECT_ROWS; y++) {
         for (uint8_t x = 0; x < RECT_COLS; x++) {
             weight.at<float>(y, x) *= poolWeight[y*RECT_COLS + x];
         }
-    }
+    }*/
 #endif
 #endif
 

@@ -145,7 +145,7 @@ void CalWeight(unsigned char *restrict frame, float *restrict weight, float *res
         multipliers[bin] = sqrt(model[bin]/candidate[bin]);
     }
 
-    //Calculation of weights with coalesced loops for software pipelining.
+    //Calculation of weights with coalesced loops for software pipelining. Naive pattern does not get pickup by compiler.
 #pragma MUST_ITERATE(RECT_SIZE, RECT_SIZE,)
     for (xy = 0; xy < RECT_SIZE; xy++) {
         curr_pixel = frame[y*RECT_COLS+x];
