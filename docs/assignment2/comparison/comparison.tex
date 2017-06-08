@@ -8,5 +8,23 @@
 \section{Comparison}
 \label{sec:comparison}
 
+\begin{table}[H]
+	\centering
+	\caption{Performance figures for every combination of implementations}
+	\begin{tabular}{lrrrr}
+		\toprule
+							& $t_k$ [s]	& Speed-up [x]	& $t$ [s]	& Speed-up [x]	\\
+		\midrule
+		Naive				& 10.137	& -			 	& 12.318	& -				\\
+		Optimised			&  0.708	& 14.3		 	&  2.798	& 4.4			\\
+		Optimised (fixp)	& 			& 			 	& 			& 				\\
+		NEON				& 			& 			 	& 			& 				\\
+		DSP					& 			& 			 	& 			& 				\\
+		DSP + Optimised		& 			& 			 	& 			& 				\\
+		DSP + NEON			& 			& 			 	& 			& 				\\
+		\bottomrule
+	\end{tabular}
+	\label{tab:comparison}
+\end{table}
 
 \end{document}

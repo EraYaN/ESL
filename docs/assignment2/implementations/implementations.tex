@@ -8,17 +8,32 @@
 \section{Implementations}
 \label{sec:implementations}
 
-The following text lists each of the implementations that were created along with a short discussion of the results. Averaged timing and speed-up data can be found in \cref{app:results}.
+The following text lists each of the implementations that were created along with a short discussion of the results.
 
 \subsection{Naive}
-
+The naive implementation was provided for the assignment. Many details regarding it have been discussed in the previous section. For the rest of the report, its runtime averaged over a total of five runs will be used as a reference time for calculating speed-ups. These times are measured as $t_k = \SI{10.137}{\second}$ and $t = \SI{12.318}{\second}$ for kernel time and total time respectively. Note that this means that a significant part of the execution time is not spent in the computation kernel and the application speed-up is therefore limited to a theoretical maximum of 5.5x.
 
 \subsection{Optimised}
+The optimised implementation contains two major improvements:
 
+\begin{enumerate}
+    \item The call to \texttt{cv::split} in \texttt{CalWeight} (l. 87), which splits the entire frame into three channels (arrays) for blue, green and red colour values, was completely removed. Having access to the three channels separately could potentially improve caching and memory access performance in \texttt{CalWeight} because of the elements being available in a sequential manner. However, splitting the entire frame in every iteration (for every call to \texttt{CalWeight}) is highly superfluous. Because \texttt{CalWeight} does not use the entire frame either, but just a subset defined by the current rectangle \texttt{rec}, it was decided to remove it altogether and access the frame directly using a call to \texttt{next\_frame.at<cv::Vec3b>(row\_index, col\_index)[k]}.
 
+    \item During \texttt{CalWeight}, the weight for every pixel in the rectangle is multiplied by a value based on an expression containing values from \texttt{target\_model} and \texttt{target\_candidate}. These values in turn depend on the \emph{bin} the current pixel falls in. Since the amount of bins is defined to be 16, there exist a total of 16 unique values resulting from the mentioned expression. The naive implementation, however, calculates a value for every pixel individually, resulting in a total of 58 x 86 x 3 = 14964 evaluations of an expression that contains the 'difficult' operations division and square root. The optimised implementation pre-calculates all 16 unique values, resulting in a large reduction in computational overhead.
+\end{enumerate}
 
+Other, less significant optimisations are
+\begin{itemize}
+     \item pre-calculating the kernel function, in stead of recalculating it every iteration;
+     \item defining loop limits as constants so the compiler might optimise them;
+     \item reducing superfluous memory access by avoiding multiple assignments and/or reads of variables and
+     \item avoiding the passing of data from function to function when it can be accessed within the \texttt{MeanShift} class.
+ \end{itemize}
+
+ This first step will prove to be the most important in terms of performance gain, resulting in $t_k = \SI{0.708}{\second}$ and $t = \SI{2.798}{\second}$.
 
 \subsection{NEON}
+
 
 
 \subsection{DSP}
@@ -32,7 +47,7 @@ The following text lists each of the implementations that were created along wit
 
 \subsection{Fixed-point}
 To implement fixed-point arithmetic, we first need to know the dynamic range of all the values in the kernels.
-As shown in \cref{fig:value-distributions} the values for the weight are mostly in the sub \num{500} range, while a couple of values reach \num{2000}. 
+As shown in \cref{fig:value-distributions} the values for the weight are mostly in the sub \num{500} range, while a couple of values reach \num{2000}.
 The other values sets are more evenly distributed.
 The final ranges are shown in \cref{tab:final-ranges}, the kernel values do not line up with the histogram because we only have to store the normalized values from the histogram, the kernel calculation itself can be done using floats as it is only done once.
 
@@ -76,7 +91,7 @@ The final ranges are shown in \cref{tab:final-ranges}, the kernel values do not 
 \end{table}
 
 The speed-up that was measured with a fixed-point implementation based on the \texttt{int32\_t} type, and all values using the largest range (\num{2048}) was about \num{18} to \num{18.6} times kernel speed-up.
-The problem is getting a faster conversion from the different ranges and a quick division that respects the fixed point nature of the values in the \textt{int32\_t} datatype.
+The problem is getting a faster conversion from the different ranges and a quick division that respects the fixed point nature of the values in the \texttt{int32\_t} datatype.
 Instead of doing a normal integer division, although adding a shift to the nominator should give correct results.
 To implement fixed-point math properly the project would need parts of boost for the operator overloads to create a good class, so all the errors and other debugging issues go away.
 But linking boost just for that is a step too far for this project.

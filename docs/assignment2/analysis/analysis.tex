@@ -17,10 +17,10 @@ In order to determine what parts of the code were most important to improve, the
 \toprule
 \textbf{name} & \textbf{\% time} & \textbf{self seconds} & \textbf{calls} &  \textbf{self ms/call} & \textbf{total ms/call} \\
 \midrule
-MeanShift::CalWeight & 34.90   &   0.15  &    157&     0.96 &    0.96  \\
-MeanShift::track & 27.92    &   0.12   &    32 &    3.75  &  13.41 \\
-MeanShift::pdf\_representation & 27.92     &  0.12    &  158  &   0.76   &  1.01  \\
-MeanShift::Epanechnikov\_kernel & 9.31      &   0.04     & 158   &  0.25    & 0.25  \\
+\texttt{MeanShift::CalWeight} & 34.90   &   0.15  &    157&     0.96 &    0.96  \\
+\texttt{MeanShift::track} & 27.92    &   0.12   &    32 &    3.75  &  13.41 \\
+\texttt{MeanShift::pdf\_representation} & 27.92     &  0.12    &  158  &   0.76   &  1.01  \\
+\texttt{MeanShift::Epanechnikov\_kernel} & 9.31      &   0.04     & 158   &  0.25    & 0.25  \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -33,7 +33,7 @@ Unsurprisingly, all the functions that take a significant amount of times are th
 \label{fig:callgraph}
 \end{figure}
 
-A callgraph produced by MCProf can be found in \cref{fig:callgraph}. Unfortunately, because MCProf only works on Intel processors it could not be run on the Beagleboard and was instead run on the server used for compilation. The difference in processing power between the server and the Beagleboard explains the difference between the gprof and MCProf profiling. The explanation for CalWeight's dominance in the callgraph can be found in \cref{tab:memprofile}. The CalWeight function has significantly more memory accesses than the other functions. Whereas the server is faster than the Beagleboard with computations, the communications overhead handicaps the obtainable speed-up in the CalWeight function. A possible decrease in the amount of necessary memory accesses in the CalWeight function will most likely cause a significant performance improvement.
+A callgraph produced by MCProf can be found in \cref{fig:callgraph}. Unfortunately, because MCProf only works on Intel processors it could not be run on the Beagleboard and was instead run on the server used for compilation. The difference in processing power between the server and the Beagleboard explains the difference between the gprof and MCProf profiling. The explanation for CalWeight's dominance in the callgraph can be found in \cref{tab:memprofile}. The CalWeight function has significantly more memory accesses than the other functions, which is likely due to the use of \texttt{cv::split}, which will be discussed in the next section. Although the server should outperform the Beagleboard with computations, this massive communications overhead handicaps the obtainable speed-up in the CalWeight function. A possible decrease in the amount of necessary memory accesses in the CalWeight function will most likely cause a significant performance improvement.
 
 \begin{table}[H]
 \centering
@@ -43,11 +43,11 @@ A callgraph produced by MCProf can be found in \cref{fig:callgraph}. Unfortunate
 \toprule
 \textbf{Name} & \textbf{Total} & \textbf{Reads} & \textbf{Writes}\\
 \midrule
-MeanShift::CalWeight   &  551678840  &   436089346   &  115589494\\
-MeanShift::pdf\_representation    &  40448790  &    26733846   &   13714944\\
-main   &    9293040   &    5895758    &  3397282\\
-MeanShift::Epanechnikov\_kernel    &   3552009       & 252870  &     3299139\\
-MeanShift::track   &    3429327   &    3407927      &   21400\\
+\texttt{MeanShift::CalWeight}   &  551678840  &   436089346   &  115589494\\
+\texttt{MeanShift::pdf\_representation}    &  40448790  &    26733846   &   13714944\\
+\texttt{main}   &    9293040   &    5895758    &  3397282\\
+\texttt{MeanShift::Epanechnikov\_kernel}    &   3552009       & 252870  &     3299139\\
+\texttt{MeanShift::track}   &    3429327   &    3407927      &   21400\\
 \bottomrule
 \end{tabular}
 \end{table}
