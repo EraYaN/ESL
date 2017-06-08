@@ -41,7 +41,7 @@
 #define CFG_PDF_SCALAR_OFFSET cv::Scalar(0) //for fixed point 0/0.1*(2^16-1)
 #define CFG_WEIGHT_SCALAR_OFFSET 1073742 //for fixed point 1/2048*(2^31-1)
 #else
-#define CFG_PDF_SCALAR_OFFSET cv::Scalar(1e-10f) //cv::Scalar(1e-10f)
+#define CFG_PDF_SCALAR_OFFSET 0.f //cv::Scalar(1e-10f)
 #define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(1.0000) //cv::Scalar(1.0000)
 #endif
 

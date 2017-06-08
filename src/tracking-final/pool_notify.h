@@ -23,7 +23,6 @@ extern Uchar8 * poolFrame;
 extern float * poolWeight;
 extern float * poolModel;
 extern float * poolCandidate;
-extern float  *poolKernel;
 
 //Class for determining buffer sizes for initialization.
 class bufferInit

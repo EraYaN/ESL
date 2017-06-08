@@ -9,15 +9,16 @@
 
 #if defined __ARM_NEON__
 #include "neon_util.h"
-#elif defined DSP
-#include <util_global_dsp.h>
 #endif
 
 #if defined(TIMING) || defined(TIMING2)
 #include "timing.h"
 #endif
 
+#if defined DSP || defined DSP_ONLY
+#include <util_global_dsp.h>
 #include "pool_notify.h"
+#endif
 // DataStruct *pool_notify_DataBuf; // extern defined in pool_notify.h
 
 
@@ -167,35 +168,35 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     }
     return pdf_model;
 }
-#elif defined DSP
-// DSP implementation of pdf_representation
-cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
-{
-    cv::Mat pdf_model(3, NUM_BINS, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
-
-    for (uint8_t y = 0; y < RECT_ROWS; y++) {
-        for (uint8_t x = 0; x < RECT_COLS; x++) {
-            poolKernel[y*RECT_COLS+x] = kernel.at<float>(y,x);
-        }
-    }
-
-    for (int k = 0; k < 3; k++) {
-        for (uint8_t y = 0; y < RECT_ROWS; y++) {
-            for (uint8_t x = 0; x < RECT_COLS; x++) {
-                poolFrame[y * RECT_COLS + x] = frame.at<cv::Vec3b>(rect.y + y, rect.x + x)[k];
-            }
-        }
-
-        pool_notify_Execute(1);
-        pool_notify_Wait();
-
-        for (uint8_t bin = 0; bin < NUM_BINS; bin++) {
-            pdf_model.at<float>(k, bin) = poolWeight[bin];
-        }
-    }
-
-    return pdf_model;
-}
+//#elif defined DSP
+//// DSP implementation of pdf_representation
+//cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
+//{
+//    cv::Mat pdf_model(3, CFG_NUM_BINS, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
+//
+//    for (uint8_t y = 0; y < RECT_ROWS; y++) {
+//        for (uint8_t x = 0; x < RECT_COLS; x++) {
+//            poolKernel[y*RECT_COLS+x] = kernel.at<float>(y,x);
+//        }
+//    }
+//
+//    for (int k = 0; k < 3; k++) {
+//        for (uint8_t y = 0; y < RECT_ROWS; y++) {
+//            for (uint8_t x = 0; x < RECT_COLS; x++) {
+//                poolFrame[y * RECT_COLS + x] = frame.at<cv::Vec3b>(rect.y + y, rect.x + x)[k];
+//            }
+//        }
+//
+//        pool_notify_Execute(1);
+//        pool_notify_Wait();
+//
+//        for (uint8_t bin = 0; bin < CFG_NUM_BINS; bin++) {
+//            pdf_model.at<float>(k, bin) = poolWeight[bin];
+//        }
+//    }
+//
+//    return pdf_model;
+//}
 #else
 //Original implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
@@ -213,20 +214,20 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
         col_index = rect.x;
 
         for (int j = 0; j < rect.width; j++) {
-            //DEBUGP("PDF Representation main loop 1...");
             curr_pixel_value = frame.at<cv::Vec3b>(row_index, col_index);
-            //DEBUGP("PDF Representation main loop 2...");
             bin_value[0] = (curr_pixel_value[0] / CFG_BIN_WIDTH);
             bin_value[1] = (curr_pixel_value[1] / CFG_BIN_WIDTH);
             bin_value[2] = (curr_pixel_value[2] / CFG_BIN_WIDTH);
-            //DEBUGP("PDF Representation main loop 3.1...");
-            //DEBUGP("PDF Representation main loop 3.1 value: " << bin_value[0]);
+
+#ifdef FIXEDPOINT
             pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j) * (F_E_RANGE / F_P_RANGE);
-            //DEBUGP("PDF Representation main loop 3.2...");
-            //DEBUGP("PDF Representation main loop 3.2 value: " << kernel.at<basetype_t>(i, j));
-            pdf_model.at<basetype_t>(0, bin_value[1]) += kernel.at<basetype_t>(i, j) * (F_E_RANGE / F_P_RANGE);
-            //DEBUGP("PDF Representation main loop 3.3...");
+            pdf_model.at<basetype_t>(1, bin_value[1]) += kernel.at<basetype_t>(i, j) * (F_E_RANGE / F_P_RANGE);
             pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j) * (F_E_RANGE / F_P_RANGE);
+#else
+            pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j);
+            pdf_model.at<basetype_t>(1, bin_value[1]) += kernel.at<basetype_t>(i, j);
+            pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j);
+#endif
             col_index++;
         }
         row_index++;
@@ -237,16 +238,131 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 #endif
 
 
-#ifdef DSP
-// DSP implementation of CalWeight
-void MeanShift::CalWeightDSP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
+#if defined DSP_ONLY || defined DSP
+// Split (de-interleave) the current rect in to BGR.
+void MeanShift::split(const cv::Mat &frame, cv::Rect &rect, uchar bgr[3][RECT_SIZE])
 {
-    //Transfer target_model and target_candidate to shared memory pool
-    for (uint8_t bin = 0; bin < CFG_NUM_BINS; bin++) {
-        poolModel[bin] = target_model.at<float>(k, bin);
-        poolCandidate[bin] = target_candidate.at<float>(k, bin);
+    int col_index, row_index;
+
+#ifdef __ARM_NEON__
+    uint8x16x3_t pixels;
+
+    row_index = rect.y;
+    for (int i = 0; i < RECT_ROWS; i++) {
+        col_index = rect.x;
+        for (int j = 0; j < rect.width; j += 16) {
+            pixels = vld3q_u8(&frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
+
+            vst1q_u8(&bgr[0][i*RECT_COLS + j], pixels.val[0]);
+            vst1q_u8(&bgr[1][i*RECT_COLS + j], pixels.val[1]);
+            vst1q_u8(&bgr[2][i*RECT_COLS + j], pixels.val[2]);
+
+            col_index += 16;
+        }
+        row_index++;
+    }
+#else
+    row_index = rect.y;
+    for (int i = 0; i < RECT_ROWS; i++) {
+        col_index = rect.x;
+        for (int j = 0; j < RECT_COLS; j++) {
+            bgr[0][i*RECT_COLS + j] = frame.at<cv::Vec3b>(row_index, col_index)[0];
+            bgr[1][i*RECT_COLS + j] = frame.at<cv::Vec3b>(row_index, col_index)[1];
+            bgr[2][i*RECT_COLS + j] = frame.at<cv::Vec3b>(row_index, col_index)[2];
+
+            col_index++;
+        }
+        row_index++;
+    }
+#endif
+}
+
+
+// Wait for the DSP to finish and process results
+void MeanShift::mulWeights(cv::Mat &weight, float *poolWeight)
+{
+     pool_notify_Wait();
+
+#ifdef __ARM_NEON__
+    float32_t* weight_ptr;
+    float32x4_t weight_vec, poolWeight_vec;
+    for (int i = 0; i < RECT_SIZE; i += 4) {
+        weight_ptr = (float32_t*)&weight.data[i * 4]; // i * 4 since data is a pointer to uchar, not float
+        weight_vec = vld1q_f32(weight_ptr);
+        poolWeight_vec = vld1q_f32((float32_t*)&poolWeight[i]);
+        weight_vec = vmulq_f32(weight_vec, poolWeight_vec);
+
+        vst1q_f32(weight_ptr, weight_vec);
+    }
+#else
+    for (int i = 0; i < RECT_ROWS; i++) {
+        for (int j = 0; j < RECT_COLS; j++) {
+            weight.at<float>(i, j) *= poolWeight[i*RECT_COLS + j];
+        }
+    }
+#endif
+}
+#endif
+
+
+#ifdef DSP
+// GPP implementation of CalWeight, when using the DSP
+void MeanShift::CalWeightGPP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
+#elif !defined DSP_ONLY
+// GPP implementation of CalWeight, when NOT using the DSP
+void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
+#endif
+#ifndef DSP_ONLY
+{
+    basetype_t multipliers[CFG_NUM_BINS];
+    DEBUGP("Calculating multipliers...");
+    for (int bin = 0; bin < CFG_NUM_BINS; bin++) {
+        basetype_t val = target_candidate.at<basetype_t>(k, bin);
+#ifdef FIXEDPOINT
+        if (val == 0) {
+            multipliers[bin] = static_cast<basetype_t>(F_C_RANGE);
+        }
+        else {
+            multipliers[bin] = to_fixed(sqrt(to_float(target_model.at<basetype_t>(k, bin), F_P_RANGE) / to_float(target_candidate.at<basetype_t>(k, bin), F_P_RANGE)), F_C_RANGE);
+        }
+#else
+        multipliers[bin] = static_cast<basetype_t>(sqrt(target_model.at<basetype_t>(k, bin) / target_candidate.at<basetype_t>(k, bin)));
+#endif
     }
 
+#ifdef DSP
+    for (int i = 0; i < RECT_ROWS; i++) {
+        for (int j = 0; j < RECT_COLS; j++) {
+            int curr_pixel = bgr[k][i*RECT_COLS + j];
+            weight.at<basetype_t>(i, j) *= multipliers[curr_pixel >> 4];
+        }
+    }
+#else
+    DEBUGP("Calculating weights...");
+    int col_index;
+    int row_index = rec.y;
+    for (int i = 0; i < RECT_ROWS; i++) {
+        col_index = rec.x;
+        for (int j = 0; j < RECT_COLS; j++) {
+            int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
+            weight.at<basetype_t>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
+
+            col_index++;
+        }
+        row_index++;
+    }
+#endif
+}
+#endif
+
+
+#if defined DSP_ONLY || defined DSP
+// DSP implementation of CalWeight
+void MeanShift::CalWeightDSP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, const int k)
+{
+    //Transfer target_model, target_candidate and the pixels in the current rectangle to shared memory pool
+    memcpy(poolModel, target_model.ptr<float>(k), CFG_NUM_BINS * sizeof(float));
+    memcpy(poolCandidate, target_candidate.ptr<float>(k), CFG_NUM_BINS * sizeof(float));
     memcpy(poolFrame, bgr[k], RECT_SIZE);
 
     pool_notify_Execute(1);
@@ -260,7 +376,7 @@ void MeanShift::CalWeightDSP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_cand
 #ifdef DSP
 // GPP + NEON implementation of CalWeight, when using the DSP
 void MeanShift::CalWeightNEON(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
-#else
+#elif !defined DSP_ONLY
 // GPP + NEON implementation of CalWeight, when NOT using the DSP
 void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
 #endif
@@ -316,55 +432,6 @@ void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candida
 #endif
 
 
-#ifdef DSP
-// GPP implementation of CalWeight, when using the DSP
-void MeanShift::CalWeightGPP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
-#else
-// GPP implementation of CalWeight, when NOT using the DSP
-void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
-#endif
-{
-    basetype_t multipliers[CFG_NUM_BINS];
-    DEBUGP("Calculating multipliers...");
-    for (int bin = 0; bin < CFG_NUM_BINS; bin++) {        
-        basetype_t val = target_candidate.at<basetype_t>(k, bin);
-#ifdef FIXEDPOINT
-        if (val == 0) {
-            multipliers[bin] = static_cast<basetype_t>(F_C_RANGE);
-        }
-        else {
-            multipliers[bin] = to_fixed(sqrt(to_float(target_model.at<basetype_t>(k, bin), F_P_RANGE) / to_float(target_candidate.at<basetype_t>(k, bin), F_P_RANGE)),F_C_RANGE);
-        }
-#else
-        multipliers[bin] = static_cast<basetype_t>(sqrt(target_model.at<basetype_t>(k, bin) / target_candidate.at<basetype_t>(k, bin)));
-#endif
-    }
-
-#ifdef DSP
-    for (int i = 0; i < RECT_ROWS; i++) {
-        for (int j = 0; j < RECT_COLS; j++) {
-            int curr_pixel = bgr[k][i*RECT_COLS + j];
-            weight.at<basetype_t>(i, j) *= multipliers[curr_pixel >> 4];
-        }
-    }
-#else
-    DEBUGP("Calculating weights...");
-    int col_index;
-    int row_index = rec.y;
-    for (int i = 0; i < RECT_ROWS; i++) {
-        col_index = rec.x;
-        for (int j = 0; j < RECT_COLS; j++) {
-            int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
-            weight.at<basetype_t>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
-
-            col_index++;
-        }
-        row_index++;
-    }
-#endif
-}
-
-
 // Main CalWeight function when NOT using DSP
 cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv::Rect &rec)
 {
@@ -378,10 +445,10 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv
     startTime = now();
 #endif
 
-#ifdef DSP
+#if defined DSP || defined DSP_ONLY
+    // If DSP is used, split colours in separate arrays for blue, green and red
     uchar bgr[3][RECT_SIZE];
     split(frame, rec, bgr);
-    CalWeightDSP(bgr, target_candidate, rec, weight, 0);
 #endif
 
 #ifdef TIMING2
@@ -390,46 +457,39 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv
     startTime = now();
 #endif
 
-#ifdef __ARM_NEON__
+    // Distribute work over platforms
+#ifdef DSP_ONLY
+    // All colours to be processed by DSP
+    CalWeightDSP(bgr, target_candidate, 0);
+    mulWeights(weight, poolWeight);
+    CalWeightDSP(bgr, target_candidate, 1);
+    mulWeights(weight, poolWeight);
+    CalWeightDSP(bgr, target_candidate, 2);
+    mulWeights(weight, poolWeight);
+#elif defined DSP
+    // Blue to be processed by DSP
+    CalWeightDSP(bgr, target_candidate, 0);
 
-#ifndef DSP
-    CalWeightNEON(frame, target_candidate, rec, weight, 0);
-    CalWeightNEON(frame, target_candidate, rec, weight, 1);
-    CalWeightNEON(frame, target_candidate, rec, weight, 2);
-#else
-    
-   /*
-   CalWeightNEON(frame, target_candidate, rec, weight, 0);
-   pool_notify_Wait(); // remove the one below
-   for (int i = 0; i < RECT_SIZE; i++) {
-        if ((float)weight.data[i * 4] == 0 && (float)poolWeight[i] == 0)
-            continue;
-        if ((float)weight.data[i * 4] < (float)poolWeight[i]) {
-            DEBUGP(i << ": DSP value was higher than NEON value. " << (float)weight.data[i * 4] << " < " << (float)poolWeight[i]);
-        }
-        else if ((float)weight.data[i * 4] > (float)poolWeight[i]) {
-            DEBUGP(i << ": DSP value was lower than NEON value. " << (float)weight.data[i * 4] << " > " << (float)poolWeight[i]);
-        }
-        else {
-            DEBUGP(i << ": DSP value was the same as NEON value. " << (float)weight.data[i * 4] << " == " << (float)poolWeight[i]);
-        }
-    }*/
-    
+#ifdef __ARM_NEON__
+    // Process green and red using NEON
     CalWeightNEON(bgr, target_candidate, rec, weight, 1);
     CalWeightNEON(bgr, target_candidate, rec, weight, 2);
-#endif
-
 #else
-
-#ifndef DSP
-    CalWeightGPP(frame, target_candidate, rec, weight, 0);
-    CalWeightGPP(frame, target_candidate, rec, weight, 1);
-    CalWeightGPP(frame, target_candidate, rec, weight, 2);
-#else
+    // Process green and red using GPP
     CalWeightGPP(bgr, target_candidate, rec, weight, 1);
     CalWeightGPP(bgr, target_candidate, rec, weight, 2);
 #endif
 
+#elif defined __ARM_NEON__
+    // All colours to be processed by NEON
+    CalWeightNEON(frame, target_candidate, rec, weight, 0);
+    CalWeightNEON(frame, target_candidate, rec, weight, 1);
+    CalWeightNEON(frame, target_candidate, rec, weight, 2);
+#else
+    // All colours to be processed by GPP
+    CalWeightGPP(frame, target_candidate, rec, weight, 0);
+    CalWeightGPP(frame, target_candidate, rec, weight, 1);
+    CalWeightGPP(frame, target_candidate, rec, weight, 2);
 #endif
 
 #ifdef TIMING2
@@ -439,30 +499,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv
 #endif
 
 #ifdef DSP
-
-    pool_notify_Wait();
-
-#ifdef __ARM_NEON__
-    float32_t* weight_ptr;
-    float32x4_t weight_vec, poolWeight_vec;
-    for (int i = 0; i < RECT_SIZE; i += 4) {
-        weight_ptr = (float32_t*)&weight.data[i * 4]; // i * 4 since data is a pointer to uchar, not float
-        weight_vec = vld1q_f32(weight_ptr);
-        poolWeight_vec = vld1q_f32((float32_t*)&poolWeight[i]);
-        weight_vec = vmulq_f32(weight_vec, poolWeight_vec);
-
-        vst1q_f32(weight_ptr, weight_vec);
-    }
-#else
-    for (int i = 0; i < RECT_SIZE; i++) {
-        weight.data[i * 4] *= (float32_t)poolWeight[i];
-    }
-    /*for (uint8_t y = 0; y < RECT_ROWS; y++) {
-        for (uint8_t x = 0; x < RECT_COLS; x++) {
-            weight.at<float>(y, x) *= poolWeight[y*RECT_COLS + x];
-        }
-    }*/
-#endif
+    mulWeights(weight, poolWeight);
 #endif
 
 #ifdef TIMING2
@@ -472,46 +509,6 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv
 
     return weight;
 }
-
-#ifdef DSP
-// Split (de-interleave) the current rect in to BGR and calculate bins.
-void MeanShift::split(const cv::Mat &frame, cv::Rect &rect, uchar bgr[3][RECT_SIZE])
-{
-    int col_index, row_index;
-
-#ifdef __ARM_NEON__
-    uint8x16x3_t pixels;
-
-    row_index = rect.y;
-    for (int i = 0; i < RECT_ROWS; i++) {
-        col_index = rect.x;
-        for (int j = 0; j < rect.width; j += 16) {
-            pixels = vld3q_u8(&frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
-
-            vst1q_u8(&bgr[0][i*RECT_COLS + j], pixels.val[0]);
-            vst1q_u8(&bgr[1][i*RECT_COLS + j], pixels.val[1]);
-            vst1q_u8(&bgr[2][i*RECT_COLS + j], pixels.val[2]);
-
-            col_index += 16;
-        }
-        row_index++;
-    }
-#else
-    row_index = rec.y;
-    for (int i = 0; i < RECT_ROWS; i++) {
-        col_index = rec.x;
-        for (int j = 0; j < RECT_COLS; j++) {
-            bgr[0][i*RECT_COLS + j] = next_frame.at<cv::Vec3b>(row_index, col_index)[0];
-            bgr[1][i*RECT_COLS + j] = next_frame.at<cv::Vec3b>(row_index, col_index)[1];
-            bgr[2][i*RECT_COLS + j] = next_frame.at<cv::Vec3b>(row_index, col_index)[2];
-
-            col_index++;
-        }
-        row_index++;
-    }
-#endif
-}
-#endif
 
 
 cv::Rect MeanShift::track(const cv::Mat &next_frame)

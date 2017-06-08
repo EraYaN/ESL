@@ -10,7 +10,7 @@
 
 #define VARIANT "final"
 
-#ifdef DSP
+#if defined DSP_ONLY || defined DSP
 #include "pool_notify.h"
 #include <util_global_dsp.h>
 #endif
@@ -30,7 +30,7 @@
         : "r"(x), "r"(y));
 }*/
 
-#ifdef DSP
+#if defined DSP_ONLY || defined DSP
 //Constructor for bufferInit class. Calculates all required buffer sizes for memory allocation
 inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
 {
@@ -48,7 +48,7 @@ inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
 int main(int argc, char ** argv)
 {
     std::cout << "Starting..." << std::endl;
-#ifdef DSP
+#if defined DSP_ONLY || defined DSP
     std::cout << "DSP support enabled." << std::endl;
 #endif
 #ifdef __ARM_NEON__
@@ -68,7 +68,7 @@ int main(int argc, char ** argv)
 
     cv::VideoCapture frame_capture;
     char *dspExecutable = NULL;
-#ifdef DSP    
+#if defined DSP_ONLY || defined DSP    
     char *strBufferSize = NULL;
 #endif
 
@@ -97,7 +97,7 @@ int main(int argc, char ** argv)
     cv::Mat frame;
     frame_capture.read(frame);
 
-#ifdef DSP
+#if defined DSP_ONLY || defined DSP
     bufferInit bufferSizes(frame, rect);
 
     perftime_t poolInitStart;
@@ -198,7 +198,7 @@ int main(int argc, char ** argv)
 #if !defined(ARMCC) && defined(MCPROF)
     MCPROF_STOP();
 #endif
-#ifdef DSP
+#if defined DSP_ONLY || defined DSP
     pool_notify_Delete(ID_PROCESSOR, bufferSizes);
 #endif
 
