@@ -104,6 +104,34 @@ int communicating = 1;
     return sum;
 }*/
 
+void pdf_representation()
+{
+    int x, y, bin;
+    int curr_pixel_value;
+    int bin_value;
+
+    //init/clear the result array
+    for (bin = 0; bin < NUM_BINS; bin++) {
+        buf->weight[bin] = 0;
+    }
+
+    for (y = 0; y < RECT_HEIGHT; y++) {
+        for (x = 0; x < RECT_WIDTH; x++) {
+            curr_pixel_value = buf->next_frame_rect0[y*RECT_WIDTH+x];
+
+            bin_value = (curr_pixel_value / 16);
+            // bin_value = (curr_pixel_value >> 4);
+            buf->weight[bin_value] += buf->kernel[y*RECT_WIDTH+x];
+            // buf->temp[y*RECT_WIDTH+x] = bin_value%16;
+            // if(bin_value > 16 || bin_value<0) {
+            if(y == 1) {
+                // buf->temp[x] = bin_value;
+                buf->temp[x] = buf->kernel[y*RECT_WIDTH+x];
+            }
+        }
+    }
+}
+
 void CalWeight()
 {
     float multipliers[NUM_BINS];
@@ -115,7 +143,7 @@ void CalWeight()
 
     for (y = 0; y < RECT_HEIGHT; y++) {
         for (x = 0; x< RECT_WIDTH; x++) {
-            curr_pixel = buf->next_frame_rect[y*RECT_WIDTH+x];
+            curr_pixel = buf->next_frame_rect0[y*RECT_WIDTH+x];
             buf->weight[y*RECT_WIDTH+x] = multipliers[curr_pixel>>4];
         }
     }
@@ -140,7 +168,12 @@ Int Task_execute(Task_TransferInfo * info)
 
             //call the functionality to be performed by dsp
             //sum = sum_dsp();
-            CalWeight();
+
+            if(buf->operation == CALWEIGHT) {
+                CalWeight();
+            } else if (buf->operation == PDF_REPRESENTATION) {
+                pdf_representation();
+            }
 
             BCACHE_wbInv((Ptr)buf, length, TRUE);
 

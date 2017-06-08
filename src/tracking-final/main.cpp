@@ -52,6 +52,9 @@ int main(int argc, char ** argv)
     }
         printf("done parsing args!\n");
 
+    printf("pool_notify_Init()\n");
+    pool_notify_Init(dspExecutable, strBufferSize);
+    printf("pool_notify_Init() done!\n");
 
     // this is used for testing the car video
     // instead of selection of object of interest using mouse
@@ -68,17 +71,13 @@ int main(int argc, char ** argv)
     std::ofstream coordinatesfile;
     coordinatesfile.open("/tmp/tracking_result.coords");
     coordinatesfile << "f" << CSV_SEPARATOR << "x" << CSV_SEPARATOR << "y" << std::endl;
-
 #ifdef ARMCC
 #ifdef USECYCLES
     init_perfcounters(1, 0);
 #endif
 #endif
 
-        printf("pool_notify_Init()\n");
-    pool_notify_Init(dspExecutable, strBufferSize);
 
-        printf("pool_notify_Init() done!\n");
     perftime_t startTime = now();
     double totalTime = 0;
     double kernelTime = 0;
@@ -100,7 +99,9 @@ int main(int argc, char ** argv)
 
 
 
+    // FLAG CASPER TODO DEBUG for (fcount = 0; fcount < TotalFrames; ++fcount) {
     for (fcount = 0; fcount < TotalFrames; ++fcount) {
+    // for (fcount = 0; fcount < 0; ++fcount) {
         initStart = now();
         // read a frame
         int status = frame_capture.read(frame);
@@ -122,7 +123,7 @@ int main(int argc, char ** argv)
         cleanupStart = now();
         coordinatesfile << fcount << CSV_SEPARATOR << ms_rect.x << CSV_SEPARATOR << ms_rect.y << std::endl;
 
-        printf("writing to file fcount =%d\n", fcount);
+        printf("writing to file fcount = %d\n", fcount);
         // mark the tracked object in frame
         cv::rectangle(frame, ms_rect, cv::Scalar(0, 0, 255), 3);
 

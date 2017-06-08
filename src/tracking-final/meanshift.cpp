@@ -52,7 +52,11 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
         }
     }
 #endif
+printf("done till flag!\n");
+
     target_model = pdf_representation(frame, target_Region);
+
+printf("done afte flag!\n");
 }
 
 float MeanShift::Epanechnikov_kernel(cv::Mat &kernel)
@@ -76,8 +80,8 @@ float MeanShift::Epanechnikov_kernel(cv::Mat &kernel)
     return kernel_sum;
 }
 
-#ifdef __ARM_NEON__
-cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
+#if defined __ARM_NEON__
+/*cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
     //TODO[c]: #magicnumber 16 = num_bins  or rect_width?
     cv::Mat pdf_model(3, 16, CV_32F, cv::Scalar(1e-10));
@@ -110,9 +114,107 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     }
 
     return pdf_model;
+}*/
+#elif defined DSP
+cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
+{
+    //TODO[c]: #magicnumber 16 = num_bins  or rect_width?
+    cv::Mat pdf_model(3, NUM_BINS, CV_32F, cv::Scalar(1e-10));
+    // cv::Vec3f curr_pixel_value;
+    // cv::Vec3f bin_value;
+
+    // int row_index = rect.y;
+    // int col_index = rect.x;
+
+    // for (int i = 0; i < rect.height; i++) {
+    //     col_index = rect.x;
+    //     for (int j = 0; j < rect.width; j++) {
+    //         curr_pixel_value = frame.at<cv::Vec3b>(row_index, col_index);
+    //         bin_value[0] = (curr_pixel_value[0] / bin_width);
+    //         bin_value[1] = (curr_pixel_value[1] / bin_width);
+    //         bin_value[2] = (curr_pixel_value[2] / bin_width);
+    //         pdf_model.at<float>(0, bin_value[0]) += kernel.at<float>(i, j);
+    //         pdf_model.at<float>(1, bin_value[1]) += kernel.at<float>(i, j);
+    //         pdf_model.at<float>(2, bin_value[2]) += kernel.at<float>(i, j);
+    //         col_index++;
+    //     }
+    //     row_index++;
+    // }
+
+        for (uint8_t x = 0; x < RECT_WIDTH; x++) {
+            pool_notify_DataBuf->temp[x] = 0;
+        }
+
+    for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
+        for (uint8_t x = 0; x < RECT_WIDTH; x++) {
+            // pool_notify_DataBuf->kernel[y*RECT_WIDTH+x] = kernel.at<float>(x, y);
+            pool_notify_DataBuf->kernel[y*RECT_WIDTH+x] = kernel.at<float>(y,x);
+            // printf("kernel gpp-dsp %d,%d = %f, %f\n",x,y, kernel.at<float>(x, y), pool_notify_DataBuf->kernel[y*RECT_WIDTH+x]);
+        }
+    }
+
+    for (int k = 0; k < 3; k++) {
+    // for (int k = 0; k < 1; k++) {
+        for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
+            for (uint8_t x = 0; x < RECT_WIDTH; x++) {
+                pool_notify_DataBuf->next_frame_rect0[y*RECT_WIDTH+x] = frame.at<cv::Vec3b>(rect.y + y, rect.x + x)[k];
+            }
+        }
+
+printf("pool_notify_Execute start!\n");
+        pool_notify_DataBuf->operation = PDF_REPRESENTATION;
+        pool_notify_Execute(1);
+printf("pool_notify_Execute done!\n");
+
+//GPP Reference:
+    cv::Vec3f curr_pixel_value;
+    cv::Vec3f bin_value;
+    float temp[RECT_HEIGHT * RECT_WIDTH];
+    int row_index = rect.y;
+    int col_index = rect.x;
+    for (int i = 0; i < rect.height; i++) {
+        col_index = rect.x;
+        for (int j = 0; j < rect.width; j++) {
+            curr_pixel_value = frame.at<cv::Vec3b>(row_index, col_index);
+            bin_value[k] = (curr_pixel_value[k] / bin_width);
+            pdf_model.at<float>(k, bin_value[k]) += kernel.at<float>(i, j);
+            // temp[i*RECT_WIDTH+j] = bin_value[k];
+            col_index++;
+            // if(i == 1) {
+                // temp[j] = bin_value[k];
+                // temp[j] = kernel.at<float>(i, j);
+            // }
+        }
+        row_index++;
+    }
+//END GPP Reference:
+
+    // row_index = rect.y;
+    // for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
+    //     col_index = rect.x;
+    //     for (uint8_t x = 0; x < RECT_WIDTH; x++) {
+    //         // printf("kernel gpp-dsp %d,%d = %f, %f\n",x,y, kernel.at<float>(x, y), pool_notify_DataBuf->temp[y*RECT_WIDTH+x]);
+    //         // printf("kernel gpp-dsp %d,%d = %d, %d, %d\n",x,y, frame.at<cv::Vec3b>(row_index, col_index)[k], pool_notify_DataBuf->temp[y*RECT_WIDTH+x], pool_notify_DataBuf->next_frame_rect0[y*RECT_WIDTH+x]);
+    //         printf("kernel gpp-dsp %d,%d = %d, %d\n",x,y, temp[y*RECT_WIDTH+x], pool_notify_DataBuf->temp[y*RECT_WIDTH+x]);
+    //         col_index++;
+    //     }
+    //     row_index++;
+    // }
+
+        for (uint8_t x = 0; x < RECT_WIDTH; x++) {
+            // printf("gpp-dsp %d = %f, %f\n",x, temp[x], pool_notify_DataBuf->temp[x]);
+        }
+
+        for (uint8_t bin = 0; bin < NUM_BINS; bin++) {
+            // printf("gpp-dsp %d = %f, %f\n", bin, pdf_model.at<float>(k, bin), pool_notify_DataBuf->weight[bin]);
+            pdf_model.at<float>(k, bin) = pool_notify_DataBuf->weight[bin];
+        }
+    }
+
+    return pdf_model;
 }
 #else
-cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
+/*cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
     //TODO[c]: #magicnumber 16 = num_bins  or rect_width?
     cv::Mat pdf_model(3, 16, CV_32F, cv::Scalar(1e-10));
@@ -140,11 +242,11 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     }
 
     return pdf_model;
-}
+}*/
 #endif
 
 #if defined __ARM_NEON__
-cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec)
+/*cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec)
 {
     int rows = rec.height;
     int cols = rec.width;
@@ -154,8 +256,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
     float32_t multipliers[cfg.num_bins];
     float32x4_t model_vec, candidate_vec, multiplier_vec;
 
-    for (int k = 0; k < 3; k++)
-    {
+    for (int k = 0; k < 3; k++) {
         for (int bin = 0; bin < cfg.num_bins; bin += 4) {
             model_vec = vld1q_f32((float32_t*)&target_model.ptr<float>(k)[bin]);
             candidate_vec = vld1q_f32((float32_t*)&target_candidate.ptr<float>(k)[bin]);
@@ -185,7 +286,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
         }
     }
     return weight;
-}
+}*/
 #elif defined DSP
 cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, cv::Mat &target_candidate, cv::Rect &rec)
 {
@@ -227,14 +328,15 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
 
 
         for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
-            for (uint8_t x = 0; x< RECT_WIDTH; x++) {
-                pool_notify_DataBuf->next_frame_rect[y*RECT_WIDTH+x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[k];
+            for (uint8_t x = 0; x < RECT_WIDTH; x++) {
+                pool_notify_DataBuf->next_frame_rect0[y*RECT_WIDTH+x] = (next_frame.at<cv::Vec3b>(rec.y + y, rec.x + x))[k];
             }
         }
 
         //DSP_execute(): waits with semaphore:
         if(VERBOSE_EXECUTE)printf("pool_notify_Execute():\n");
-        
+
+        pool_notify_DataBuf->operation = CALWEIGHT;
         pool_notify_Execute(1);
         // printf("pool_notify_Execute() done\n");
 
@@ -242,7 +344,7 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &next_frame, cv::Mat &target_model, c
         if(VERBOSE_EXECUTE) printf("pool_notify_Execute() done: %f\n", pool_notify_DataBuf->weight[0]);
 
         for (uint8_t y = 0; y < RECT_HEIGHT; y++) {
-            for (uint8_t x = 0; x< RECT_WIDTH; x++) {
+            for (uint8_t x = 0; x < RECT_WIDTH; x++) {
                 weight.at<float>(y, x) *= pool_notify_DataBuf->weight[y*RECT_WIDTH+x];
             }
         }
