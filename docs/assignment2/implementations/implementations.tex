@@ -19,7 +19,7 @@ The optimised implementation contains two major improvements:
 \begin{enumerate}
     \item The call to \texttt{cv::split} in \texttt{CalWeight} (l. 87), which splits the entire frame into three channels (arrays) for blue, green and red colour values, was completely removed. Having access to the three channels separately could potentially improve caching and memory access performance in \texttt{CalWeight} because of the elements being available in a sequential manner. However, splitting the entire frame in every iteration (for every call to \texttt{CalWeight}) is highly superfluous. Because \texttt{CalWeight} does not use the entire frame either, but just a subset defined by the current rectangle \texttt{rec}, it was decided to remove it altogether and access the frame directly using a call to \texttt{next\_frame.at<cv::Vec3b>(row\_index, col\_index)[k]}.
 
-    \item During \texttt{CalWeight}, the weight for every pixel in the rectangle is multiplied by a value based on an expression containing values from \texttt{target\_model} and \texttt{target\_candidate}. These values in turn depend on the \emph{bin} the current pixel falls in. Since the amount of bins is defined to be 16, there exist a total of 16 unique values resulting from the mentioned expression. The naive implementation, however, calculates a value for every pixel individually, resulting in a total of 58 x 86 x 3 = 14964 evaluations of an expression that contains the 'difficult' operations division and square root. The optimised implementation pre-calculates all 16 unique values, resulting in a large reduction in computational overhead.
+    \item During \texttt{CalWeight}, the weight for every pixel in the rectangle is multiplied by a value based on an expression containing values from \texttt{target\_model} and \texttt{target\_candidate}. These values in turn depend on the \emph{bin} the current pixel falls in. Since the amount of bins is defined to be 16, there exist a total of 16 unique values resulting from the mentioned expression. The naive implementation, however, calculates a value for every pixel individually, resulting in a total of 58 x 86 x 3 = 14964 evaluations of an expression that contains the 'difficult' operations division and square root. The optimised implementation pre-calculates all 16 unique multiplier values, resulting in a large reduction in computational overhead.
 \end{enumerate}
 
 Other, less significant optimisations are
@@ -33,7 +33,18 @@ Other, less significant optimisations are
  This first step will prove to be the most important in terms of performance gain, resulting in $t_k = \SI{0.708}{\second}$ and $t = \SI{2.798}{\second}$.
 
 \subsection{NEON}
+Starting from the optimised implementation, very little rewriting had to be done to make the algorithm suitable for NEON execution. For this implementation, most loops were simply modified to process 4 (32-bit \texttt{float}) or even 16 (8-bit \texttt{unsigned char}) values in every iteration. The following parts of the program utilize NEON:
 
+\begin{description}
+    \item[\texttt{Init\_target\_frame}], where the normalisation of the Epanechnikov kernel is performed for four elements concurrently.
+
+    \item[\texttt{pdf\_representation}], where the calculation of the bin each pixel belongs to, depending on its BGR values, is calculated using NEON. Although this is hardly computationally intensive, being a division of each channel value by the amount of bins, which equals 16 (and therefore bin = value >> 4), the memory access pattern is a prime example of why one would like to use NEON, as it allows for loading the interleaved BGR channels to three separate arrays for further processing, with a single function call. Since each channel is represented by a single byte, 16 pixels of three channels each can be loaded at the same time.
+    Note that the subsequent calculation of \texttt{pdf\_model} itself cannot be performed using NEON as its memory access pattern is highly irregular due to the use of bin values as an index.
+
+    \item[\texttt{CalWeightNEON}], where pre-calculating the multiplier for each bin, as previously discussed, is done for four values at once. As NEON only supports calculation of reciprocals and reciprocal square roots, the operation $c = \sqrt{a \mathbin{/} b}$ was rewritten to $c = 1 \mathbin{/} \sqrt{b \cdot 1 \mathbin{/} a}$ to obtain NEON-implementable code. Like in \texttt{pdf\_representation}, calculating weights could not be performed using NEON due to its irregular indexing of the multiplier array.
+\end{description}
+
+As expected, the various utilisations of NEON to vectorise operations did cause another jump in performance, yielding $t_k = \SI{0.508}{\second}$ and $t = \SI{2.600}{\second}$. Since only a small part of the total program could be vectorized, mostly due to the irregular access patterns inherent to the algorithm, performance increase over the optimised implementation might be slower than expected.
 
 
 \subsection{DSP}
