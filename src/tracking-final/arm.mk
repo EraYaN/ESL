@@ -88,8 +88,8 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	-fno-omit-frame-pointer			\
 	-mapcs							\
 	-mabi=aapcs-linux				\
-	-mfloat-abi=softfp				\
     -mfpu=neon                      \
+	-mfloat-abi=softfp				\
     -ftree-vectorize                \
 	-ffast-math						\
 	-std=$(CPPSTD)					\

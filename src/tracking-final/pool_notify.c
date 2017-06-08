@@ -469,8 +469,10 @@ NORMAL_API DSP_STATUS pool_notify_Wait()
 #ifdef DEBUG
     printf("Entered pool_notify_Wait ()\n");
 #endif
-    if(DSPDone == 0)
+    if (DSPDone == 0)
+    {
         sem_wait(&sem);
+    }
 
     return status;
 }

@@ -114,13 +114,15 @@ void pdf_representation(unsigned char *restrict frame, float *restrict kernel)
     unsigned char curr_pixel_value;
     int bin_value;
 
+#pragma MUST_ITERATE(RECT_ROWS,RECT_ROWS,)
     for (y = 0; y < RECT_ROWS; y++) {
+#pragma MUST_ITERATE(RECT_COLS,RECT_COLS,)
         for (x = 0; x < RECT_COLS; x++) {
             curr_pixel_value = frame[y*RECT_COLS + x];
 
             bin_value = (curr_pixel_value >>4);
 
-            candidate[bin_value] += kernel[y*RECT_COLS + x];
+            candidate[bin_value] = candidate[bin_value] + kernel[y*RECT_COLS + x];
         }
     }
 }
