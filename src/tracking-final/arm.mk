@@ -20,8 +20,6 @@ LIBS=-lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video 
 #   Compiler symbol definitions
 #   ----------------------------------------------------------------------------
 DEFS :=        -DARMCC               \
-               -DDEBUGPRINT2          \
-               -DWRITE_DYN_RANGE2    \
                -DFIXEDPOINT          \
                -DOS_LINUX            \
                -DMAX_DSPS=1          \
@@ -40,6 +38,7 @@ DEFS :=        -DARMCC               \
                -DCHNL_ZCPY_LINK      \
                -DZCPY_LINK           \
                -DKFILE_DEFAULT       \
+               -DDSP          \
                -DDA8XXGEM            \
                -DDA8XXGEM_PHYINTERFACE=SHMEM_INTERFACE
 

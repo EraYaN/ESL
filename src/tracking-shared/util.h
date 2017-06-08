@@ -50,8 +50,13 @@
 #define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(512) //for fixed point 1/64*((2^16)-1)
 
 #else
-#define CFG_PDF_SCALAR_OFFSET 0.f //cv::Scalar(1e-10f)
+#if defined DSP && defined __ARM_NEON__
+#define CFG_PDF_SCALAR_OFFSET  cv::Scalar(1e-10f)
 #define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(1.0000) //cv::Scalar(1.0000)
+#else
+#define CFG_PDF_SCALAR_OFFSET 0.f
+#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(1.0000) //cv::Scalar(1.0000)
+#endif
 #endif
 
 #define VERBOSE_EXECUTE 0
