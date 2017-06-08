@@ -43,23 +43,6 @@ MeanShift::~MeanShift()
 #endif
 }
 
-
-int fastsqrt(int _number) {
-    float number = _number;
-
-    float x2 = number * 0.5F;
-    float y = number;
-    long i = *(long*)&y;
-    //i = (long)0x5fe6ec85e7de30da - (i >> 1);
-    i = 0x5f3759df - (i >> 1);
-    y = *(float*)&i;
-
-    y = y * (1.5F - (x2*y*y));
-    y = y * (1.5F - (x2*y*y)); // let's be precise
-
-    return static_cast<int>(1 / y + 0.5f);
-}
-
 void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
 {
     DEBUGP("Init target frame started...");
@@ -118,7 +101,7 @@ float MeanShift::Epanechnikov_kernel()
             float y = static_cast<float> (j - RECT_COLS_PADDED / 2);
             float norm_x = x*x / (RECT_ROWS*RECT_ROWS / 4) + y*y / (RECT_COLS_PADDED*RECT_COLS_PADDED / 4);
             float result = norm_x < 1 ? (epanechnikov_cd*(1.0 - norm_x)) : 0;
-            dynrange(dynrangefile, __FUNCTION__, result);
+            //dynrange(dynrangefile, __FUNCTION__, result);
             kernel.at<float>(i, j) = result;
             kernel_sum += result;
         }
@@ -220,14 +203,18 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
             bin_value[2] = (curr_pixel_value[2] / CFG_BIN_WIDTH);
 
 #ifdef FIXEDPOINT
-            pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j) * (F_E_RANGE / F_P_RANGE);
-            pdf_model.at<basetype_t>(1, bin_value[1]) += kernel.at<basetype_t>(i, j) * (F_E_RANGE / F_P_RANGE);
-            pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j) * (F_E_RANGE / F_P_RANGE);
+            pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j) >> F_E_TO_P;
+            pdf_model.at<basetype_t>(1, bin_value[1]) += kernel.at<basetype_t>(i, j) >> F_E_TO_P;
+            pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j) >> F_E_TO_P;           
 #else
             pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j);
             pdf_model.at<basetype_t>(1, bin_value[1]) += kernel.at<basetype_t>(i, j);
             pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j);
 #endif
+
+            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(0, bin_value[0]));
+            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(1, bin_value[1]));
+            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(2, bin_value[2]));
             col_index++;
         }
         row_index++;
@@ -316,15 +303,21 @@ void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidat
 {
     basetype_t multipliers[CFG_NUM_BINS];
     DEBUGP("Calculating multipliers...");
-    for (int bin = 0; bin < CFG_NUM_BINS; bin++) {
-        basetype_t val = target_candidate.at<basetype_t>(k, bin);
+    for (int bin = 0; bin < CFG_NUM_BINS; bin++) {        
 #ifdef FIXEDPOINT
-        if (val == 0) {
-            multipliers[bin] = static_cast<basetype_t>(F_C_RANGE);
+        basetype_t val_candidate = target_candidate.at<basetype_t>(k, bin) >> F_P_TO_C;
+        basetype_t val_model = target_model.at<basetype_t>(k, bin) >> F_P_TO_C;
+        dynrange(dynrangefile, "Ca", to_float(target_candidate.at<basetype_t>(k, bin),F_P_RANGE));
+        dynrange(dynrangefile, "Cb", to_float(target_model.at<basetype_t>(k, bin), F_P_RANGE));
+        dynrange(dynrangefile, "Cc", val_candidate);
+        dynrange(dynrangefile, "Cp", val_model);
+        if (val_candidate == 0) {
+            multipliers[bin] = 0;// static_cast<basetype_t>(F_C_RANGE);
         }
         else {
-            multipliers[bin] = to_fixed(sqrt(to_float(target_model.at<basetype_t>(k, bin), F_P_RANGE) / to_float(target_candidate.at<basetype_t>(k, bin), F_P_RANGE)), F_C_RANGE);
+            multipliers[bin] = F_C_SQRT(F_C_DIVD(val_model,val_candidate));
         }
+        dynrange(dynrangefile, "Cm", multipliers[bin]);
 #else
         multipliers[bin] = static_cast<basetype_t>(sqrt(target_model.at<basetype_t>(k, bin) / target_candidate.at<basetype_t>(k, bin)));
 #endif
@@ -345,8 +338,12 @@ void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidat
         col_index = rec.x;
         for (int j = 0; j < RECT_COLS; j++) {
             int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
+#ifdef FIXEDPOINT
+            weight.at<basetype_t>(i, j) = F_C_MULT(weight.at<basetype_t>(i, j), multipliers[curr_pixel >> CFG_2LOG_NUM_BINS]);
+#else
             weight.at<basetype_t>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
-
+#endif
+            dynrange(dynrangefile, "Cw", weight.at<basetype_t>(i, j));
             col_index++;
         }
         row_index++;
@@ -552,16 +549,33 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         next_rect.width = RECT_COLS;
         next_rect.height = RECT_ROWS;
 
+#ifdef FIXEDPOINT
         for (int i = 0; i < RECT_ROWS; i++) {
             for (int j = 0; j < RECT_COLS; j++) {
                 float norm_i = static_cast<float>(i - centre) / centre;
                 float norm_j = static_cast<float>(j - centre) / centre;
                 mult = pow(norm_i, 2) + pow(norm_j, 2) > 1.0 ? 0.0 : 1.0;
+                float w = to_float(weight.at<basetype_t>(i, j), F_C_RANGE);
+                //DEBUGP("Selected Weight: " << w);
+                float wm = w*mult;
+                delta_x += static_cast<float>(norm_j*wm);
+                delta_y += static_cast<float>(norm_i*wm);
+                sum_wij += static_cast<float>(wm);
+            }
+        }
+#else
+        for (int i = 0; i < RECT_ROWS; i++) {
+            for (int j = 0; j < RECT_COLS; j++) {
+                float norm_i = static_cast<float>(i - centre) / centre;
+                float norm_j = static_cast<float>(j - centre) / centre;
+                mult = pow(norm_i, 2) + pow(norm_j, 2) > 1.0 ? 0.0 : 1.0;
+                DEBUGP("Selected Weight: " << norm_j*weight.at<float>(i, j));
                 delta_x += static_cast<float>(norm_j*weight.at<float>(i, j)*mult);
                 delta_y += static_cast<float>(norm_i*weight.at<float>(i, j)*mult);
                 sum_wij += static_cast<float>(weight.at<float>(i, j)*mult);
             }
         }
+#endif
 
         next_rect.x += static_cast<int>((delta_x / sum_wij)*centre);
         next_rect.y += static_cast<int>((delta_y / sum_wij)*centre);

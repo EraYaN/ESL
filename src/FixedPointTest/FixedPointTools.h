@@ -56,7 +56,7 @@ inline longbasetype_t sqrtF2Flong(longbasetype_t x)
     uint64_t t, q, b, r;
     r = x;
     b = 1ull << 62;
-    q = 0ull;    
+    q = 0ull;
     while (b > (1 << 16))
     {
         t = q + b;

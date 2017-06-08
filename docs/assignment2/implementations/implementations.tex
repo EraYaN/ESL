@@ -76,7 +76,7 @@ The final ranges are shown in \cref{tab:final-ranges}, the kernel values do not 
 \end{table}
 
 The speed-up that was measured with a fixed-point implementation based on the \texttt{int32\_t} type, and all values using the largest range (\num{2048}) was about \num{18} to \num{18.6} times kernel speed-up.
-The problem is getting a faster conversion from the different ranges and a quick division that respects the fixed point nature of the values in the \textt{int32\_t} datatype.
+The problem is getting a faster conversion from the different ranges and a quick division that respects the fixed point nature of the values in the \texttt{int32\_t} datatype.
 Instead of doing a normal integer division, although adding a shift to the nominator should give correct results.
 To implement fixed-point math properly the project would need parts of boost for the operator overloads to create a good class, so all the errors and other debugging issues go away.
 But linking boost just for that is a step too far for this project.
