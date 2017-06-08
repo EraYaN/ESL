@@ -1,70 +1,61 @@
 % This file was created by matlab2tikz.
 %
-\definecolor{mycolor1}{rgb}{0.85000,0.32500,0.09800}%
-\definecolor{mycolor2}{rgb}{0.92900,0.69400,0.12500}%
-\definecolor{mycolor3}{rgb}{0.49400,0.18400,0.55600}%
+%The latest updates can be retrieved from
+%  http://www.mathworks.com/matlabcentral/fileexchange/22022-matlab2tikz-matlab2tikz
+%where you can also make suggestions and rate matlab2tikz.
+%
+\definecolor{mycolor1}{rgb}{0.20810,0.16630,0.52920}%
+\definecolor{mycolor2}{rgb}{0.97630,0.98310,0.05380}%
 %
 \begin{tikzpicture}
 
 \begin{axis}[%
-width=0.951\figurewidth,
-height=\figureheight,
+width=\figurewidth,
+height=0.994\figureheight,
 at={(0\figurewidth,0\figureheight)},
 scale only axis,
+bar shift auto,
 xmin=0,
-xmax=140,
-xlabel={Matrix size},
+xmax=8,
+xtick={1,2,3,4,5,6,7},
+xticklabels={{Naive},{Optimised},{Optimised (fixp.)},{NEON},{DSP},{DSP + Optimised},{DSP + NEON}},
+xticklabel style={rotate=45},
 ymin=0,
-ymax=25,
-ylabel={Multiplication Speed-up},
-axis background/.style={fill=white},
-axis x line*=bottom,
-axis y line*=left,
-legend style={at={(1,0.66)},anchor=east}
+ymax=20,
+ylabel style={font=\color{white!15!black}},
+ylabel={Speed-up [x]},
+axis background/.style={fill=white}
 ]
-\addplot [color=mycolor1,solid,line width=2.0pt,mark=o,mark options={solid}]
-  table[row sep=crcr]{%
-4	1\\
-8	2\\
-16	3\\
-32	4\\
-64	4\\
-128	4\\
+\addplot[ybar, bar width=0.229, fill=mycolor1, draw=black, area legend] table[row sep=crcr] {%
+1	1\\
+2	14.3\\
+3	0\\
+4	20\\
+5	0\\
+6	0\\
+7	0\\
 };
-\addlegendentry{GPP};
-
-\addplot [color=mycolor2,solid,line width=2.0pt,mark=o,mark options={solid}]
-  table[row sep=crcr]{%
-4	2\\
-8	6\\
-16	9\\
-32	22\\
-64	22\\
-128	22\\
-};
-\addlegendentry{NEON};
-
-\addplot [color=mycolor3,solid,line width=2.0pt,mark=o,mark options={solid}]
-  table[row sep=crcr]{%
-4	0\\
+\addplot[forget plot, color=white!15!black] table[row sep=crcr] {%
+0	0\\
 8	0\\
-16	0\\
-32	1\\
-64	1\\
-128	11\\
 };
-\addlegendentry{DSP};
-
-\addplot [color=black,solid]
+\addplot[ybar, bar width=0.229, fill=mycolor2, draw=black, area legend] table[row sep=crcr] {%
+1	1\\
+2	4.4\\
+3	0\\
+4	4.7\\
+5	0\\
+6	0\\
+7	0\\
+};
+\addplot[forget plot, color=white!15!black] table[row sep=crcr] {%
+0	0\\
+8	0\\
+};
+\addplot [color=white!20!black, dashed, forget plot]
   table[row sep=crcr]{%
-4	3\\
-8	3\\
-16	3\\
-32	3\\
-64	3\\
-128	3\\
+0	1\\
+8	1\\
 };
-\addlegendentry{Requirement};
-
 \end{axis}
 \end{tikzpicture}%
