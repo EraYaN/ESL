@@ -17,10 +17,12 @@ LIBS=-lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video 
 		$(DSPLINK)/gpp/BUILD/EXPORT/RELEASE/dsplink.lib
 
 #   ----------------------------------------------------------------------------
-#   Compiler symbol definitions
+#   Compiler symbol definitions (Put a 2 behind the options that you want disbaled)
 #   ----------------------------------------------------------------------------
 DEFS :=        -DARMCC               \
-               -DFIXEDPOINT          \
+               -DFIXEDPOINT2          \
+               -DDSP                 \
+               -DDEBUGPRINT2          \
                -DOS_LINUX            \
                -DMAX_DSPS=1          \
                -DMAX_PROCESSORS=2    \
@@ -38,7 +40,6 @@ DEFS :=        -DARMCC               \
                -DCHNL_ZCPY_LINK      \
                -DZCPY_LINK           \
                -DKFILE_DEFAULT       \
-               -DDSP          \
                -DDA8XXGEM            \
                -DDA8XXGEM_PHYINTERFACE=SHMEM_INTERFACE
 
@@ -93,6 +94,9 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	-ffast-math						\
 	-std=$(CPPSTD)					\
 	--sysroot=$(SYSROOT)
+
+# Set NEON enabled here.
+CFLAGS += -mfpu=neon
 
 all: checkdirs $(EXEC)
 

@@ -46,7 +46,7 @@
 //#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(16) //for fixed point 1/2048*((2^16)-1)
 //#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(64) //for fixed point 1/512*((2^16)-1)
 //#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(128) //for fixed point 1/256*((2^16)-1)
-#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(256) //for fixed point 1/128*((2^16)-1)
+//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(256) //for fixed point 1/128*((2^16)-1)
 #define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(512) //for fixed point 1/64*((2^16)-1)
 
 #else
@@ -59,6 +59,7 @@
 #endif
 #endif
 
+//TODO use DEBUGP macro
 #define VERBOSE_EXECUTE 0
 
 #ifdef DEBUGPRINT
