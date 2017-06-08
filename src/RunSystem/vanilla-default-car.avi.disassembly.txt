@@ -1,0 +1,2864 @@
+
+/home/lars/projects/tracking/armMeanshiftExec:     file format elf32-littlearm
+
+
+Disassembly of section .init:
+
+00009864 <_init>:
+    9864:	push	{lr}		; (str lr, [sp, #-4]!)
+    9868:	sub	sp, sp, #4
+    986c:	bl	9c54 <call_gmon_start>
+    9870:	add	sp, sp, #4
+    9874:	ldmfd	sp!, {pc}
+
+Disassembly of section .plt:
+
+00009878 <__aeabi_fdiv@plt-0x14>:
+    9878:	push	{lr}		; (str lr, [sp, #-4]!)
+    987c:	ldr	lr, [pc, #4]	; 9888 <_init+0x24>
+    9880:	add	lr, pc, lr
+    9884:	ldr	pc, [lr, #8]!
+    9888:	.word	0x0000ae5c
+
+0000988c <__aeabi_fdiv@plt>:
+    988c:	add	ip, pc, #0, 12
+    9890:	add	ip, ip, #40960	; 0xa000
+    9894:	ldr	pc, [ip, #3676]!	; 0xe5c
+
+00009898 <cv::Mat::copySize(cv::Mat const&)@plt>:
+    9898:	add	ip, pc, #0, 12
+    989c:	add	ip, ip, #40960	; 0xa000
+    98a0:	ldr	pc, [ip, #3668]!	; 0xe54
+
+000098a4 <std::basic_ios<char, std::char_traits<char> >::setstate(std::_Ios_Iostate)@plt>:
+    98a4:	add	ip, pc, #0, 12
+    98a8:	add	ip, ip, #40960	; 0xa000
+    98ac:	ldr	pc, [ip, #3660]!	; 0xe4c
+
+000098b0 <cv::VideoCapture::read(cv::Mat&)@plt>:
+    98b0:	add	ip, pc, #0, 12
+    98b4:	add	ip, ip, #40960	; 0xa000
+    98b8:	ldr	pc, [ip, #3652]!	; 0xe44
+
+000098bc <std::basic_filebuf<char, std::char_traits<char> >::close()@plt>:
+    98bc:	add	ip, pc, #0, 12
+    98c0:	add	ip, ip, #40960	; 0xa000
+    98c4:	ldr	pc, [ip, #3644]!	; 0xe3c
+
+000098c8 <__aeabi_i2d@plt>:
+    98c8:	add	ip, pc, #0, 12
+    98cc:	add	ip, ip, #40960	; 0xa000
+    98d0:	ldr	pc, [ip, #3636]!	; 0xe34
+
+000098d4 <std::basic_ofstream<char, std::char_traits<char> >::basic_ofstream()@plt>:
+    98d4:	add	ip, pc, #0, 12
+    98d8:	add	ip, ip, #40960	; 0xa000
+    98dc:	ldr	pc, [ip, #3628]!	; 0xe2c
+
+000098e0 <__aeabi_f2d@plt>:
+    98e0:	add	ip, pc, #0, 12
+    98e4:	add	ip, ip, #40960	; 0xa000
+    98e8:	ldr	pc, [ip, #3620]!	; 0xe24
+
+000098ec <__aeabi_fsub@plt>:
+    98ec:	add	ip, pc, #0, 12
+    98f0:	add	ip, ip, #40960	; 0xa000
+    98f4:	ldr	pc, [ip, #3612]!	; 0xe1c
+
+000098f8 <std::ostream::operator<<(int)@plt>:
+    98f8:	add	ip, pc, #0, 12
+    98fc:	add	ip, ip, #40960	; 0xa000
+    9900:	ldr	pc, [ip, #3604]!	; 0xe14
+
+00009904 <std::__throw_bad_cast()@plt>:
+    9904:	add	ip, pc, #0, 12
+    9908:	add	ip, ip, #40960	; 0xa000
+    990c:	ldr	pc, [ip, #3596]!	; 0xe0c
+
+00009910 <__libc_start_main@plt>:
+    9910:	add	ip, pc, #0, 12
+    9914:	add	ip, ip, #40960	; 0xa000
+    9918:	ldr	pc, [ip, #3588]!	; 0xe04
+
+0000991c <cv::VideoWriter::operator<<(cv::Mat const&)@plt>:
+    991c:	add	ip, pc, #0, 12
+    9920:	add	ip, ip, #40960	; 0xa000
+    9924:	ldr	pc, [ip, #3580]!	; 0xdfc
+
+00009928 <__aeabi_fadd@plt>:
+    9928:	add	ip, pc, #0, 12
+    992c:	add	ip, ip, #40960	; 0xa000
+    9930:	ldr	pc, [ip, #3572]!	; 0xdf4
+
+00009934 <clock_gettime@plt>:
+    9934:	add	ip, pc, #0, 12
+    9938:	add	ip, ip, #40960	; 0xa000
+    993c:	ldr	pc, [ip, #3564]!	; 0xdec
+
+00009940 <std::ostream::flush()@plt>:
+    9940:	add	ip, pc, #0, 12
+    9944:	add	ip, ip, #40960	; 0xa000
+    9948:	ldr	pc, [ip, #3556]!	; 0xde4
+
+0000994c <cv::Mat::deallocate()@plt>:
+    994c:	add	ip, pc, #0, 12
+    9950:	add	ip, ip, #40960	; 0xa000
+    9954:	ldr	pc, [ip, #3548]!	; 0xddc
+
+00009958 <cv::split(cv::Mat const&, std::vector<cv::Mat, std::allocator<cv::Mat> >&)@plt>:
+    9958:	add	ip, pc, #0, 12
+    995c:	add	ip, ip, #40960	; 0xa000
+    9960:	ldr	pc, [ip, #3540]!	; 0xdd4
+
+00009964 <std::__basic_file<char>::~__basic_file()@plt>:
+    9964:	add	ip, pc, #0, 12
+    9968:	add	ip, ip, #40960	; 0xa000
+    996c:	ldr	pc, [ip, #3532]!	; 0xdcc
+
+00009970 <std::basic_streambuf<char, std::char_traits<char> >::~basic_streambuf()@plt>:
+    9970:	add	ip, pc, #0, 12
+    9974:	add	ip, ip, #40960	; 0xa000
+    9978:	ldr	pc, [ip, #3524]!	; 0xdc4
+
+0000997c <operator delete(void*)@plt>:
+    997c:	add	ip, pc, #0, 12
+    9980:	add	ip, ip, #40960	; 0xa000
+    9984:	ldr	pc, [ip, #3516]!	; 0xdbc
+
+00009988 <std::ostream::put(char)@plt>:
+    9988:	add	ip, pc, #0, 12
+    998c:	add	ip, ip, #40960	; 0xa000
+    9990:	ldr	pc, [ip, #3508]!	; 0xdb4
+
+00009994 <__monstartup@plt>:
+    9994:	add	ip, pc, #0, 12
+    9998:	add	ip, ip, #40960	; 0xa000
+    999c:	ldr	pc, [ip, #3500]!	; 0xdac
+
+000099a0 <std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)@plt>:
+    99a0:	add	ip, pc, #0, 12
+    99a4:	add	ip, ip, #40960	; 0xa000
+    99a8:	ldr	pc, [ip, #3492]!	; 0xda4
+
+000099ac <__gxx_personality_v0@plt>:
+    99ac:	add	ip, pc, #0, 12
+    99b0:	add	ip, ip, #40960	; 0xa000
+    99b4:	ldr	pc, [ip, #3484]!	; 0xd9c
+
+000099b8 <__aeabi_fmul@plt>:
+    99b8:	add	ip, pc, #0, 12
+    99bc:	add	ip, ip, #40960	; 0xa000
+    99c0:	ldr	pc, [ip, #3476]!	; 0xd94
+
+000099c4 <_mcleanup@plt>:
+    99c4:	add	ip, pc, #0, 12
+    99c8:	add	ip, ip, #40960	; 0xa000
+    99cc:	ldr	pc, [ip, #3468]!	; 0xd8c
+
+000099d0 <std::ios_base::Init::~Init()@plt>:
+    99d0:	add	ip, pc, #0, 12
+    99d4:	add	ip, ip, #40960	; 0xa000
+    99d8:	ldr	pc, [ip, #3460]!	; 0xd84
+
+000099dc <cv::VideoCapture::VideoCapture(std::string const&)@plt>:
+    99dc:	add	ip, pc, #0, 12
+    99e0:	add	ip, ip, #40960	; 0xa000
+    99e4:	ldr	pc, [ip, #3452]!	; 0xd7c
+
+000099e8 <std::ios_base::~ios_base()@plt>:
+    99e8:	add	ip, pc, #0, 12
+    99ec:	add	ip, ip, #40960	; 0xa000
+    99f0:	ldr	pc, [ip, #3444]!	; 0xd74
+
+000099f4 <cv::rectangle(cv::Mat&, cv::Rect_<int>, cv::Scalar_<double> const&, int, int, int)@plt>:
+    99f4:	add	ip, pc, #0, 12
+    99f8:	add	ip, ip, #40960	; 0xa000
+    99fc:	ldr	pc, [ip, #3436]!	; 0xd6c
+
+00009a00 <cv::VideoWriter::~VideoWriter()@plt>:
+    9a00:	add	ip, pc, #0, 12
+    9a04:	add	ip, ip, #40960	; 0xa000
+    9a08:	ldr	pc, [ip, #3428]!	; 0xd64
+
+00009a0c <cv::VideoCapture::~VideoCapture()@plt>:
+    9a0c:	add	ip, pc, #0, 12
+    9a10:	add	ip, ip, #40960	; 0xa000
+    9a14:	ldr	pc, [ip, #3420]!	; 0xd5c
+
+00009a18 <std::ostream& std::ostream::_M_insert<double>(double)@plt>:
+    9a18:	add	ip, pc, #0, 12
+    9a1c:	add	ip, ip, #40960	; 0xa000
+    9a20:	ldr	pc, [ip, #3412]!	; 0xd54
+
+00009a24 <__aeabi_dcmpgt@plt>:
+    9a24:	add	ip, pc, #0, 12
+    9a28:	add	ip, ip, #40960	; 0xa000
+    9a2c:	ldr	pc, [ip, #3404]!	; 0xd4c
+
+00009a30 <__aeabi_dadd@plt>:
+    9a30:	add	ip, pc, #0, 12
+    9a34:	add	ip, ip, #40960	; 0xa000
+    9a38:	ldr	pc, [ip, #3396]!	; 0xd44
+
+00009a3c <std::basic_ofstream<char, std::char_traits<char> >::~basic_ofstream()@plt>:
+    9a3c:	add	ip, pc, #0, 12
+    9a40:	add	ip, ip, #40960	; 0xa000
+    9a44:	ldr	pc, [ip, #3388]!	; 0xd3c
+
+00009a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>:
+    9a48:	add	ip, pc, #0, 12
+    9a4c:	add	ip, ip, #40960	; 0xa000
+    9a50:	ldr	pc, [ip, #3380]!	; 0xd34
+
+00009a54 <__aeabi_fcmplt@plt>:
+    9a54:	add	ip, pc, #0, 12
+    9a58:	add	ip, ip, #40960	; 0xa000
+    9a5c:	ldr	pc, [ip, #3372]!	; 0xd2c
+
+00009a60 <__aeabi_i2f@plt>:
+    9a60:	add	ip, pc, #0, 12
+    9a64:	add	ip, ip, #40960	; 0xa000
+    9a68:	ldr	pc, [ip, #3364]!	; 0xd24
+
+00009a6c <sqrtf@plt>:
+    9a6c:	add	ip, pc, #0, 12
+    9a70:	add	ip, ip, #40960	; 0xa000
+    9a74:	ldr	pc, [ip, #3356]!	; 0xd1c
+
+00009a78 <cv::VideoWriter::VideoWriter(std::string const&, int, double, cv::Size_<int>, bool)@plt>:
+    9a78:	add	ip, pc, #0, 12
+    9a7c:	add	ip, ip, #40960	; 0xa000
+    9a80:	ldr	pc, [ip, #3348]!	; 0xd14
+
+00009a84 <memcmp@plt>:
+    9a84:	add	ip, pc, #0, 12
+    9a88:	add	ip, ip, #40960	; 0xa000
+    9a8c:	ldr	pc, [ip, #3340]!	; 0xd0c
+
+00009a90 <pthread_cancel@plt>:
+    9a90:	add	ip, pc, #0, 12
+    9a94:	add	ip, ip, #40960	; 0xa000
+    9a98:	ldr	pc, [ip, #3332]!	; 0xd04
+
+00009a9c <cv::fastFree(void*)@plt>:
+    9a9c:	add	ip, pc, #0, 12
+    9aa0:	add	ip, ip, #40960	; 0xa000
+    9aa4:	ldr	pc, [ip, #3324]!	; 0xcfc
+
+00009aa8 <std::basic_filebuf<char, std::char_traits<char> >::open(char const*, std::_Ios_Openmode)@plt>:
+    9aa8:	add	ip, pc, #0, 12
+    9aac:	add	ip, ip, #40960	; 0xa000
+    9ab0:	ldr	pc, [ip, #3316]!	; 0xcf4
+
+00009ab4 <__cxa_end_cleanup@plt>:
+    9ab4:	add	ip, pc, #0, 12
+    9ab8:	add	ip, ip, #40960	; 0xa000
+    9abc:	ldr	pc, [ip, #3308]!	; 0xcec
+
+00009ac0 <std::string::_Rep::_M_destroy(std::allocator<char> const&)@plt>:
+    9ac0:	add	ip, pc, #0, 12
+    9ac4:	add	ip, ip, #40960	; 0xa000
+    9ac8:	ldr	pc, [ip, #3300]!	; 0xce4
+
+00009acc <__gnu_mcount_nc@plt>:
+    9acc:	add	ip, pc, #0, 12
+    9ad0:	add	ip, ip, #40960	; 0xa000
+    9ad4:	ldr	pc, [ip, #3292]!	; 0xcdc
+
+00009ad8 <std::locale::~locale()@plt>:
+    9ad8:	add	ip, pc, #0, 12
+    9adc:	add	ip, ip, #40960	; 0xa000
+    9ae0:	ldr	pc, [ip, #3284]!	; 0xcd4
+
+00009ae4 <std::ios_base::Init::Init()@plt>:
+    9ae4:	add	ip, pc, #0, 12
+    9ae8:	add	ip, ip, #40960	; 0xa000
+    9aec:	ldr	pc, [ip, #3276]!	; 0xccc
+
+00009af0 <std::basic_ios<char, std::char_traits<char> >::~basic_ios()@plt>:
+    9af0:	add	ip, pc, #0, 12
+    9af4:	add	ip, ip, #40960	; 0xa000
+    9af8:	ldr	pc, [ip, #3268]!	; 0xcc4
+
+00009afc <cv::Mat::create(int, int const*, int)@plt>:
+    9afc:	add	ip, pc, #0, 12
+    9b00:	add	ip, ip, #40960	; 0xa000
+    9b04:	ldr	pc, [ip, #3260]!	; 0xcbc
+
+00009b08 <__cxa_atexit@plt>:
+    9b08:	add	ip, pc, #0, 12
+    9b0c:	add	ip, ip, #40960	; 0xa000
+    9b10:	ldr	pc, [ip, #3252]!	; 0xcb4
+
+00009b14 <__aeabi_ddiv@plt>:
+    9b14:	add	ip, pc, #0, 12
+    9b18:	add	ip, ip, #40960	; 0xa000
+    9b1c:	ldr	pc, [ip, #3244]!	; 0xcac
+
+00009b20 <abort@plt>:
+    9b20:	add	ip, pc, #0, 12
+    9b24:	add	ip, ip, #40960	; 0xa000
+    9b28:	ldr	pc, [ip, #3236]!	; 0xca4
+
+00009b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>:
+    9b2c:	add	ip, pc, #0, 12
+    9b30:	add	ip, ip, #40960	; 0xa000
+    9b34:	ldr	pc, [ip, #3228]!	; 0xc9c
+
+00009b38 <cv::Mat::operator=(cv::Scalar_<double> const&)@plt>:
+    9b38:	add	ip, pc, #0, 12
+    9b3c:	add	ip, ip, #40960	; 0xa000
+    9b40:	ldr	pc, [ip, #3220]!	; 0xc94
+
+00009b44 <__aeabi_dsub@plt>:
+    9b44:	add	ip, pc, #0, 12
+    9b48:	add	ip, ip, #40960	; 0xa000
+    9b4c:	ldr	pc, [ip, #3212]!	; 0xc8c
+
+00009b50 <std::basic_ios<char, std::char_traits<char> >::clear(std::_Ios_Iostate)@plt>:
+    9b50:	add	ip, pc, #0, 12
+    9b54:	add	ip, ip, #40960	; 0xa000
+    9b58:	ldr	pc, [ip, #3204]!	; 0xc84
+
+00009b5c <__aeabi_ui2f@plt>:
+    9b5c:	add	ip, pc, #0, 12
+    9b60:	add	ip, ip, #40960	; 0xa000
+    9b64:	ldr	pc, [ip, #3196]!	; 0xc7c
+
+00009b68 <cv::VideoCapture::VideoCapture()@plt>:
+    9b68:	add	ip, pc, #0, 12
+    9b6c:	add	ip, ip, #40960	; 0xa000
+    9b70:	ldr	pc, [ip, #3188]!	; 0xc74
+
+00009b74 <__aeabi_f2iz@plt>:
+    9b74:	add	ip, pc, #0, 12
+    9b78:	add	ip, ip, #40960	; 0xa000
+    9b7c:	ldr	pc, [ip, #3180]!	; 0xc6c
+
+00009b80 <std::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string()@plt>:
+    9b80:	add	ip, pc, #0, 12
+    9b84:	add	ip, ip, #40960	; 0xa000
+    9b88:	ldr	pc, [ip, #3172]!	; 0xc64
+
+00009b8c <__aeabi_atexit@plt>:
+    9b8c:	add	ip, pc, #0, 12
+    9b90:	add	ip, ip, #40960	; 0xa000
+    9b94:	ldr	pc, [ip, #3164]!	; 0xc5c
+
+00009b98 <std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&)@plt>:
+    9b98:	add	ip, pc, #0, 12
+    9b9c:	add	ip, ip, #40960	; 0xa000
+    9ba0:	ldr	pc, [ip, #3156]!	; 0xc54
+
+00009ba4 <cv::Ptr<CvCapture>::delete_obj()@plt>:
+    9ba4:	add	ip, pc, #0, 12
+    9ba8:	add	ip, ip, #40960	; 0xa000
+    9bac:	ldr	pc, [ip, #3148]!	; 0xc4c
+
+00009bb0 <__aeabi_d2f@plt>:
+    9bb0:	add	ip, pc, #0, 12
+    9bb4:	add	ip, ip, #40960	; 0xa000
+    9bb8:	ldr	pc, [ip, #3140]!	; 0xc44
+
+00009bbc <__aeabi_dmul@plt>:
+    9bbc:	add	ip, pc, #0, 12
+    9bc0:	add	ip, ip, #40960	; 0xa000
+    9bc4:	ldr	pc, [ip, #3132]!	; 0xc3c
+
+Disassembly of section .text:
+
+00009bc8 <_start>:
+    9bc8:	ldr	ip, [pc, #36]	; 9bf4 <_start+0x2c>
+    9bcc:	mov	fp, #0
+    9bd0:	pop	{r1}		; (ldr r1, [sp], #4)
+    9bd4:	mov	r2, sp
+    9bd8:	push	{r2}		; (str r2, [sp, #-4]!)
+    9bdc:	push	{r0}		; (str r0, [sp, #-4]!)
+    9be0:	ldr	r0, [pc, #16]	; 9bf8 <_start+0x30>
+    9be4:	ldr	r3, [pc, #16]	; 9bfc <_start+0x34>
+    9be8:	push	{ip}		; (str ip, [sp, #-4]!)
+    9bec:	bl	9910 <__libc_start_main@plt>
+    9bf0:	bl	9b20 <abort@plt>
+    9bf4:	.word	0x0000c150
+    9bf8:	.word	0x0000b0dc
+    9bfc:	.word	0x0000c154
+
+00009c00 <__gmon_start__>:
+    9c00:	ldr	r2, [pc, #60]	; 9c44 <__gmon_start__+0x44>
+    9c04:	push	{lr}		; (str lr, [sp, #-4]!)
+    9c08:	sub	sp, sp, #4
+    9c0c:	ldr	r3, [r2]
+    9c10:	cmp	r3, #0
+    9c14:	beq	9c20 <__gmon_start__+0x20>
+    9c18:	add	sp, sp, #4
+    9c1c:	ldmfd	sp!, {pc}
+    9c20:	add	r3, r3, #1
+    9c24:	ldr	r0, [pc, #28]	; 9c48 <__gmon_start__+0x48>
+    9c28:	ldr	r1, [pc, #28]	; 9c4c <__gmon_start__+0x4c>
+    9c2c:	str	r3, [r2]
+    9c30:	bl	9994 <__monstartup@plt>
+    9c34:	ldr	r0, [pc, #20]	; 9c50 <__gmon_start__+0x50>
+    9c38:	add	sp, sp, #4
+    9c3c:	pop	{lr}		; (ldr lr, [sp], #4)
+    9c40:	b	c1c8 <atexit>
+    9c44:	.word	0x00014980
+    9c48:	.word	0x00009bc8
+    9c4c:	.word	0x0000c200
+    9c50:	.word	0x000099c4
+
+00009c54 <call_gmon_start>:
+    9c54:	ldr	r3, [pc, #20]	; 9c70 <call_gmon_start+0x1c>
+    9c58:	ldr	r2, [pc, #20]	; 9c74 <call_gmon_start+0x20>
+    9c5c:	add	r3, pc, r3
+    9c60:	ldr	r1, [r3, r2]
+    9c64:	cmp	r1, #0
+    9c68:	bxeq	lr
+    9c6c:	b	9c00 <__gmon_start__>
+    9c70:	.word	0x0000aa80
+    9c74:	.word	0x00000120
+
+00009c78 <__do_global_dtors_aux>:
+    9c78:	ldr	r2, [pc, #16]	; 9c90 <__do_global_dtors_aux+0x18>
+    9c7c:	ldrb	r3, [r2]
+    9c80:	cmp	r3, #0
+    9c84:	moveq	r3, #1
+    9c88:	strbeq	r3, [r2]
+    9c8c:	bx	lr
+    9c90:	.word	0x00014984
+
+00009c94 <frame_dummy>:
+    9c94:	ldr	r0, [pc, #32]	; 9cbc <frame_dummy+0x28>
+    9c98:	push	{r4, lr}
+    9c9c:	ldr	r3, [r0]
+    9ca0:	cmp	r3, #0
+    9ca4:	popeq	{r4, pc}
+    9ca8:	ldr	r3, [pc, #16]	; 9cc0 <frame_dummy+0x2c>
+    9cac:	cmp	r3, #0
+    9cb0:	popeq	{r4, pc}
+    9cb4:	blx	r3
+    9cb8:	pop	{r4, pc}
+    9cbc:	.word	0x00014578
+    9cc0:	.word	0x00000000
+
+00009cc4 <diffToNanoseconds(timespec, timespec, double)>:
+    9cc4:	mov	ip, sp
+    9cc8:	push	{r4, r5, r6, r7, r8, r9, fp, ip, lr, pc}
+    9ccc:	sub	fp, ip, #4
+    9cd0:	sub	sp, sp, #16
+    9cd4:	stmfd	sp!, {lr}
+    9cd8:	bl	9acc <__gnu_mcount_nc@plt>
+    9cdc:	sub	ip, fp, #52	; 0x34
+    9ce0:	stm	ip, {r2, r3}
+    9ce4:	ldr	r7, [pc, #156]	; 9d88 <diffToNanoseconds(timespec, timespec, double)+0xc4>
+    9ce8:	sub	r3, fp, #44	; 0x2c
+    9cec:	mov	r6, #0
+    9cf0:	stm	r3, {r0, r1}
+    9cf4:	mov	r0, r2
+    9cf8:	bl	98c8 <__aeabi_i2d@plt>
+    9cfc:	mov	r2, r6
+    9d00:	mov	r3, r7
+    9d04:	bl	9bbc <__aeabi_dmul@plt>
+    9d08:	mov	r4, r0
+    9d0c:	ldr	r0, [fp, #-48]	; 0xffffffd0
+    9d10:	mov	r5, r1
+    9d14:	bl	98c8 <__aeabi_i2d@plt>
+    9d18:	mov	r2, r0
+    9d1c:	mov	r3, r1
+    9d20:	mov	r0, r4
+    9d24:	mov	r1, r5
+    9d28:	bl	9a30 <__aeabi_dadd@plt>
+    9d2c:	mov	r8, r0
+    9d30:	ldr	r0, [fp, #-44]	; 0xffffffd4
+    9d34:	mov	r9, r1
+    9d38:	bl	98c8 <__aeabi_i2d@plt>
+    9d3c:	mov	r2, r6
+    9d40:	mov	r3, r7
+    9d44:	bl	9bbc <__aeabi_dmul@plt>
+    9d48:	mov	r4, r0
+    9d4c:	ldr	r0, [fp, #-40]	; 0xffffffd8
+    9d50:	mov	r5, r1
+    9d54:	bl	98c8 <__aeabi_i2d@plt>
+    9d58:	mov	r2, r0
+    9d5c:	mov	r3, r1
+    9d60:	mov	r0, r4
+    9d64:	mov	r1, r5
+    9d68:	bl	9a30 <__aeabi_dadd@plt>
+    9d6c:	mov	r2, r0
+    9d70:	mov	r3, r1
+    9d74:	mov	r0, r8
+    9d78:	mov	r1, r9
+    9d7c:	bl	9b44 <__aeabi_dsub@plt>
+    9d80:	sub	sp, fp, #36	; 0x24
+    9d84:	ldm	sp, {r4, r5, r6, r7, r8, r9, fp, sp, pc}
+    9d88:	.word	0x41cdcd65
+
+00009d8c <global constructors keyed to diffToNanoseconds(timespec, timespec, double)>:
+    9d8c:	mov	ip, sp
+    9d90:	push	{r4, r5, fp, ip, lr, pc}
+    9d94:	sub	fp, ip, #4
+    9d98:	stmfd	sp!, {lr}
+    9d9c:	bl	9acc <__gnu_mcount_nc@plt>
+    9da0:	ldr	r4, [pc, #24]	; 9dc0 <global constructors keyed to diffToNanoseconds(timespec, timespec, double)+0x34>
+    9da4:	mov	r0, r4
+    9da8:	bl	9ae4 <std::ios_base::Init::Init()@plt>
+    9dac:	ldr	r1, [pc, #16]	; 9dc4 <global constructors keyed to diffToNanoseconds(timespec, timespec, double)+0x38>
+    9db0:	ldr	r2, [pc, #16]	; 9dc8 <global constructors keyed to diffToNanoseconds(timespec, timespec, double)+0x3c>
+    9db4:	mov	r0, r4
+    9db8:	ldm	sp, {r4, r5, fp, sp, lr}
+    9dbc:	b	9b8c <__aeabi_atexit@plt>
+    9dc0:	.word	0x00014985
+    9dc4:	.word	0x000099d0
+    9dc8:	.word	0x00014810
+
+00009dcc <now()>:
+    9dcc:	mov	ip, sp
+    9dd0:	push	{r4, r5, fp, ip, lr, pc}
+    9dd4:	sub	fp, ip, #4
+    9dd8:	stmfd	sp!, {lr}
+    9ddc:	bl	9acc <__gnu_mcount_nc@plt>
+    9de0:	mov	r4, r0
+    9de4:	mov	r1, r0
+    9de8:	mov	r0, #2
+    9dec:	bl	9934 <clock_gettime@plt>
+    9df0:	mov	r0, r4
+    9df4:	ldm	sp, {r4, r5, fp, sp, pc}
+
+00009df8 <MeanShift::MeanShift()>:
+    9df8:	mov	ip, sp
+    9dfc:	push	{r4, r5, fp, ip, lr, pc}
+    9e00:	sub	fp, ip, #4
+    9e04:	stmfd	sp!, {lr}
+    9e08:	bl	9acc <__gnu_mcount_nc@plt>
+    9e0c:	ldr	r1, [pc, #112]	; 9e84 <MeanShift::MeanShift()+0x8c>
+    9e10:	add	ip, r0, #12
+    9e14:	str	r1, [r0]
+    9e18:	mov	r1, #8
+    9e1c:	mov	r2, #0
+    9e20:	add	r4, r0, #52	; 0x34
+    9e24:	str	ip, [r0, #44]	; 0x2c
+    9e28:	str	r1, [r0, #84]	; 0x54
+    9e2c:	mov	ip, #16
+    9e30:	mov	r1, #256	; 0x100
+    9e34:	str	r4, [r0, #48]	; 0x30
+    9e38:	str	r2, [r0, #72]	; 0x48
+    9e3c:	str	ip, [r0, #76]	; 0x4c
+    9e40:	str	r1, [r0, #80]	; 0x50
+    9e44:	str	r2, [r0, #4]
+    9e48:	str	r2, [r0, #8]
+    9e4c:	str	r2, [r0, #12]
+    9e50:	str	r2, [r0, #16]
+    9e54:	str	r2, [r0, #20]
+    9e58:	str	r2, [r0, #24]
+    9e5c:	str	r2, [r0, #28]
+    9e60:	str	r2, [r0, #32]
+    9e64:	str	r2, [r0, #36]	; 0x24
+    9e68:	str	r2, [r0, #40]	; 0x28
+    9e6c:	str	r2, [r0, #56]	; 0x38
+    9e70:	str	r2, [r0, #52]	; 0x34
+    9e74:	str	r2, [r0, #60]	; 0x3c
+    9e78:	str	r2, [r0, #64]	; 0x40
+    9e7c:	str	r2, [r0, #68]	; 0x44
+    9e80:	ldm	sp, {r4, r5, fp, sp, pc}
+    9e84:	.word	0x41800000
+
+00009e88 <MeanShift::MeanShift()>:
+    9e88:	mov	ip, sp
+    9e8c:	push	{r4, r5, fp, ip, lr, pc}
+    9e90:	sub	fp, ip, #4
+    9e94:	stmfd	sp!, {lr}
+    9e98:	bl	9acc <__gnu_mcount_nc@plt>
+    9e9c:	ldr	r1, [pc, #112]	; 9f14 <MeanShift::MeanShift()+0x8c>
+    9ea0:	add	ip, r0, #12
+    9ea4:	str	r1, [r0]
+    9ea8:	mov	r1, #8
+    9eac:	mov	r2, #0
+    9eb0:	add	r4, r0, #52	; 0x34
+    9eb4:	str	ip, [r0, #44]	; 0x2c
+    9eb8:	str	r1, [r0, #84]	; 0x54
+    9ebc:	mov	ip, #16
+    9ec0:	mov	r1, #256	; 0x100
+    9ec4:	str	r4, [r0, #48]	; 0x30
+    9ec8:	str	r2, [r0, #72]	; 0x48
+    9ecc:	str	ip, [r0, #76]	; 0x4c
+    9ed0:	str	r1, [r0, #80]	; 0x50
+    9ed4:	str	r2, [r0, #4]
+    9ed8:	str	r2, [r0, #8]
+    9edc:	str	r2, [r0, #12]
+    9ee0:	str	r2, [r0, #16]
+    9ee4:	str	r2, [r0, #20]
+    9ee8:	str	r2, [r0, #24]
+    9eec:	str	r2, [r0, #28]
+    9ef0:	str	r2, [r0, #32]
+    9ef4:	str	r2, [r0, #36]	; 0x24
+    9ef8:	str	r2, [r0, #40]	; 0x28
+    9efc:	str	r2, [r0, #56]	; 0x38
+    9f00:	str	r2, [r0, #52]	; 0x34
+    9f04:	str	r2, [r0, #60]	; 0x3c
+    9f08:	str	r2, [r0, #64]	; 0x40
+    9f0c:	str	r2, [r0, #68]	; 0x44
+    9f10:	ldm	sp, {r4, r5, fp, sp, pc}
+    9f14:	.word	0x41800000
+
+00009f18 <MeanShift::Epanechnikov_kernel(cv::Mat&)>:
+    9f18:	mov	ip, sp
+    9f1c:	push	{r4, r5, r6, r7, r8, r9, sl, fp, ip, lr, pc}
+    9f20:	sub	fp, ip, #4
+    9f24:	sub	sp, sp, #44	; 0x2c
+    9f28:	stmfd	sp!, {lr}
+    9f2c:	bl	9acc <__gnu_mcount_nc@plt>
+    9f30:	mov	sl, r1
+    9f34:	ldr	r1, [r1, #8]
+    9f38:	str	r1, [fp, #-80]	; 0xffffffb0
+    9f3c:	ldr	r3, [sl, #12]
+    9f40:	mov	r0, r1
+    9f44:	str	r3, [fp, #-76]	; 0xffffffb4
+    9f48:	bl	98c8 <__aeabi_i2d@plt>
+    9f4c:	ldr	r2, [pc, #456]	; a11c <MeanShift::Epanechnikov_kernel(cv::Mat&)+0x204>
+    9f50:	ldr	r3, [pc, #456]	; a120 <MeanShift::Epanechnikov_kernel(cv::Mat&)+0x208>
+    9f54:	bl	9bbc <__aeabi_dmul@plt>
+    9f58:	mov	r4, r0
+    9f5c:	ldr	r0, [fp, #-76]	; 0xffffffb4
+    9f60:	mov	r5, r1
+    9f64:	bl	98c8 <__aeabi_i2d@plt>
+    9f68:	mov	r2, r0
+    9f6c:	mov	r3, r1
+    9f70:	mov	r0, r4
+    9f74:	mov	r1, r5
+    9f78:	bl	9bbc <__aeabi_dmul@plt>
+    9f7c:	bl	9bb0 <__aeabi_d2f@plt>
+    9f80:	ldr	lr, [fp, #-80]	; 0xffffffb0
+    9f84:	str	r0, [fp, #-72]	; 0xffffffb8
+    9f88:	cmp	lr, #0
+    9f8c:	movle	r8, #0
+    9f90:	ble	a110 <MeanShift::Epanechnikov_kernel(cv::Mat&)+0x1f8>
+    9f94:	ldr	r0, [fp, #-76]	; 0xffffffb4
+    9f98:	mov	ip, lr
+    9f9c:	mov	r1, r0
+    9fa0:	mul	r0, r1, r0
+    9fa4:	mul	ip, lr, ip
+    9fa8:	add	r3, r0, #3
+    9fac:	cmp	r0, #0
+    9fb0:	add	r2, lr, lr, lsr #31
+    9fb4:	add	r1, r1, r1, lsr #31
+    9fb8:	movlt	r0, r3
+    9fbc:	asr	r2, r2, #1
+    9fc0:	asr	r1, r1, #1
+    9fc4:	rsb	r2, r2, #0
+    9fc8:	rsb	r1, r1, #0
+    9fcc:	asr	ip, ip, #2
+    9fd0:	asr	r0, r0, #2
+    9fd4:	str	r2, [fp, #-68]	; 0xffffffbc
+    9fd8:	str	r1, [fp, #-64]	; 0xffffffc0
+    9fdc:	str	ip, [fp, #-52]	; 0xffffffcc
+    9fe0:	str	r0, [fp, #-60]	; 0xffffffc4
+    9fe4:	mov	r8, #0
+    9fe8:	mov	r9, #0
+    9fec:	ldr	lr, [fp, #-76]	; 0xffffffb4
+    9ff0:	cmp	lr, #0
+    9ff4:	ble	a100 <MeanShift::Epanechnikov_kernel(cv::Mat&)+0x1e8>
+    9ff8:	ldr	r1, [fp, #-68]	; 0xffffffbc
+    9ffc:	mov	r7, #0
+    a000:	add	r0, r9, r1
+    a004:	bl	9a60 <__aeabi_i2f@plt>
+    a008:	mov	r4, r0
+    a00c:	ldr	r0, [fp, #-52]	; 0xffffffcc
+    a010:	bl	9a60 <__aeabi_i2f@plt>
+    a014:	mov	r1, r4
+    a018:	mov	r5, r0
+    a01c:	mov	r0, r4
+    a020:	bl	99b8 <__aeabi_fmul@plt>
+    a024:	mov	r1, r5
+    a028:	bl	988c <__aeabi_fdiv@plt>
+    a02c:	str	r0, [fp, #-48]	; 0xffffffd0
+    a030:	ldr	r0, [fp, #-60]	; 0xffffffc4
+    a034:	bl	9a60 <__aeabi_i2f@plt>
+    a038:	str	r0, [fp, #-56]	; 0xffffffc8
+    a03c:	b	a078 <MeanShift::Epanechnikov_kernel(cv::Mat&)+0x160>
+    a040:	ldr	r3, [sl, #44]	; 0x2c
+    a044:	lsl	r0, r7, #2
+    a048:	ldr	r2, [r3]
+    a04c:	ldr	r1, [sl, #16]
+    a050:	mla	r3, r2, r9, r0
+    a054:	mov	r0, r8
+    a058:	str	ip, [r1, r3]
+    a05c:	mov	r1, ip
+    a060:	bl	9928 <__aeabi_fadd@plt>
+    a064:	ldr	r1, [fp, #-76]	; 0xffffffb4
+    a068:	add	r7, r7, #1
+    a06c:	cmp	r1, r7
+    a070:	mov	r8, r0
+    a074:	ble	a100 <MeanShift::Epanechnikov_kernel(cv::Mat&)+0x1e8>
+    a078:	ldr	lr, [fp, #-64]	; 0xffffffc0
+    a07c:	add	r0, r7, lr
+    a080:	bl	9a60 <__aeabi_i2f@plt>
+    a084:	mov	r1, r0
+    a088:	bl	99b8 <__aeabi_fmul@plt>
+    a08c:	ldr	r1, [fp, #-56]	; 0xffffffc8
+    a090:	bl	988c <__aeabi_fdiv@plt>
+    a094:	ldr	r1, [fp, #-48]	; 0xffffffd0
+    a098:	bl	9928 <__aeabi_fadd@plt>
+    a09c:	mov	r1, #1065353216	; 0x3f800000
+    a0a0:	mov	r6, r0
+    a0a4:	bl	9a54 <__aeabi_fcmplt@plt>
+    a0a8:	cmp	r0, #0
+    a0ac:	moveq	ip, #0
+    a0b0:	beq	a040 <MeanShift::Epanechnikov_kernel(cv::Mat&)+0x128>
+    a0b4:	ldr	r0, [fp, #-72]	; 0xffffffb8
+    a0b8:	bl	98e0 <__aeabi_f2d@plt>
+    a0bc:	mov	r4, r0
+    a0c0:	mov	r0, r6
+    a0c4:	mov	r5, r1
+    a0c8:	bl	98e0 <__aeabi_f2d@plt>
+    a0cc:	mov	r2, r0
+    a0d0:	mov	r3, r1
+    a0d4:	mov	r0, #0
+    a0d8:	ldr	r1, [pc, #68]	; a124 <MeanShift::Epanechnikov_kernel(cv::Mat&)+0x20c>
+    a0dc:	bl	9b44 <__aeabi_dsub@plt>
+    a0e0:	mov	r2, r0
+    a0e4:	mov	r3, r1
+    a0e8:	mov	r0, r4
+    a0ec:	mov	r1, r5
+    a0f0:	bl	9bbc <__aeabi_dmul@plt>
+    a0f4:	bl	9bb0 <__aeabi_d2f@plt>
+    a0f8:	mov	ip, r0
+    a0fc:	b	a040 <MeanShift::Epanechnikov_kernel(cv::Mat&)+0x128>
+    a100:	ldr	r3, [fp, #-80]	; 0xffffffb0
+    a104:	add	r9, r9, #1
+    a108:	cmp	r3, r9
+    a10c:	bgt	9fec <MeanShift::Epanechnikov_kernel(cv::Mat&)+0xd4>
+    a110:	mov	r0, r8
+    a114:	sub	sp, fp, #40	; 0x28
+    a118:	ldm	sp, {r4, r5, r6, r7, r8, r9, sl, fp, sp, pc}
+    a11c:	.word	0x70dbe03c
+    a120:	.word	0x3fd41b2f
+    a124:	.word	0x3ff00000
+
+0000a128 <global constructors keyed to MeanShift::MeanShift()>:
+    a128:	mov	ip, sp
+    a12c:	push	{r4, r5, fp, ip, lr, pc}
+    a130:	sub	fp, ip, #4
+    a134:	stmfd	sp!, {lr}
+    a138:	bl	9acc <__gnu_mcount_nc@plt>
+    a13c:	ldr	r4, [pc, #24]	; a15c <global constructors keyed to MeanShift::MeanShift()+0x34>
+    a140:	mov	r0, r4
+    a144:	bl	9ae4 <std::ios_base::Init::Init()@plt>
+    a148:	ldr	r1, [pc, #16]	; a160 <global constructors keyed to MeanShift::MeanShift()+0x38>
+    a14c:	ldr	r2, [pc, #16]	; a164 <global constructors keyed to MeanShift::MeanShift()+0x3c>
+    a150:	mov	r0, r4
+    a154:	ldm	sp, {r4, r5, fp, sp, lr}
+    a158:	b	9b8c <__aeabi_atexit@plt>
+    a15c:	.word	0x00014986
+    a160:	.word	0x000099d0
+    a164:	.word	0x00014810
+
+0000a168 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)>:
+    a168:	mov	ip, sp
+    a16c:	push	{r4, r5, r6, r7, r8, r9, sl, fp, ip, lr, pc}
+    a170:	sub	fp, ip, #4
+    a174:	sub	sp, sp, #196	; 0xc4
+    a178:	stmfd	sp!, {lr}
+    a17c:	bl	9acc <__gnu_mcount_nc@plt>
+    a180:	str	r3, [fp, #-220]	; 0xffffff24
+    a184:	ldr	r5, [r3, #12]
+    a188:	ldr	r3, [r3, #8]
+    a18c:	sub	r6, fp, #196	; 0xc4
+    a190:	sub	sl, fp, #52	; 0x34
+    a194:	mov	r4, #0
+    a198:	mov	r9, r0
+    a19c:	add	ip, r6, #8
+    a1a0:	add	lr, r6, #48	; 0x30
+    a1a4:	mov	r0, r6
+    a1a8:	str	r3, [fp, #-48]	; 0xffffffd0
+    a1ac:	mov	r6, #0
+    a1b0:	mov	r3, #5
+    a1b4:	str	r1, [fp, #-212]	; 0xffffff2c
+    a1b8:	str	r2, [fp, #-216]	; 0xffffff28
+    a1bc:	mov	r1, #2
+    a1c0:	mov	r2, sl
+    a1c4:	str	r5, [fp, #-52]	; 0xffffffcc
+    a1c8:	mov	r5, #0
+    a1cc:	str	ip, [fp, #-156]	; 0xffffff64
+    a1d0:	str	lr, [fp, #-152]	; 0xffffff68
+    a1d4:	str	r4, [fp, #-196]	; 0xffffff3c
+    a1d8:	str	r4, [fp, #-192]	; 0xffffff40
+    a1dc:	str	r4, [fp, #-188]	; 0xffffff44
+    a1e0:	str	r4, [fp, #-184]	; 0xffffff48
+    a1e4:	str	r4, [fp, #-172]	; 0xffffff54
+    a1e8:	str	r4, [fp, #-168]	; 0xffffff58
+    a1ec:	str	r4, [fp, #-160]	; 0xffffff60
+    a1f0:	str	r4, [fp, #-148]	; 0xffffff6c
+    a1f4:	str	r4, [fp, #-144]	; 0xffffff70
+    a1f8:	str	r4, [fp, #-164]	; 0xffffff5c
+    a1fc:	str	r4, [fp, #-176]	; 0xffffff50
+    a200:	str	r4, [fp, #-180]	; 0xffffff4c
+    a204:	str	r5, [fp, #-100]	; 0xffffff9c
+    a208:	str	r6, [fp, #-96]	; 0xffffffa0
+    a20c:	str	r5, [fp, #-92]	; 0xffffffa4
+    a210:	str	r6, [fp, #-88]	; 0xffffffa8
+    a214:	str	r5, [fp, #-84]	; 0xffffffac
+    a218:	str	r6, [fp, #-80]	; 0xffffffb0
+    a21c:	str	r5, [fp, #-108]	; 0xffffff94
+    a220:	str	r6, [fp, #-104]	; 0xffffff98
+    a224:	bl	9afc <cv::Mat::create(int, int const*, int)@plt>
+    a228:	sub	r1, fp, #108	; 0x6c
+    a22c:	sub	r0, fp, #196	; 0xc4
+    a230:	bl	9b38 <cv::Mat::operator=(cv::Scalar_<double> const&)@plt>
+    a234:	sub	r1, fp, #196	; 0xc4
+    a238:	ldr	r0, [fp, #-212]	; 0xffffff2c
+    a23c:	bl	9f18 <MeanShift::Epanechnikov_kernel(cv::Mat&)>
+    a240:	mov	r1, r0
+    a244:	mov	r0, #1065353216	; 0x3f800000
+    a248:	bl	988c <__aeabi_fdiv@plt>
+    a24c:	add	r3, r9, #8
+    a250:	add	r2, r9, #48	; 0x30
+    a254:	str	r0, [fp, #-208]	; 0xffffff30
+    a258:	str	r3, [r9, #40]	; 0x28
+    a25c:	str	r2, [r9, #44]	; 0x2c
+    a260:	str	r4, [r9, #48]	; 0x30
+    a264:	str	r4, [r9]
+    a268:	str	r4, [r9, #4]
+    a26c:	str	r4, [r9, #8]
+    a270:	str	r4, [r9, #12]
+    a274:	str	r4, [r9, #16]
+    a278:	str	r4, [r9, #20]
+    a27c:	str	r4, [r9, #24]
+    a280:	str	r4, [r9, #28]
+    a284:	str	r4, [r9, #32]
+    a288:	str	r4, [r9, #36]	; 0x24
+    a28c:	str	r4, [r9, #52]	; 0x34
+    a290:	ldr	r4, [pc, #696]	; a550 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)+0x3e8>
+    a294:	str	r5, [fp, #-132]	; 0xffffff7c
+    a298:	str	r6, [fp, #-128]	; 0xffffff80
+    a29c:	ldr	r5, [pc, #688]	; a554 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)+0x3ec>
+    a2a0:	mov	ip, #8
+    a2a4:	str	r4, [fp, #-140]	; 0xffffff74
+    a2a8:	str	r5, [fp, #-136]	; 0xffffff78
+    a2ac:	str	ip, [fp, #-52]	; 0xffffffcc
+    a2b0:	mov	r4, #0
+    a2b4:	mov	r5, #0
+    a2b8:	mov	ip, #16
+    a2bc:	mov	r2, sl
+    a2c0:	mov	r0, r9
+    a2c4:	mov	r1, #2
+    a2c8:	mov	r3, #5
+    a2cc:	str	ip, [fp, #-48]	; 0xffffffd0
+    a2d0:	str	r4, [fp, #-116]	; 0xffffff8c
+    a2d4:	str	r5, [fp, #-112]	; 0xffffff90
+    a2d8:	str	r4, [fp, #-124]	; 0xffffff84
+    a2dc:	str	r5, [fp, #-120]	; 0xffffff88
+    a2e0:	bl	9afc <cv::Mat::create(int, int const*, int)@plt>
+    a2e4:	mov	r0, r9
+    a2e8:	sub	r1, fp, #140	; 0x8c
+    a2ec:	bl	9b38 <cv::Mat::operator=(cv::Scalar_<double> const&)@plt>
+    a2f0:	ldr	r5, [fp, #-220]	; 0xffffff24
+    a2f4:	mov	r3, #0
+    a2f8:	ldr	r1, [r5, #12]
+    a2fc:	str	r3, [fp, #-56]	; 0xffffffc8
+    a300:	str	r3, [fp, #-64]	; 0xffffffc0
+    a304:	str	r3, [fp, #-60]	; 0xffffffc4
+    a308:	ldr	r6, [r5, #4]
+    a30c:	cmp	r1, #0
+    a310:	str	r6, [fp, #-204]	; 0xffffff34
+    a314:	ble	a4d4 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)+0x36c>
+    a318:	sub	ip, fp, #64	; 0x40
+    a31c:	sub	r0, fp, #76	; 0x4c
+    a320:	ldr	r3, [r5, #8]
+    a324:	mov	sl, #0
+    a328:	str	ip, [fp, #-236]	; 0xffffff14
+    a32c:	str	r0, [fp, #-232]	; 0xffffff18
+    a330:	ldr	r4, [fp, #-220]	; 0xffffff24
+    a334:	cmp	r3, #0
+    a338:	ldr	r2, [r4]
+    a33c:	ble	a4c8 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)+0x360>
+    a340:	ldr	r5, [fp, #-204]	; 0xffffff34
+    a344:	add	r7, r2, r2, lsl #1
+    a348:	add	r5, sl, r5
+    a34c:	str	r5, [fp, #-200]	; 0xffffff38
+    a350:	mov	r8, #0
+    a354:	ldr	r6, [fp, #-216]	; 0xffffff28
+    a358:	ldr	r3, [r6, #44]	; 0x2c
+    a35c:	ldr	r4, [r6, #16]
+    a360:	ldr	r2, [r3]
+    a364:	ldr	r3, [fp, #-200]	; 0xffffff38
+    a368:	lsl	r6, r8, #2
+    a36c:	mla	r3, r2, r3, r7
+    a370:	ldrb	r0, [r4, r3]
+    a374:	add	r4, r4, r3
+    a378:	bl	9b5c <__aeabi_ui2f@plt>
+    a37c:	str	r0, [fp, #-76]	; 0xffffffb4
+    a380:	ldrb	r0, [r4, #1]
+    a384:	bl	9b5c <__aeabi_ui2f@plt>
+    a388:	str	r0, [fp, #-72]	; 0xffffffb8
+    a38c:	ldrb	r0, [r4, #2]
+    a390:	bl	9b5c <__aeabi_ui2f@plt>
+    a394:	ldr	ip, [fp, #-232]	; 0xffffff18
+    a398:	ldr	r3, [fp, #-236]	; 0xffffff14
+    a39c:	str	r0, [fp, #-68]	; 0xffffffbc
+    a3a0:	ldm	ip, {r0, r1, r2}
+    a3a4:	stm	r3, {r0, r1, r2}
+    a3a8:	ldr	r5, [fp, #-212]	; 0xffffff2c
+    a3ac:	ldr	r0, [fp, #-60]	; 0xffffffc4
+    a3b0:	ldr	r4, [r5]
+    a3b4:	add	r8, r8, #1
+    a3b8:	mov	r1, r4
+    a3bc:	bl	988c <__aeabi_fdiv@plt>
+    a3c0:	mov	r1, r4
+    a3c4:	str	r0, [fp, #-224]	; 0xffffff20
+    a3c8:	ldr	r0, [fp, #-56]	; 0xffffffc8
+    a3cc:	bl	988c <__aeabi_fdiv@plt>
+    a3d0:	mov	r1, r4
+    a3d4:	str	r0, [fp, #-228]	; 0xffffff1c
+    a3d8:	ldr	r0, [fp, #-64]	; 0xffffffc0
+    a3dc:	bl	988c <__aeabi_fdiv@plt>
+    a3e0:	bl	9b74 <__aeabi_f2iz@plt>
+    a3e4:	ldr	r2, [fp, #-152]	; 0xffffff68
+    a3e8:	ldr	r3, [fp, #-180]	; 0xffffff4c
+    a3ec:	ldr	r1, [r2]
+    a3f0:	add	r3, r3, r6
+    a3f4:	mul	r2, r1, sl
+    a3f8:	mov	r5, r0
+    a3fc:	ldr	r1, [r3, r2]
+    a400:	ldr	r0, [fp, #-208]	; 0xffffff30
+    a404:	bl	99b8 <__aeabi_fmul@plt>
+    a408:	ldr	r4, [r9, #16]
+    a40c:	mov	r1, r0
+    a410:	ldr	r0, [r4, r5, lsl #2]
+    a414:	bl	9928 <__aeabi_fadd@plt>
+    a418:	str	r0, [r4, r5, lsl #2]
+    a41c:	ldr	r0, [fp, #-224]	; 0xffffff20
+    a420:	bl	9b74 <__aeabi_f2iz@plt>
+    a424:	ldr	r3, [fp, #-152]	; 0xffffff68
+    a428:	ldr	r1, [r9, #44]	; 0x2c
+    a42c:	ldr	r2, [r3]
+    a430:	ldr	r3, [fp, #-180]	; 0xffffff4c
+    a434:	mul	ip, r2, sl
+    a438:	ldr	r4, [r1]
+    a43c:	add	r3, r3, r6
+    a440:	ldr	r1, [r3, ip]
+    a444:	add	r4, r4, r0, lsl #2
+    a448:	ldr	r0, [fp, #-208]	; 0xffffff30
+    a44c:	bl	99b8 <__aeabi_fmul@plt>
+    a450:	ldr	r5, [r9, #16]
+    a454:	mov	r1, r0
+    a458:	ldr	r0, [r5, r4]
+    a45c:	bl	9928 <__aeabi_fadd@plt>
+    a460:	str	r0, [r5, r4]
+    a464:	ldr	r0, [fp, #-228]	; 0xffffff1c
+    a468:	bl	9b74 <__aeabi_f2iz@plt>
+    a46c:	ldr	r3, [fp, #-152]	; 0xffffff68
+    a470:	ldr	r1, [r9, #44]	; 0x2c
+    a474:	ldr	r2, [r3]
+    a478:	ldr	r4, [r1]
+    a47c:	mul	ip, r2, sl
+    a480:	ldr	r3, [fp, #-180]	; 0xffffff4c
+    a484:	lsl	r4, r4, #1
+    a488:	add	r3, r3, r6
+    a48c:	ldr	r1, [r3, ip]
+    a490:	add	r4, r4, r0, lsl #2
+    a494:	ldr	r0, [fp, #-208]	; 0xffffff30
+    a498:	bl	99b8 <__aeabi_fmul@plt>
+    a49c:	ldr	r5, [r9, #16]
+    a4a0:	mov	r1, r0
+    a4a4:	ldr	r0, [r5, r4]
+    a4a8:	bl	9928 <__aeabi_fadd@plt>
+    a4ac:	str	r0, [r5, r4]
+    a4b0:	ldr	r6, [fp, #-220]	; 0xffffff24
+    a4b4:	add	r7, r7, #3
+    a4b8:	ldr	r3, [r6, #8]
+    a4bc:	cmp	r3, r8
+    a4c0:	bgt	a354 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)+0x1ec>
+    a4c4:	ldr	r1, [r6, #12]
+    a4c8:	add	sl, sl, #1
+    a4cc:	cmp	sl, r1
+    a4d0:	blt	a330 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)+0x1c8>
+    a4d4:	ldr	r0, [fp, #-176]	; 0xffffff50
+    a4d8:	cmp	r0, #0
+    a4dc:	beq	a4f8 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)+0x390>
+    a4e0:	mvn	r1, #0
+    a4e4:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    a4e8:	cmp	r0, #1
+    a4ec:	bne	a4f8 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)+0x390>
+    a4f0:	sub	r0, fp, #196	; 0xc4
+    a4f4:	bl	994c <cv::Mat::deallocate()@plt>
+    a4f8:	ldr	r3, [fp, #-156]	; 0xffffff64
+    a4fc:	mov	r2, #0
+    a500:	str	r2, [fp, #-168]	; 0xffffff58
+    a504:	str	r2, [fp, #-172]	; 0xffffff54
+    a508:	str	r2, [r3]
+    a50c:	ldr	r0, [fp, #-152]	; 0xffffff68
+    a510:	sub	ip, fp, #196	; 0xc4
+    a514:	add	r3, ip, #48	; 0x30
+    a518:	cmp	r0, r3
+    a51c:	beq	a530 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)+0x3c8>
+    a520:	str	r2, [fp, #-164]	; 0xffffff5c
+    a524:	str	r2, [fp, #-176]	; 0xffffff50
+    a528:	str	r2, [fp, #-180]	; 0xffffff4c
+    a52c:	bl	9a9c <cv::fastFree(void*)@plt>
+    a530:	mov	r0, r9
+    a534:	sub	sp, fp, #40	; 0x28
+    a538:	ldm	sp, {r4, r5, r6, r7, r8, r9, sl, fp, sp, pc}
+    a53c:	mov	r4, r0
+    a540:	sub	r0, fp, #196	; 0xc4
+    a544:	bl	af54 <cv::Mat::~Mat()>
+    a548:	mov	r0, r4
+    a54c:	bl	9ab4 <__cxa_end_cleanup@plt>
+    a550:	.word	0xd9d7bdbb
+    a554:	.word	0x3ddb7cdf
+
+0000a558 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)>:
+    a558:	mov	ip, sp
+    a55c:	push	{r4, r5, r6, fp, ip, lr, pc}
+    a560:	sub	fp, ip, #4
+    a564:	sub	sp, sp, #60	; 0x3c
+    a568:	stmfd	sp!, {lr}
+    a56c:	bl	9acc <__gnu_mcount_nc@plt>
+    a570:	ldr	r4, [r2, #12]
+    a574:	ldm	r2, {r3, ip, lr}
+    a578:	mov	r5, r0
+    a57c:	sub	r6, fp, #84	; 0x54
+    a580:	str	r3, [r0, #60]	; 0x3c
+    a584:	str	r4, [r0, #72]	; 0x48
+    a588:	mov	r2, r1
+    a58c:	str	ip, [r0, #64]	; 0x40
+    a590:	str	lr, [r0, #68]	; 0x44
+    a594:	add	r4, r0, #4
+    a598:	mov	r1, r5
+    a59c:	mov	r0, r6
+    a5a0:	add	r3, r5, #60	; 0x3c
+    a5a4:	bl	a168 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)>
+    a5a8:	cmp	r4, r6
+    a5ac:	ldreq	r0, [fp, #-64]	; 0xffffffc0
+    a5b0:	beq	a660 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0x108>
+    a5b4:	ldr	r0, [fp, #-64]	; 0xffffffc0
+    a5b8:	cmp	r0, #0
+    a5bc:	beq	a5c8 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0x70>
+    a5c0:	mov	r1, #1
+    a5c4:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    a5c8:	ldr	r0, [r5, #24]
+    a5cc:	cmp	r0, #0
+    a5d0:	beq	a5e4 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0x8c>
+    a5d4:	mvn	r1, #0
+    a5d8:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    a5dc:	cmp	r0, #1
+    a5e0:	beq	a6f8 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0x1a0>
+    a5e4:	ldr	r1, [r5, #44]	; 0x2c
+    a5e8:	mov	r2, #0
+    a5ec:	str	r2, [r5, #36]	; 0x24
+    a5f0:	str	r2, [r5, #32]
+    a5f4:	str	r2, [r5, #28]
+    a5f8:	str	r2, [r5, #20]
+    a5fc:	str	r2, [r1]
+    a600:	ldr	r3, [r5, #8]
+    a604:	str	r2, [r5, #24]
+    a608:	cmp	r3, #2
+    a60c:	ldr	r3, [fp, #-84]	; 0xffffffac
+    a610:	str	r3, [r5, #4]
+    a614:	bgt	a624 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0xcc>
+    a618:	ldr	r3, [fp, #-80]	; 0xffffffb0
+    a61c:	cmp	r3, #2
+    a620:	ble	a6b4 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0x15c>
+    a624:	mov	r0, r4
+    a628:	mov	r1, r6
+    a62c:	bl	9898 <cv::Mat::copySize(cv::Mat const&)@plt>
+    a630:	ldr	r3, [fp, #-68]	; 0xffffffbc
+    a634:	ldr	r2, [fp, #-48]	; 0xffffffd0
+    a638:	str	r3, [r5, #20]
+    a63c:	ldr	r3, [fp, #-60]	; 0xffffffc4
+    a640:	ldr	r0, [fp, #-64]	; 0xffffffc0
+    a644:	str	r2, [r5, #40]	; 0x28
+    a648:	str	r3, [r5, #28]
+    a64c:	ldr	r2, [fp, #-56]	; 0xffffffc8
+    a650:	ldr	r3, [fp, #-52]	; 0xffffffcc
+    a654:	str	r2, [r5, #32]
+    a658:	str	r3, [r5, #36]	; 0x24
+    a65c:	str	r0, [r5, #24]
+    a660:	cmp	r0, #0
+    a664:	beq	a678 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0x120>
+    a668:	mvn	r1, #0
+    a66c:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    a670:	cmp	r0, #1
+    a674:	beq	a6ec <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0x194>
+    a678:	ldr	r3, [fp, #-44]	; 0xffffffd4
+    a67c:	mov	r2, #0
+    a680:	str	r2, [fp, #-52]	; 0xffffffcc
+    a684:	str	r2, [fp, #-56]	; 0xffffffc8
+    a688:	str	r2, [fp, #-60]	; 0xffffffc4
+    a68c:	str	r2, [fp, #-68]	; 0xffffffbc
+    a690:	str	r2, [r3]
+    a694:	ldr	r0, [fp, #-40]	; 0xffffffd8
+    a698:	add	r3, r6, #48	; 0x30
+    a69c:	cmp	r0, r3
+    a6a0:	beq	a6ac <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0x154>
+    a6a4:	str	r2, [fp, #-64]	; 0xffffffc0
+    a6a8:	bl	9a9c <cv::fastFree(void*)@plt>
+    a6ac:	sub	sp, fp, #24
+    a6b0:	ldm	sp, {r4, r5, r6, fp, sp, pc}
+    a6b4:	str	r3, [r5, #8]
+    a6b8:	ldr	r3, [fp, #-76]	; 0xffffffb4
+    a6bc:	ldr	r2, [fp, #-72]	; 0xffffffb8
+    a6c0:	str	r3, [r5, #12]
+    a6c4:	ldr	r3, [fp, #-40]	; 0xffffffd8
+    a6c8:	str	r2, [r5, #16]
+    a6cc:	ldr	r1, [r3]
+    a6d0:	ldr	r2, [r5, #48]	; 0x30
+    a6d4:	str	r1, [r2]
+    a6d8:	ldr	r3, [fp, #-40]	; 0xffffffd8
+    a6dc:	ldr	r0, [r5, #48]	; 0x30
+    a6e0:	ldr	r2, [r3, #4]
+    a6e4:	str	r2, [r0, #4]
+    a6e8:	b	a630 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0xd8>
+    a6ec:	mov	r0, r6
+    a6f0:	bl	994c <cv::Mat::deallocate()@plt>
+    a6f4:	b	a678 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0x120>
+    a6f8:	mov	r0, r4
+    a6fc:	bl	994c <cv::Mat::deallocate()@plt>
+    a700:	b	a5e4 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)+0x8c>
+    a704:	mov	r4, r0
+    a708:	mov	r0, r6
+    a70c:	bl	af54 <cv::Mat::~Mat()>
+    a710:	mov	r0, r4
+    a714:	bl	9ab4 <__cxa_end_cleanup@plt>
+
+0000a718 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)>:
+    a718:	mov	ip, sp
+    a71c:	push	{r4, r5, r6, r7, r8, r9, sl, fp, ip, lr, pc}
+    a720:	sub	fp, ip, #4
+    a724:	sub	sp, sp, #100	; 0x64
+    a728:	stmfd	sp!, {lr}
+    a72c:	bl	9acc <__gnu_mcount_nc@plt>
+    a730:	ldr	r4, [fp, #8]
+    a734:	str	r0, [fp, #-128]	; 0xffffff80
+    a738:	ldr	r4, [r4, #12]
+    a73c:	ldr	ip, [fp, #8]
+    a740:	str	r4, [fp, #-124]	; 0xffffff84
+    a744:	ldr	ip, [ip, #8]
+    a748:	mov	r8, #0
+    a74c:	str	ip, [fp, #-120]	; 0xffffff88
+    a750:	add	ip, r0, #8
+    a754:	str	ip, [r0, #40]	; 0x28
+    a758:	ldr	r4, [fp, #-128]	; 0xffffff80
+    a75c:	add	lr, r0, #48	; 0x30
+    a760:	str	lr, [r4, #44]	; 0x2c
+    a764:	str	r1, [fp, #-132]	; 0xffffff7c
+    a768:	str	r3, [fp, #-136]	; 0xffffff78
+    a76c:	str	r8, [r4]
+    a770:	str	r8, [r4, #4]
+    a774:	str	r8, [r4, #8]
+    a778:	str	r8, [r4, #12]
+    a77c:	str	r8, [r4, #16]
+    a780:	str	r8, [r4, #20]
+    a784:	str	r8, [r4, #24]
+    a788:	str	r8, [r4, #28]
+    a78c:	str	r8, [r4, #32]
+    a790:	str	r8, [r4, #36]	; 0x24
+    a794:	str	r8, [r4, #52]	; 0x34
+    a798:	str	r8, [r4, #48]	; 0x30
+    a79c:	ldr	ip, [fp, #-124]	; 0xffffff84
+    a7a0:	ldr	lr, [fp, #-120]	; 0xffffff88
+    a7a4:	ldr	r5, [pc, #656]	; aa3c <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x324>
+    a7a8:	mov	r6, #0
+    a7ac:	mov	r7, #0
+    a7b0:	mov	sl, r2
+    a7b4:	mov	r1, #2
+    a7b8:	sub	r2, fp, #52	; 0x34
+    a7bc:	mov	r3, #5
+    a7c0:	mov	r4, #0
+    a7c4:	str	r4, [fp, #-100]	; 0xffffff9c
+    a7c8:	str	r5, [fp, #-96]	; 0xffffffa0
+    a7cc:	str	ip, [fp, #-52]	; 0xffffffcc
+    a7d0:	str	lr, [fp, #-48]	; 0xffffffd0
+    a7d4:	sub	r4, fp, #44	; 0x2c
+    a7d8:	str	r6, [fp, #-92]	; 0xffffffa4
+    a7dc:	str	r7, [fp, #-88]	; 0xffffffa8
+    a7e0:	str	r6, [fp, #-76]	; 0xffffffb4
+    a7e4:	str	r7, [fp, #-72]	; 0xffffffb8
+    a7e8:	str	r6, [fp, #-84]	; 0xffffffac
+    a7ec:	str	r7, [fp, #-80]	; 0xffffffb0
+    a7f0:	bl	9afc <cv::Mat::create(int, int const*, int)@plt>
+    a7f4:	sub	r1, fp, #100	; 0x64
+    a7f8:	ldr	r0, [fp, #-128]	; 0xffffff80
+    a7fc:	bl	9b38 <cv::Mat::operator=(cv::Scalar_<double> const&)@plt>
+    a800:	str	r8, [r4, #-20]!	; 0xffffffec
+    a804:	mov	r0, sl
+    a808:	mov	r1, r4
+    a80c:	str	r8, [fp, #-56]	; 0xffffffc8
+    a810:	str	r8, [fp, #-60]	; 0xffffffc4
+    a814:	bl	9958 <cv::split(cv::Mat const&, std::vector<cv::Mat, std::allocator<cv::Mat> >&)@plt>
+    a818:	mov	r9, r8
+    a81c:	str	r8, [fp, #-108]	; 0xffffff94
+    a820:	ldr	r2, [fp, #8]
+    a824:	ldr	r1, [fp, #-124]	; 0xffffff84
+    a828:	ldr	r2, [r2, #4]
+    a82c:	cmp	r1, #0
+    a830:	str	r2, [fp, #-116]	; 0xffffff8c
+    a834:	ble	a94c <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x234>
+    a838:	mov	r3, #0
+    a83c:	str	r3, [fp, #-112]	; 0xffffff90
+    a840:	ldr	r4, [fp, #-120]	; 0xffffff88
+    a844:	ldr	ip, [fp, #8]
+    a848:	cmp	r4, #0
+    a84c:	ldr	sl, [ip]
+    a850:	ble	a934 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x21c>
+    a854:	ldr	lr, [fp, #-112]	; 0xffffff90
+    a858:	ldr	r1, [fp, #-116]	; 0xffffff8c
+    a85c:	mov	r8, #0
+    a860:	add	lr, lr, r1
+    a864:	str	lr, [fp, #-104]	; 0xffffff98
+    a868:	ldr	r4, [fp, #-108]	; 0xffffff94
+    a86c:	ldr	r3, [fp, #-64]	; 0xffffffc0
+    a870:	ldr	r2, [fp, #-128]	; 0xffffff80
+    a874:	add	r3, r3, r4
+    a878:	ldr	r1, [r3, #44]	; 0x2c
+    a87c:	ldr	lr, [r2, #44]	; 0x2c
+    a880:	ldr	r0, [r1]
+    a884:	ldr	r1, [fp, #-104]	; 0xffffff98
+    a888:	ldr	r2, [r3, #16]
+    a88c:	mul	r1, r0, r1
+    a890:	ldr	ip, [lr]
+    a894:	add	r2, r2, sl
+    a898:	ldr	r7, [fp, #-112]	; 0xffffff90
+    a89c:	ldrb	r0, [r2, r1]
+    a8a0:	lsl	r3, r8, #2
+    a8a4:	mla	r7, ip, r7, r3
+    a8a8:	bl	9a60 <__aeabi_i2f@plt>
+    a8ac:	ldr	ip, [fp, #-132]	; 0xffffff7c
+    a8b0:	add	r8, r8, #1
+    a8b4:	ldr	r1, [ip]
+    a8b8:	bl	988c <__aeabi_fdiv@plt>
+    a8bc:	bl	9b74 <__aeabi_f2iz@plt>
+    a8c0:	ldr	r1, [fp, #4]
+    a8c4:	ldr	lr, [fp, #-136]	; 0xffffff78
+    a8c8:	ldr	r2, [r1, #44]	; 0x2c
+    a8cc:	ldr	r3, [lr, #44]	; 0x2c
+    a8d0:	ldr	ip, [r2]
+    a8d4:	ldr	r1, [r3]
+    a8d8:	mul	r5, ip, r9
+    a8dc:	ldr	ip, [fp, #4]
+    a8e0:	mul	r4, r1, r9
+    a8e4:	ldr	r2, [ip, #16]
+    a8e8:	ldr	r3, [lr, #16]
+    a8ec:	lsl	r0, r0, #2
+    a8f0:	ldr	lr, [fp, #-128]	; 0xffffff80
+    a8f4:	add	r2, r2, r0
+    a8f8:	add	r3, r3, r0
+    a8fc:	ldr	r6, [lr, #16]
+    a900:	ldr	r0, [r3, r4]
+    a904:	ldr	r1, [r2, r5]
+    a908:	bl	988c <__aeabi_fdiv@plt>
+    a90c:	ldr	r4, [r6, r7]
+    a910:	bl	9a6c <sqrtf@plt>
+    a914:	mov	r1, r0
+    a918:	mov	r0, r4
+    a91c:	bl	99b8 <__aeabi_fmul@plt>
+    a920:	ldr	r1, [fp, #-120]	; 0xffffff88
+    a924:	add	sl, sl, #1
+    a928:	cmp	r1, r8
+    a92c:	str	r0, [r6, r7]
+    a930:	bgt	a868 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x150>
+    a934:	ldr	r2, [fp, #-112]	; 0xffffff90
+    a938:	ldr	r3, [fp, #-124]	; 0xffffff84
+    a93c:	add	r2, r2, #1
+    a940:	cmp	r3, r2
+    a944:	str	r2, [fp, #-112]	; 0xffffff90
+    a948:	bgt	a840 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x128>
+    a94c:	ldr	r4, [fp, #-108]	; 0xffffff94
+    a950:	add	r9, r9, #1
+    a954:	add	r4, r4, #56	; 0x38
+    a958:	cmp	r9, #3
+    a95c:	str	r4, [fp, #-108]	; 0xffffff94
+    a960:	bne	a820 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x108>
+    a964:	ldr	r4, [fp, #-64]	; 0xffffffc0
+    a968:	ldr	r6, [fp, #-60]	; 0xffffffc4
+    a96c:	cmp	r4, r6
+    a970:	beq	a9e4 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x2cc>
+    a974:	mov	r5, #0
+    a978:	b	a9b8 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x2a0>
+    a97c:	ldr	r3, [r4, #40]	; 0x28
+    a980:	str	r5, [r4, #32]
+    a984:	str	r5, [r4, #28]
+    a988:	str	r5, [r4, #24]
+    a98c:	str	r5, [r4, #16]
+    a990:	str	r5, [r3]
+    a994:	ldr	r0, [r4, #44]	; 0x2c
+    a998:	add	r3, r4, #48	; 0x30
+    a99c:	cmp	r0, r3
+    a9a0:	str	r5, [r4, #20]
+    a9a4:	beq	a9ac <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x294>
+    a9a8:	bl	9a9c <cv::fastFree(void*)@plt>
+    a9ac:	add	r4, r4, #56	; 0x38
+    a9b0:	cmp	r6, r4
+    a9b4:	beq	a9e0 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x2c8>
+    a9b8:	ldr	r0, [r4, #20]
+    a9bc:	cmp	r0, #0
+    a9c0:	beq	a97c <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x264>
+    a9c4:	mvn	r1, #0
+    a9c8:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    a9cc:	cmp	r0, #1
+    a9d0:	bne	a97c <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x264>
+    a9d4:	mov	r0, r4
+    a9d8:	bl	994c <cv::Mat::deallocate()@plt>
+    a9dc:	b	a97c <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x264>
+    a9e0:	ldr	r6, [fp, #-64]	; 0xffffffc0
+    a9e4:	cmp	r6, #0
+    a9e8:	beq	a9f4 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x2dc>
+    a9ec:	mov	r0, r6
+    a9f0:	bl	997c <operator delete(void*)@plt>
+    a9f4:	ldr	r0, [fp, #-128]	; 0xffffff80
+    a9f8:	sub	sp, fp, #40	; 0x28
+    a9fc:	ldm	sp, {r4, r5, r6, r7, r8, r9, sl, fp, sp, pc}
+    aa00:	mov	r5, r0
+    aa04:	mov	r0, r4
+    aa08:	bl	afd0 <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()>
+    aa0c:	ldr	r0, [fp, #-128]	; 0xffffff80
+    aa10:	bl	af54 <cv::Mat::~Mat()>
+    aa14:	mov	r0, r5
+    aa18:	bl	9ab4 <__cxa_end_cleanup@plt>
+    aa1c:	ldr	r3, [fp, #-64]	; 0xffffffc0
+    aa20:	mov	r4, r0
+    aa24:	cmp	r3, #0
+    aa28:	beq	aa34 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x31c>
+    aa2c:	mov	r0, r3
+    aa30:	bl	997c <operator delete(void*)@plt>
+    aa34:	mov	r5, r4
+    aa38:	b	aa0c <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)+0x2f4>
+    aa3c:	.word	0x3ff00000
+
+0000aa40 <MeanShift::track(cv::Mat const&)>:
+    aa40:	mov	ip, sp
+    aa44:	push	{r4, r5, r6, r7, r8, r9, sl, fp, ip, lr, pc}
+    aa48:	sub	fp, ip, #4
+    aa4c:	sub	sp, sp, #196	; 0xc4
+    aa50:	stmfd	sp!, {lr}
+    aa54:	bl	9acc <__gnu_mcount_nc@plt>
+    aa58:	str	r0, [fp, #-200]	; 0xffffff38
+    aa5c:	str	r1, [fp, #-204]	; 0xffffff34
+    aa60:	ldr	r1, [fp, #-200]	; 0xffffff38
+    aa64:	mov	r0, #0
+    aa68:	str	r0, [r1]
+    aa6c:	str	r0, [r1, #4]
+    aa70:	str	r0, [r1, #8]
+    aa74:	str	r0, [r1, #12]
+    aa78:	ldr	ip, [fp, #-204]	; 0xffffff34
+    aa7c:	ldr	r3, [ip, #84]	; 0x54
+    aa80:	str	r2, [fp, #-208]	; 0xffffff30
+    aa84:	cmp	r3, r0
+    aa88:	ble	ae50 <MeanShift::track(cv::Mat const&)+0x410>
+    aa8c:	str	r0, [fp, #-188]	; 0xffffff44
+    aa90:	add	r1, ip, #4
+    aa94:	add	r0, ip, #60	; 0x3c
+    aa98:	str	r0, [fp, #-196]	; 0xffffff3c
+    aa9c:	str	r1, [fp, #-192]	; 0xffffff40
+    aaa0:	sub	r0, fp, #100	; 0x64
+    aaa4:	ldr	r1, [fp, #-204]	; 0xffffff34
+    aaa8:	ldr	r2, [fp, #-208]	; 0xffffff30
+    aaac:	ldr	r3, [fp, #-196]	; 0xffffff3c
+    aab0:	bl	a168 <MeanShift::pdf_representation(cv::Mat const&, cv::Rect_<int> const&)>
+    aab4:	sub	ip, fp, #100	; 0x64
+    aab8:	str	ip, [sp]
+    aabc:	ldr	ip, [fp, #-196]	; 0xffffff3c
+    aac0:	sub	r0, fp, #156	; 0x9c
+    aac4:	ldr	r1, [fp, #-204]	; 0xffffff34
+    aac8:	ldr	r2, [fp, #-208]	; 0xffffff30
+    aacc:	ldr	r3, [fp, #-192]	; 0xffffff40
+    aad0:	str	ip, [sp, #4]
+    aad4:	bl	a718 <MeanShift::CalWeight(cv::Mat const&, cv::Mat&, cv::Mat&, cv::Rect_<int>&)>
+    aad8:	ldr	r0, [fp, #-148]	; 0xffffff6c
+    aadc:	str	r0, [fp, #-216]	; 0xffffff28
+    aae0:	sub	r0, r0, #1
+    aae4:	bl	98c8 <__aeabi_i2d@plt>
+    aae8:	mov	r2, #0
+    aaec:	ldr	r3, [pc, #1112]	; af4c <MeanShift::track(cv::Mat const&)+0x50c>
+    aaf0:	bl	9bbc <__aeabi_dmul@plt>
+    aaf4:	bl	9bb0 <__aeabi_d2f@plt>
+    aaf8:	ldr	ip, [fp, #-204]	; 0xffffff34
+    aafc:	str	r0, [fp, #-180]	; 0xffffff4c
+    ab00:	ldr	r1, [fp, #-204]	; 0xffffff34
+    ab04:	ldr	r0, [ip, #72]	; 0x48
+    ab08:	ldr	ip, [fp, #-216]	; 0xffffff28
+    ab0c:	ldr	r3, [r1, #60]	; 0x3c
+    ab10:	cmp	ip, #0
+    ab14:	ldr	r2, [r1, #64]	; 0x40
+    ab18:	ldr	ip, [fp, #-200]	; 0xffffff38
+    ab1c:	ldr	r1, [r1, #68]	; 0x44
+    ab20:	movle	sl, #0
+    ab24:	str	r3, [ip]
+    ab28:	str	r2, [ip, #4]
+    ab2c:	str	r1, [ip, #8]
+    ab30:	str	r0, [ip, #12]
+    ab34:	movle	r9, sl
+    ab38:	strle	sl, [fp, #-184]	; 0xffffff48
+    ab3c:	ble	ad08 <MeanShift::track(cv::Mat const&)+0x2c8>
+    ab40:	ldr	r0, [fp, #-144]	; 0xffffff70
+    ab44:	mov	sl, #0
+    ab48:	mov	r1, #0
+    ab4c:	str	r0, [fp, #-220]	; 0xffffff24
+    ab50:	mov	r9, sl
+    ab54:	str	sl, [fp, #-184]	; 0xffffff48
+    ab58:	str	r1, [fp, #-176]	; 0xffffff50
+    ab5c:	ldr	r2, [fp, #-220]	; 0xffffff24
+    ab60:	cmp	r2, #0
+    ab64:	ble	acf0 <MeanShift::track(cv::Mat const&)+0x2b0>
+    ab68:	ldr	r0, [fp, #-176]	; 0xffffff50
+    ab6c:	bl	9a60 <__aeabi_i2f@plt>
+    ab70:	ldr	r1, [fp, #-180]	; 0xffffff4c
+    ab74:	bl	98ec <__aeabi_fsub@plt>
+    ab78:	ldr	r1, [fp, #-180]	; 0xffffff4c
+    ab7c:	bl	988c <__aeabi_fdiv@plt>
+    ab80:	str	r0, [fp, #-160]	; 0xffffff60
+    ab84:	bl	98e0 <__aeabi_f2d@plt>
+    ab88:	ldr	r3, [fp, #-112]	; 0xffffff90
+    ab8c:	ldr	ip, [fp, #-140]	; 0xffffff74
+    ab90:	str	r0, [fp, #-172]	; 0xffffff54
+    ab94:	str	r1, [fp, #-168]	; 0xffffff58
+    ab98:	mov	r7, #0
+    ab9c:	str	r3, [fp, #-212]	; 0xffffff2c
+    aba0:	str	ip, [fp, #-224]	; 0xffffff20
+    aba4:	mov	r0, r7
+    aba8:	bl	9a60 <__aeabi_i2f@plt>
+    abac:	ldr	r1, [fp, #-180]	; 0xffffff4c
+    abb0:	bl	98ec <__aeabi_fsub@plt>
+    abb4:	ldr	r1, [fp, #-180]	; 0xffffff4c
+    abb8:	bl	988c <__aeabi_fdiv@plt>
+    abbc:	mov	r8, r0
+    abc0:	sub	r1, fp, #172	; 0xac
+    abc4:	ldm	r1, {r0, r1}
+    abc8:	mov	r2, r0
+    abcc:	mov	r3, r1
+    abd0:	bl	9bbc <__aeabi_dmul@plt>
+    abd4:	mov	r4, r0
+    abd8:	mov	r0, r8
+    abdc:	mov	r5, r1
+    abe0:	bl	98e0 <__aeabi_f2d@plt>
+    abe4:	mov	r2, r0
+    abe8:	mov	r3, r1
+    abec:	bl	9bbc <__aeabi_dmul@plt>
+    abf0:	mov	r2, r0
+    abf4:	mov	r3, r1
+    abf8:	mov	r0, r4
+    abfc:	mov	r1, r5
+    ac00:	bl	9a30 <__aeabi_dadd@plt>
+    ac04:	mov	r2, #0
+    ac08:	ldr	r3, [pc, #832]	; af50 <MeanShift::track(cv::Mat const&)+0x510>
+    ac0c:	bl	9a24 <__aeabi_dcmpgt@plt>
+    ac10:	ldr	r2, [fp, #-212]	; 0xffffff2c
+    ac14:	lsl	r3, r7, #2
+    ac18:	ldr	r1, [r2]
+    ac1c:	ldr	r2, [fp, #-176]	; 0xffffff50
+    ac20:	cmp	r0, #0
+    ac24:	mla	r2, r1, r2, r3
+    ac28:	ldr	r3, [fp, #-224]	; 0xffffff20
+    ac2c:	mov	r1, r8
+    ac30:	ldr	r4, [r3, r2]
+    ac34:	moveq	r5, #0
+    ac38:	mov	r0, r4
+    ac3c:	ldreq	r6, [pc, #780]	; af50 <MeanShift::track(cv::Mat const&)+0x510>
+    ac40:	movne	r5, #0
+    ac44:	movne	r6, #0
+    ac48:	bl	99b8 <__aeabi_fmul@plt>
+    ac4c:	bl	98e0 <__aeabi_f2d@plt>
+    ac50:	mov	r2, r0
+    ac54:	mov	r3, r1
+    ac58:	mov	r0, r5
+    ac5c:	mov	r1, r6
+    ac60:	bl	9bbc <__aeabi_dmul@plt>
+    ac64:	bl	9bb0 <__aeabi_d2f@plt>
+    ac68:	mov	r1, r0
+    ac6c:	mov	r0, sl
+    ac70:	bl	9928 <__aeabi_fadd@plt>
+    ac74:	ldr	r1, [fp, #-160]	; 0xffffff60
+    ac78:	mov	sl, r0
+    ac7c:	mov	r0, r4
+    ac80:	bl	99b8 <__aeabi_fmul@plt>
+    ac84:	bl	98e0 <__aeabi_f2d@plt>
+    ac88:	mov	r2, r0
+    ac8c:	mov	r3, r1
+    ac90:	mov	r0, r5
+    ac94:	mov	r1, r6
+    ac98:	bl	9bbc <__aeabi_dmul@plt>
+    ac9c:	bl	9bb0 <__aeabi_d2f@plt>
+    aca0:	mov	r1, r0
+    aca4:	ldr	r0, [fp, #-184]	; 0xffffff48
+    aca8:	bl	9928 <__aeabi_fadd@plt>
+    acac:	str	r0, [fp, #-184]	; 0xffffff48
+    acb0:	mov	r0, r4
+    acb4:	bl	98e0 <__aeabi_f2d@plt>
+    acb8:	mov	r2, r0
+    acbc:	mov	r3, r1
+    acc0:	mov	r0, r5
+    acc4:	mov	r1, r6
+    acc8:	bl	9bbc <__aeabi_dmul@plt>
+    accc:	bl	9bb0 <__aeabi_d2f@plt>
+    acd0:	mov	r1, r0
+    acd4:	mov	r0, r9
+    acd8:	bl	9928 <__aeabi_fadd@plt>
+    acdc:	ldr	ip, [fp, #-220]	; 0xffffff24
+    ace0:	add	r7, r7, #1
+    ace4:	cmp	ip, r7
+    ace8:	mov	r9, r0
+    acec:	bgt	aba4 <MeanShift::track(cv::Mat const&)+0x164>
+    acf0:	ldr	r0, [fp, #-176]	; 0xffffff50
+    acf4:	ldr	r1, [fp, #-216]	; 0xffffff28
+    acf8:	add	r0, r0, #1
+    acfc:	cmp	r0, r1
+    ad00:	str	r0, [fp, #-176]	; 0xffffff50
+    ad04:	blt	ab5c <MeanShift::track(cv::Mat const&)+0x11c>
+    ad08:	mov	r1, r9
+    ad0c:	mov	r0, sl
+    ad10:	bl	988c <__aeabi_fdiv@plt>
+    ad14:	ldr	r1, [fp, #-180]	; 0xffffff4c
+    ad18:	bl	99b8 <__aeabi_fmul@plt>
+    ad1c:	bl	9b74 <__aeabi_f2iz@plt>
+    ad20:	ldr	r1, [fp, #-200]	; 0xffffff38
+    ad24:	ldr	r2, [fp, #-200]	; 0xffffff38
+    ad28:	ldr	r3, [r1]
+    ad2c:	mov	r1, r9
+    ad30:	add	r4, r3, r0
+    ad34:	str	r4, [r2]
+    ad38:	ldr	r0, [fp, #-184]	; 0xffffff48
+    ad3c:	bl	988c <__aeabi_fdiv@plt>
+    ad40:	ldr	r1, [fp, #-180]	; 0xffffff4c
+    ad44:	bl	99b8 <__aeabi_fmul@plt>
+    ad48:	bl	9b74 <__aeabi_f2iz@plt>
+    ad4c:	ldr	ip, [fp, #-200]	; 0xffffff38
+    ad50:	ldr	r1, [fp, #-204]	; 0xffffff34
+    ad54:	ldr	r3, [ip, #4]
+    ad58:	ldr	r2, [r1, #60]	; 0x3c
+    ad5c:	add	r0, r0, r3
+    ad60:	cmp	r4, r2
+    ad64:	str	r0, [ip, #4]
+    ad68:	bne	ad78 <MeanShift::track(cv::Mat const&)+0x338>
+    ad6c:	ldr	r3, [r1, #64]	; 0x40
+    ad70:	cmp	r0, r3
+    ad74:	beq	ae74 <MeanShift::track(cv::Mat const&)+0x434>
+    ad78:	ldr	r3, [fp, #-136]	; 0xffffff78
+    ad7c:	ldr	r2, [fp, #-204]	; 0xffffff34
+    ad80:	cmp	r3, #0
+    ad84:	str	r4, [r2, #60]	; 0x3c
+    ad88:	str	r0, [r2, #64]	; 0x40
+    ad8c:	beq	ada4 <MeanShift::track(cv::Mat const&)+0x364>
+    ad90:	mov	r0, r3
+    ad94:	mvn	r1, #0
+    ad98:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    ad9c:	cmp	r0, #1
+    ada0:	beq	ae5c <MeanShift::track(cv::Mat const&)+0x41c>
+    ada4:	mov	r3, #0
+    ada8:	str	r3, [fp, #-124]	; 0xffffff84
+    adac:	str	r3, [fp, #-128]	; 0xffffff80
+    adb0:	str	r3, [fp, #-132]	; 0xffffff7c
+    adb4:	str	r3, [fp, #-140]	; 0xffffff74
+    adb8:	ldr	r3, [fp, #-116]	; 0xffffff8c
+    adbc:	mov	ip, #0
+    adc0:	str	ip, [r3]
+    adc4:	ldr	r0, [fp, #-112]	; 0xffffff90
+    adc8:	sub	r1, fp, #156	; 0x9c
+    adcc:	add	r3, r1, #48	; 0x30
+    add0:	cmp	r0, r3
+    add4:	str	ip, [fp, #-136]	; 0xffffff78
+    add8:	beq	ade0 <MeanShift::track(cv::Mat const&)+0x3a0>
+    addc:	bl	9a9c <cv::fastFree(void*)@plt>
+    ade0:	ldr	r0, [fp, #-80]	; 0xffffffb0
+    ade4:	cmp	r0, #0
+    ade8:	beq	adfc <MeanShift::track(cv::Mat const&)+0x3bc>
+    adec:	mvn	r1, #0
+    adf0:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    adf4:	cmp	r0, #1
+    adf8:	beq	ae68 <MeanShift::track(cv::Mat const&)+0x428>
+    adfc:	ldr	r3, [fp, #-60]	; 0xffffffc4
+    ae00:	mov	r2, #0
+    ae04:	str	r2, [fp, #-68]	; 0xffffffbc
+    ae08:	str	r2, [fp, #-72]	; 0xffffffb8
+    ae0c:	str	r2, [fp, #-76]	; 0xffffffb4
+    ae10:	str	r2, [fp, #-84]	; 0xffffffac
+    ae14:	str	r2, [r3]
+    ae18:	ldr	r0, [fp, #-56]	; 0xffffffc8
+    ae1c:	sub	ip, fp, #100	; 0x64
+    ae20:	add	r3, ip, #48	; 0x30
+    ae24:	cmp	r0, r3
+    ae28:	str	r2, [fp, #-80]	; 0xffffffb0
+    ae2c:	beq	ae34 <MeanShift::track(cv::Mat const&)+0x3f4>
+    ae30:	bl	9a9c <cv::fastFree(void*)@plt>
+    ae34:	ldr	r0, [fp, #-204]	; 0xffffff34
+    ae38:	ldr	r1, [fp, #-188]	; 0xffffff44
+    ae3c:	ldr	r3, [r0, #84]	; 0x54
+    ae40:	add	r1, r1, #1
+    ae44:	cmp	r3, r1
+    ae48:	str	r1, [fp, #-188]	; 0xffffff44
+    ae4c:	bgt	aaa0 <MeanShift::track(cv::Mat const&)+0x60>
+    ae50:	ldr	r0, [fp, #-200]	; 0xffffff38
+    ae54:	sub	sp, fp, #40	; 0x28
+    ae58:	ldm	sp, {r4, r5, r6, r7, r8, r9, sl, fp, sp, pc}
+    ae5c:	sub	r0, fp, #156	; 0x9c
+    ae60:	bl	994c <cv::Mat::deallocate()@plt>
+    ae64:	b	ada4 <MeanShift::track(cv::Mat const&)+0x364>
+    ae68:	sub	r0, fp, #100	; 0x64
+    ae6c:	bl	994c <cv::Mat::deallocate()@plt>
+    ae70:	b	adfc <MeanShift::track(cv::Mat const&)+0x3bc>
+    ae74:	ldr	r0, [fp, #-136]	; 0xffffff78
+    ae78:	cmp	r0, #0
+    ae7c:	beq	ae90 <MeanShift::track(cv::Mat const&)+0x450>
+    ae80:	mvn	r1, #0
+    ae84:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    ae88:	cmp	r0, #1
+    ae8c:	beq	af40 <MeanShift::track(cv::Mat const&)+0x500>
+    ae90:	ldr	r2, [fp, #-116]	; 0xffffff8c
+    ae94:	mov	r3, #0
+    ae98:	str	r3, [fp, #-124]	; 0xffffff84
+    ae9c:	str	r3, [fp, #-128]	; 0xffffff80
+    aea0:	str	r3, [fp, #-132]	; 0xffffff7c
+    aea4:	str	r3, [fp, #-140]	; 0xffffff74
+    aea8:	str	r3, [r2]
+    aeac:	ldr	r0, [fp, #-112]	; 0xffffff90
+    aeb0:	sub	ip, fp, #156	; 0x9c
+    aeb4:	add	r2, ip, #48	; 0x30
+    aeb8:	cmp	r0, r2
+    aebc:	str	r3, [fp, #-136]	; 0xffffff78
+    aec0:	beq	aec8 <MeanShift::track(cv::Mat const&)+0x488>
+    aec4:	bl	9a9c <cv::fastFree(void*)@plt>
+    aec8:	ldr	r0, [fp, #-80]	; 0xffffffb0
+    aecc:	cmp	r0, #0
+    aed0:	beq	aee4 <MeanShift::track(cv::Mat const&)+0x4a4>
+    aed4:	mvn	r1, #0
+    aed8:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    aedc:	cmp	r0, #1
+    aee0:	beq	af34 <MeanShift::track(cv::Mat const&)+0x4f4>
+    aee4:	ldr	r3, [fp, #-60]	; 0xffffffc4
+    aee8:	mov	r2, #0
+    aeec:	str	r2, [fp, #-68]	; 0xffffffbc
+    aef0:	str	r2, [fp, #-72]	; 0xffffffb8
+    aef4:	str	r2, [fp, #-76]	; 0xffffffb4
+    aef8:	str	r2, [fp, #-84]	; 0xffffffac
+    aefc:	str	r2, [r3]
+    af00:	ldr	r0, [fp, #-56]	; 0xffffffc8
+    af04:	sub	r1, fp, #100	; 0x64
+    af08:	add	r3, r1, #48	; 0x30
+    af0c:	cmp	r0, r3
+    af10:	beq	ae50 <MeanShift::track(cv::Mat const&)+0x410>
+    af14:	str	r2, [fp, #-80]	; 0xffffffb0
+    af18:	bl	9a9c <cv::fastFree(void*)@plt>
+    af1c:	b	ae50 <MeanShift::track(cv::Mat const&)+0x410>
+    af20:	mov	r4, r0
+    af24:	sub	r0, fp, #100	; 0x64
+    af28:	bl	af54 <cv::Mat::~Mat()>
+    af2c:	mov	r0, r4
+    af30:	bl	9ab4 <__cxa_end_cleanup@plt>
+    af34:	sub	r0, fp, #100	; 0x64
+    af38:	bl	994c <cv::Mat::deallocate()@plt>
+    af3c:	b	aee4 <MeanShift::track(cv::Mat const&)+0x4a4>
+    af40:	sub	r0, fp, #156	; 0x9c
+    af44:	bl	994c <cv::Mat::deallocate()@plt>
+    af48:	b	ae90 <MeanShift::track(cv::Mat const&)+0x450>
+    af4c:	.word	0x3fe00000
+    af50:	.word	0x3ff00000
+
+0000af54 <cv::Mat::~Mat()>:
+    af54:	mov	ip, sp
+    af58:	push	{r4, r5, fp, ip, lr, pc}
+    af5c:	sub	fp, ip, #4
+    af60:	stmfd	sp!, {lr}
+    af64:	bl	9acc <__gnu_mcount_nc@plt>
+    af68:	mov	r4, r0
+    af6c:	ldr	r0, [r0, #20]
+    af70:	cmp	r0, #0
+    af74:	beq	af88 <cv::Mat::~Mat()+0x34>
+    af78:	mvn	r1, #0
+    af7c:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    af80:	cmp	r0, #1
+    af84:	beq	afc4 <cv::Mat::~Mat()+0x70>
+    af88:	ldr	r3, [r4, #40]	; 0x28
+    af8c:	mov	r2, #0
+    af90:	str	r2, [r4, #32]
+    af94:	str	r2, [r4, #28]
+    af98:	str	r2, [r4, #24]
+    af9c:	str	r2, [r4, #16]
+    afa0:	str	r2, [r3]
+    afa4:	ldr	r0, [r4, #44]	; 0x2c
+    afa8:	add	r3, r4, #48	; 0x30
+    afac:	cmp	r0, r3
+    afb0:	str	r2, [r4, #20]
+    afb4:	beq	afbc <cv::Mat::~Mat()+0x68>
+    afb8:	bl	9a9c <cv::fastFree(void*)@plt>
+    afbc:	mov	r0, r4
+    afc0:	ldm	sp, {r4, r5, fp, sp, pc}
+    afc4:	mov	r0, r4
+    afc8:	bl	994c <cv::Mat::deallocate()@plt>
+    afcc:	b	af88 <cv::Mat::~Mat()+0x34>
+
+0000afd0 <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()>:
+    afd0:	mov	ip, sp
+    afd4:	push	{r4, r5, r6, r7, fp, ip, lr, pc}
+    afd8:	sub	fp, ip, #4
+    afdc:	stmfd	sp!, {lr}
+    afe0:	bl	9acc <__gnu_mcount_nc@plt>
+    afe4:	ldm	r0, {r4, r6}
+    afe8:	mov	r7, r0
+    afec:	cmp	r4, r6
+    aff0:	beq	b064 <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()+0x94>
+    aff4:	mov	r5, #0
+    aff8:	b	b038 <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()+0x68>
+    affc:	ldr	r3, [r4, #40]	; 0x28
+    b000:	str	r5, [r4, #32]
+    b004:	str	r5, [r4, #28]
+    b008:	str	r5, [r4, #24]
+    b00c:	str	r5, [r4, #16]
+    b010:	str	r5, [r3]
+    b014:	ldr	r0, [r4, #44]	; 0x2c
+    b018:	add	r3, r4, #48	; 0x30
+    b01c:	cmp	r0, r3
+    b020:	str	r5, [r4, #20]
+    b024:	beq	b02c <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()+0x5c>
+    b028:	bl	9a9c <cv::fastFree(void*)@plt>
+    b02c:	add	r4, r4, #56	; 0x38
+    b030:	cmp	r6, r4
+    b034:	beq	b060 <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()+0x90>
+    b038:	ldr	r0, [r4, #20]
+    b03c:	cmp	r0, #0
+    b040:	beq	affc <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()+0x2c>
+    b044:	mvn	r1, #0
+    b048:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    b04c:	cmp	r0, #1
+    b050:	bne	affc <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()+0x2c>
+    b054:	mov	r0, r4
+    b058:	bl	994c <cv::Mat::deallocate()@plt>
+    b05c:	b	affc <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()+0x2c>
+    b060:	ldr	r6, [r7]
+    b064:	cmp	r6, #0
+    b068:	beq	b074 <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()+0xa4>
+    b06c:	mov	r0, r6
+    b070:	bl	997c <operator delete(void*)@plt>
+    b074:	mov	r0, r7
+    b078:	ldm	sp, {r4, r5, r6, r7, fp, sp, pc}
+    b07c:	ldr	r3, [r7]
+    b080:	mov	r4, r0
+    b084:	cmp	r3, #0
+    b088:	beq	b094 <std::vector<cv::Mat, std::allocator<cv::Mat> >::~vector()+0xc4>
+    b08c:	mov	r0, r3
+    b090:	bl	997c <operator delete(void*)@plt>
+    b094:	mov	r0, r4
+    b098:	bl	9ab4 <__cxa_end_cleanup@plt>
+
+0000b09c <global constructors keyed to main>:
+    b09c:	mov	ip, sp
+    b0a0:	push	{r4, r5, fp, ip, lr, pc}
+    b0a4:	sub	fp, ip, #4
+    b0a8:	stmfd	sp!, {lr}
+    b0ac:	bl	9acc <__gnu_mcount_nc@plt>
+    b0b0:	ldr	r4, [pc, #24]	; b0d0 <global constructors keyed to main+0x34>
+    b0b4:	mov	r0, r4
+    b0b8:	bl	9ae4 <std::ios_base::Init::Init()@plt>
+    b0bc:	ldr	r1, [pc, #16]	; b0d4 <global constructors keyed to main+0x38>
+    b0c0:	ldr	r2, [pc, #16]	; b0d8 <global constructors keyed to main+0x3c>
+    b0c4:	mov	r0, r4
+    b0c8:	ldm	sp, {r4, r5, fp, sp, lr}
+    b0cc:	b	9b8c <__aeabi_atexit@plt>
+    b0d0:	.word	0x00014987
+    b0d4:	.word	0x000099d0
+    b0d8:	.word	0x00014810
+
+0000b0dc <main>:
+    b0dc:	mov	ip, sp
+    b0e0:	push	{r4, r5, r6, r7, r8, r9, sl, fp, ip, lr, pc}
+    b0e4:	sub	sp, sp, #1200	; 0x4b0
+    b0e8:	sub	fp, ip, #4
+    b0ec:	sub	sp, sp, #4
+    b0f0:	stmfd	sp!, {lr}
+    b0f4:	bl	9acc <__gnu_mcount_nc@plt>
+    b0f8:	mov	r4, r0
+    b0fc:	sub	r0, fp, #140	; 0x8c
+    b100:	mov	r7, r1
+    b104:	bl	9b68 <cv::VideoCapture::VideoCapture()@plt>
+    b108:	cmp	r4, #1
+    b10c:	ble	bd7c <main+0xca0>
+    b110:	sub	r6, fp, #52	; 0x34
+    b114:	ldr	r1, [r7, #4]
+    b118:	mov	r0, r6
+    b11c:	sub	r2, fp, #45	; 0x2d
+    b120:	bl	9b98 <std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&)@plt>
+    b124:	sub	r5, fp, #152	; 0x98
+    b128:	mov	r0, r5
+    b12c:	mov	r1, r6
+    b130:	bl	99dc <cv::VideoCapture::VideoCapture(std::string const&)@plt>
+    b134:	ldr	r4, [fp, #-144]	; 0xffffff70
+    b138:	cmp	r4, #0
+    b13c:	beq	b14c <main+0x70>
+    b140:	mov	r0, r4
+    b144:	mov	r1, #1
+    b148:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    b14c:	ldr	r0, [fp, #-132]	; 0xffffff7c
+    b150:	cmp	r0, #0
+    b154:	beq	b168 <main+0x8c>
+    b158:	mvn	r1, #0
+    b15c:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    b160:	cmp	r0, #1
+    b164:	beq	bd58 <main+0xc7c>
+    b168:	ldr	r3, [fp, #-148]	; 0xffffff6c
+    b16c:	mov	r0, r5
+    b170:	str	r3, [fp, #-136]	; 0xffffff78
+    b174:	str	r4, [fp, #-132]	; 0xffffff7c
+    b178:	bl	9a0c <cv::VideoCapture::~VideoCapture()@plt>
+    b17c:	ldr	r0, [fp, #-52]	; 0xffffffcc
+    b180:	ldr	r6, [pc, #3880]	; c0b0 <main+0xfd4>
+    b184:	sub	r4, r0, #12
+    b188:	cmp	r4, r6
+    b18c:	bne	bf48 <main+0xe6c>
+    b190:	sub	r2, fp, #284	; 0x11c
+    b194:	add	lr, r2, #8
+    b198:	add	r4, r2, #48	; 0x30
+    b19c:	mov	r1, r2
+    b1a0:	ldr	r2, [pc, #3852]	; c0b4 <main+0xfd8>
+    b1a4:	mov	r3, #228	; 0xe4
+    b1a8:	mov	ip, #0
+    b1ac:	str	r3, [fp, #-180]	; 0xffffff4c
+    b1b0:	str	r2, [fp, #-176]	; 0xffffff50
+    b1b4:	mov	r3, #86	; 0x56
+    b1b8:	mov	r2, #58	; 0x3a
+    b1bc:	sub	r0, fp, #140	; 0x8c
+    b1c0:	str	r3, [fp, #-172]	; 0xffffff54
+    b1c4:	str	r2, [fp, #-168]	; 0xffffff58
+    b1c8:	str	lr, [fp, #-244]	; 0xffffff0c
+    b1cc:	str	r4, [fp, #-240]	; 0xffffff10
+    b1d0:	str	ip, [fp, #-236]	; 0xffffff14
+    b1d4:	str	ip, [fp, #-284]	; 0xfffffee4
+    b1d8:	str	ip, [fp, #-280]	; 0xfffffee8
+    b1dc:	str	ip, [fp, #-276]	; 0xfffffeec
+    b1e0:	str	ip, [fp, #-272]	; 0xfffffef0
+    b1e4:	str	ip, [fp, #-268]	; 0xfffffef4
+    b1e8:	str	ip, [fp, #-264]	; 0xfffffef8
+    b1ec:	str	ip, [fp, #-260]	; 0xfffffefc
+    b1f0:	str	ip, [fp, #-256]	; 0xffffff00
+    b1f4:	str	ip, [fp, #-252]	; 0xffffff04
+    b1f8:	str	ip, [fp, #-248]	; 0xffffff08
+    b1fc:	str	ip, [fp, #-232]	; 0xffffff18
+    b200:	bl	98b0 <cv::VideoCapture::read(cv::Mat&)@plt>
+    b204:	ldr	r3, [fp, #-272]	; 0xfffffef0
+    b208:	cmp	r3, #9
+    b20c:	ble	b21c <main+0x140>
+    b210:	ldr	r3, [fp, #-276]	; 0xfffffeec
+    b214:	cmp	r3, #9
+    b218:	bgt	b340 <main+0x264>
+    b21c:	ldr	r4, [pc, #3732]	; c0b8 <main+0xfdc>
+    b220:	ldr	r1, [pc, #3732]	; c0bc <main+0xfe0>
+    b224:	mov	r0, r4
+    b228:	mov	r2, #77	; 0x4d
+    b22c:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b230:	ldr	r2, [r4]
+    b234:	ldr	r3, [r2, #-12]
+    b238:	add	r3, r4, r3
+    b23c:	ldr	r5, [r3, #124]	; 0x7c
+    b240:	cmp	r5, #0
+    b244:	beq	c14c <main+0x1070>
+    b248:	ldrb	r3, [r5, #28]
+    b24c:	cmp	r3, #0
+    b250:	subeq	r4, fp, #628	; 0x274
+    b254:	ldrbne	r0, [r5, #39]	; 0x27
+    b258:	bne	b2c4 <main+0x1e8>
+    b25c:	strb	r3, [r4, r3]
+    b260:	add	r3, r3, #1
+    b264:	cmp	r3, #256	; 0x100
+    b268:	bne	b25c <main+0x180>
+    b26c:	add	r6, r5, #29
+    b270:	ldr	ip, [r5]
+    b274:	mov	r0, r5
+    b278:	mov	r1, r4
+    b27c:	add	r2, r4, #256	; 0x100
+    b280:	mov	r3, r6
+    b284:	mov	lr, pc
+    b288:	ldr	pc, [ip, #28]
+    b28c:	mov	r3, #1
+    b290:	strb	r3, [r5, #28]
+    b294:	mov	r1, r6
+    b298:	mov	r0, r4
+    b29c:	mov	r2, #256	; 0x100
+    b2a0:	bl	9a84 <memcmp@plt>
+    b2a4:	cmp	r0, #0
+    b2a8:	movne	r3, #2
+    b2ac:	strbne	r3, [r5, #28]
+    b2b0:	mov	r0, r5
+    b2b4:	ldr	r3, [r5]
+    b2b8:	mov	r1, #10
+    b2bc:	mov	lr, pc
+    b2c0:	ldr	pc, [r3, #24]
+    b2c4:	mov	r1, r0
+    b2c8:	ldr	r0, [pc, #3560]	; c0b8 <main+0xfdc>
+    b2cc:	bl	9988 <std::ostream::put(char)@plt>
+    b2d0:	bl	9940 <std::ostream::flush()@plt>
+    b2d4:	mov	r4, #1
+    b2d8:	ldr	r0, [fp, #-264]	; 0xfffffef8
+    b2dc:	cmp	r0, #0
+    b2e0:	beq	b2f4 <main+0x218>
+    b2e4:	mvn	r1, #0
+    b2e8:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    b2ec:	cmp	r0, #1
+    b2f0:	beq	bd70 <main+0xc94>
+    b2f4:	ldr	r2, [fp, #-244]	; 0xffffff0c
+    b2f8:	mov	r3, #0
+    b2fc:	str	r3, [fp, #-252]	; 0xffffff04
+    b300:	str	r3, [fp, #-256]	; 0xffffff00
+    b304:	str	r3, [fp, #-260]	; 0xfffffefc
+    b308:	str	r3, [fp, #-268]	; 0xfffffef4
+    b30c:	str	r3, [r2]
+    b310:	ldr	r0, [fp, #-240]	; 0xffffff10
+    b314:	sub	r6, fp, #284	; 0x11c
+    b318:	add	r2, r6, #48	; 0x30
+    b31c:	cmp	r0, r2
+    b320:	str	r3, [fp, #-264]	; 0xfffffef8
+    b324:	beq	b32c <main+0x250>
+    b328:	bl	9a9c <cv::fastFree(void*)@plt>
+    b32c:	sub	r0, fp, #140	; 0x8c
+    b330:	bl	9a0c <cv::VideoCapture::~VideoCapture()@plt>
+    b334:	mov	r0, r4
+    b338:	sub	sp, fp, #40	; 0x28
+    b33c:	ldm	sp, {r4, r5, r6, r7, r8, r9, sl, fp, sp, pc}
+    b340:	sub	r0, fp, #372	; 0x174
+    b344:	bl	9e88 <MeanShift::MeanShift()>
+    b348:	sub	r0, fp, #372	; 0x174
+    b34c:	sub	r1, fp, #284	; 0x11c
+    b350:	sub	r2, fp, #180	; 0xb4
+    b354:	bl	a558 <MeanShift::Init_target_frame(cv::Mat const&, cv::Rect_<int> const&)>
+    b358:	sub	r5, fp, #56	; 0x38
+    b35c:	mov	r0, r5
+    b360:	ldr	r1, [pc, #3416]	; c0c0 <main+0xfe4>
+    b364:	sub	r2, fp, #46	; 0x2e
+    b368:	bl	9b98 <std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&)@plt>
+    b36c:	ldr	r3, [fp, #-272]	; 0xfffffef0
+    b370:	ldr	ip, [fp, #-276]	; 0xfffffeec
+    b374:	ldr	r4, [pc, #3400]	; c0c4 <main+0xfe8>
+    b378:	str	r3, [fp, #-64]	; 0xffffffc0
+    b37c:	mov	r3, #0
+    b380:	str	ip, [fp, #-60]	; 0xffffffc4
+    b384:	stm	sp, {r3, r4}
+    b388:	sub	ip, fp, #64	; 0x40
+    b38c:	mov	r3, #1
+    b390:	sub	r0, fp, #164	; 0xa4
+    b394:	mov	r1, r5
+    b398:	ldr	r2, [pc, #3368]	; c0c8 <main+0xfec>
+    b39c:	str	ip, [sp, #8]
+    b3a0:	str	r3, [sp, #12]
+    b3a4:	bl	9a78 <cv::VideoWriter::VideoWriter(std::string const&, int, double, cv::Size_<int>, bool)@plt>
+    b3a8:	ldr	r0, [fp, #-56]	; 0xffffffc8
+    b3ac:	sub	r4, r0, #12
+    b3b0:	cmp	r6, r4
+    b3b4:	bne	c058 <main+0xf7c>
+    b3b8:	sub	r4, fp, #1136	; 0x470
+    b3bc:	sub	r4, r4, #12
+    b3c0:	sub	r4, r4, #12
+    b3c4:	mov	r0, r4
+    b3c8:	str	r4, [fp, #-1200]	; 0xfffffb50
+    b3cc:	bl	98d4 <std::basic_ofstream<char, std::char_traits<char> >::basic_ofstream()@plt>
+    b3d0:	add	r0, r4, #4
+    b3d4:	ldr	r1, [pc, #3312]	; c0cc <main+0xff0>
+    b3d8:	mov	r2, #48	; 0x30
+    b3dc:	bl	9aa8 <std::basic_filebuf<char, std::char_traits<char> >::open(char const*, std::_Ios_Openmode)@plt>
+    b3e0:	cmp	r0, #0
+    b3e4:	beq	befc <main+0xe20>
+    b3e8:	ldr	r3, [fp, #-1160]	; 0xfffffb78
+    b3ec:	ldr	r6, [fp, #-1200]	; 0xfffffb50
+    b3f0:	ldr	r0, [r3, #-12]
+    b3f4:	mov	r1, #0
+    b3f8:	add	r0, r6, r0
+    b3fc:	bl	9b50 <std::basic_ios<char, std::char_traits<char> >::clear(std::_Ios_Iostate)@plt>
+    b400:	ldr	r0, [fp, #-1200]	; 0xfffffb50
+    b404:	ldr	r1, [pc, #3268]	; c0d0 <main+0xff4>
+    b408:	mov	r2, #1
+    b40c:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b410:	ldr	r0, [fp, #-1200]	; 0xfffffb50
+    b414:	ldr	r1, [pc, #3256]	; c0d4 <main+0xff8>
+    b418:	mov	r2, #1
+    b41c:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b420:	ldr	r0, [fp, #-1200]	; 0xfffffb50
+    b424:	ldr	r1, [pc, #3244]	; c0d8 <main+0xffc>
+    b428:	mov	r2, #1
+    b42c:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b430:	ldr	r0, [fp, #-1200]	; 0xfffffb50
+    b434:	ldr	r1, [pc, #3224]	; c0d4 <main+0xff8>
+    b438:	mov	r2, #1
+    b43c:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b440:	ldr	r0, [fp, #-1200]	; 0xfffffb50
+    b444:	ldr	r1, [pc, #3216]	; c0dc <main+0x1000>
+    b448:	mov	r2, #1
+    b44c:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b450:	ldr	r2, [fp, #-1160]	; 0xfffffb78
+    b454:	ldr	r7, [fp, #-1200]	; 0xfffffb50
+    b458:	ldr	r3, [r2, #-12]
+    b45c:	add	r3, r7, r3
+    b460:	ldr	r5, [r3, #124]	; 0x7c
+    b464:	cmp	r5, #0
+    b468:	beq	c004 <main+0xf28>
+    b46c:	ldrb	r3, [r5, #28]
+    b470:	cmp	r3, #0
+    b474:	subeq	r4, fp, #628	; 0x274
+    b478:	ldrbne	r0, [r5, #39]	; 0x27
+    b47c:	bne	b4e8 <main+0x40c>
+    b480:	strb	r3, [r4, r3]
+    b484:	add	r3, r3, #1
+    b488:	cmp	r3, #256	; 0x100
+    b48c:	bne	b480 <main+0x3a4>
+    b490:	add	r6, r5, #29
+    b494:	ldr	ip, [r5]
+    b498:	mov	r0, r5
+    b49c:	mov	r1, r4
+    b4a0:	add	r2, r4, #256	; 0x100
+    b4a4:	mov	r3, r6
+    b4a8:	mov	lr, pc
+    b4ac:	ldr	pc, [ip, #28]
+    b4b0:	mov	r3, #1
+    b4b4:	strb	r3, [r5, #28]
+    b4b8:	mov	r1, r6
+    b4bc:	mov	r0, r4
+    b4c0:	mov	r2, #256	; 0x100
+    b4c4:	bl	9a84 <memcmp@plt>
+    b4c8:	cmp	r0, #0
+    b4cc:	movne	r3, #2
+    b4d0:	strbne	r3, [r5, #28]
+    b4d4:	mov	r0, r5
+    b4d8:	ldr	r3, [r5]
+    b4dc:	mov	r1, #10
+    b4e0:	mov	lr, pc
+    b4e4:	ldr	pc, [r3, #24]
+    b4e8:	mov	r1, r0
+    b4ec:	ldr	r0, [fp, #-1200]	; 0xfffffb50
+    b4f0:	bl	9988 <std::ostream::put(char)@plt>
+    b4f4:	bl	9940 <std::ostream::flush()@plt>
+    b4f8:	sub	ip, fp, #72	; 0x48
+    b4fc:	mov	r0, ip
+    b500:	str	ip, [fp, #-1224]	; 0xfffffb38
+    b504:	bl	9dcc <now()>
+    b508:	mov	r2, #0
+    b50c:	mov	r1, #0
+    b510:	sub	r5, fp, #884	; 0x374
+    b514:	str	r1, [fp, #-1188]	; 0xfffffb5c
+    b518:	str	r2, [fp, #-1184]	; 0xfffffb60
+    b51c:	str	r1, [fp, #-1180]	; 0xfffffb64
+    b520:	str	r2, [fp, #-1176]	; 0xfffffb68
+    b524:	str	r1, [fp, #-1172]	; 0xfffffb6c
+    b528:	str	r2, [fp, #-1168]	; 0xfffffb70
+    b52c:	sub	r3, fp, #104	; 0x68
+    b530:	sub	r2, fp, #96	; 0x60
+    b534:	sub	r4, fp, #80	; 0x50
+    b538:	add	r6, r5, #256	; 0x100
+    b53c:	mov	r8, #0
+    b540:	str	r2, [fp, #-1208]	; 0xfffffb48
+    b544:	str	r3, [fp, #-1212]	; 0xfffffb44
+    b548:	str	r4, [fp, #-1216]	; 0xfffffb40
+    b54c:	str	r6, [fp, #-1204]	; 0xfffffb4c
+    b550:	sub	r0, fp, #96	; 0x60
+    b554:	bl	9dcc <now()>
+    b558:	sub	r0, fp, #140	; 0x8c
+    b55c:	sub	r1, fp, #284	; 0x11c
+    b560:	bl	98b0 <cv::VideoCapture::read(cv::Mat&)@plt>
+    b564:	cmp	r0, #0
+    b568:	beq	b8c0 <main+0x7e4>
+    b56c:	sub	r0, fp, #104	; 0x68
+    b570:	bl	9dcc <now()>
+    b574:	ldr	r7, [fp, #-1208]	; 0xfffffb48
+    b578:	ldr	ip, [fp, #-1212]	; 0xfffffb44
+    b57c:	ldm	r7, {r0, r1}
+    b580:	ldr	r7, [pc, #2904]	; c0e0 <main+0x1004>
+    b584:	ldm	ip, {r2, r3}
+    b588:	mov	r6, #0
+    b58c:	stm	sp, {r6, r7}
+    b590:	bl	9cc4 <diffToNanoseconds(timespec, timespec, double)>
+    b594:	mov	r2, r0
+    b598:	mov	r3, r1
+    b59c:	ldr	r0, [fp, #-1180]	; 0xfffffb64
+    b5a0:	ldr	r1, [fp, #-1176]	; 0xfffffb68
+    b5a4:	bl	9a30 <__aeabi_dadd@plt>
+    b5a8:	str	r0, [fp, #-1180]	; 0xfffffb64
+    b5ac:	str	r1, [fp, #-1176]	; 0xfffffb68
+    b5b0:	sub	r0, fp, #80	; 0x50
+    b5b4:	bl	9dcc <now()>
+    b5b8:	sub	r0, fp, #628	; 0x274
+    b5bc:	sub	r1, fp, #372	; 0x174
+    b5c0:	sub	r2, fp, #284	; 0x11c
+    b5c4:	bl	aa40 <MeanShift::track(cv::Mat const&)>
+    b5c8:	sub	r4, fp, #88	; 0x58
+    b5cc:	mov	r0, r4
+    b5d0:	ldr	r9, [fp, #-624]	; 0xfffffd90
+    b5d4:	ldr	sl, [fp, #-628]	; 0xfffffd8c
+    b5d8:	bl	9dcc <now()>
+    b5dc:	ldr	r7, [fp, #-1216]	; 0xfffffb40
+    b5e0:	ldm	r4, {r2, r3}
+    b5e4:	ldm	r7, {r0, r1}
+    b5e8:	ldr	r7, [pc, #2800]	; c0e0 <main+0x1004>
+    b5ec:	mov	r6, #0
+    b5f0:	stm	sp, {r6, r7}
+    b5f4:	bl	9cc4 <diffToNanoseconds(timespec, timespec, double)>
+    b5f8:	mov	r2, r0
+    b5fc:	mov	r3, r1
+    b600:	sub	r7, fp, #112	; 0x70
+    b604:	ldr	r0, [fp, #-1188]	; 0xfffffb5c
+    b608:	ldr	r1, [fp, #-1184]	; 0xfffffb60
+    b60c:	str	r7, [fp, #-1220]	; 0xfffffb3c
+    b610:	bl	9a30 <__aeabi_dadd@plt>
+    b614:	str	r0, [fp, #-1188]	; 0xfffffb5c
+    b618:	str	r1, [fp, #-1184]	; 0xfffffb60
+    b61c:	sub	r0, fp, #112	; 0x70
+    b620:	bl	9dcc <now()>
+    b624:	ldr	r0, [fp, #-1200]	; 0xfffffb50
+    b628:	mov	r1, r8
+    b62c:	bl	98f8 <std::ostream::operator<<(int)@plt>
+    b630:	ldr	r1, [pc, #2716]	; c0d4 <main+0xff8>
+    b634:	mov	r2, #1
+    b638:	mov	r4, r0
+    b63c:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b640:	mov	r0, r4
+    b644:	mov	r1, sl
+    b648:	bl	98f8 <std::ostream::operator<<(int)@plt>
+    b64c:	ldr	r1, [pc, #2688]	; c0d4 <main+0xff8>
+    b650:	mov	r2, #1
+    b654:	mov	r4, r0
+    b658:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b65c:	mov	r0, r4
+    b660:	mov	r1, r9
+    b664:	bl	98f8 <std::ostream::operator<<(int)@plt>
+    b668:	ldr	r2, [r0]
+    b66c:	mov	r6, r0
+    b670:	ldr	r3, [r2, #-12]
+    b674:	add	r3, r0, r3
+    b678:	ldr	r4, [r3, #124]	; 0x7c
+    b67c:	cmp	r4, #0
+    b680:	beq	bf28 <main+0xe4c>
+    b684:	ldrb	r3, [r4, #28]
+    b688:	cmp	r3, #0
+    b68c:	ldrbne	r1, [r4, #39]	; 0x27
+    b690:	bne	b700 <main+0x624>
+    b694:	strb	r3, [r5, r3]
+    b698:	add	r3, r3, #1
+    b69c:	cmp	r3, #256	; 0x100
+    b6a0:	bne	b694 <main+0x5b8>
+    b6a4:	add	r7, r4, #29
+    b6a8:	ldr	ip, [r4]
+    b6ac:	mov	r0, r4
+    b6b0:	mov	r1, r5
+    b6b4:	ldr	r2, [fp, #-1204]	; 0xfffffb4c
+    b6b8:	mov	r3, r7
+    b6bc:	mov	lr, pc
+    b6c0:	ldr	pc, [ip, #28]
+    b6c4:	mov	r3, #1
+    b6c8:	strb	r3, [r4, #28]
+    b6cc:	mov	r1, r7
+    b6d0:	mov	r0, r5
+    b6d4:	mov	r2, #256	; 0x100
+    b6d8:	bl	9a84 <memcmp@plt>
+    b6dc:	cmp	r0, #0
+    b6e0:	movne	r3, #2
+    b6e4:	strbne	r3, [r4, #28]
+    b6e8:	mov	r0, r4
+    b6ec:	ldr	r3, [r4]
+    b6f0:	mov	r1, #10
+    b6f4:	mov	lr, pc
+    b6f8:	ldr	pc, [r3, #24]
+    b6fc:	mov	r1, r0
+    b700:	mov	r0, r6
+    b704:	bl	9988 <std::ostream::put(char)@plt>
+    b708:	bl	9940 <std::ostream::flush()@plt>
+    b70c:	mov	r6, #0
+    b710:	mov	r7, #0
+    b714:	ldr	ip, [fp, #-620]	; 0xfffffd94
+    b718:	ldr	lr, [fp, #-616]	; 0xfffffd98
+    b71c:	str	r6, [fp, #-228]	; 0xffffff1c
+    b720:	str	r7, [fp, #-224]	; 0xffffff20
+    b724:	str	r6, [fp, #-220]	; 0xffffff24
+    b728:	str	r7, [fp, #-216]	; 0xffffff28
+    b72c:	ldr	r7, [pc, #2480]	; c0e4 <main+0x1008>
+    b730:	mov	r6, #0
+    b734:	str	r6, [fp, #-212]	; 0xffffff2c
+    b738:	str	r7, [fp, #-208]	; 0xffffff30
+    b73c:	str	ip, [fp, #-188]	; 0xffffff44
+    b740:	str	lr, [fp, #-184]	; 0xffffff48
+    b744:	mov	ip, #8
+    b748:	mov	lr, #0
+    b74c:	mov	r6, #0
+    b750:	mov	r7, #0
+    b754:	sub	r0, fp, #284	; 0x11c
+    b758:	sub	r1, fp, #196	; 0xc4
+    b75c:	sub	r2, fp, #228	; 0xe4
+    b760:	mov	r3, #3
+    b764:	str	sl, [fp, #-196]	; 0xffffff3c
+    b768:	str	r9, [fp, #-192]	; 0xffffff40
+    b76c:	stm	sp, {ip, lr}
+    b770:	str	r6, [fp, #-204]	; 0xffffff34
+    b774:	str	r7, [fp, #-200]	; 0xffffff38
+    b778:	bl	99f4 <cv::rectangle(cv::Mat&, cv::Rect_<int>, cv::Scalar_<double> const&, int, int, int)@plt>
+    b77c:	sub	r0, fp, #164	; 0xa4
+    b780:	sub	r1, fp, #284	; 0x11c
+    b784:	bl	991c <cv::VideoWriter::operator<<(cv::Mat const&)@plt>
+    b788:	ldr	r7, [pc, #2392]	; c0e8 <main+0x100c>
+    b78c:	asr	r3, r8, #31
+    b790:	smull	ip, r2, r7, r8
+    b794:	rsb	r3, r3, r2, asr #2
+    b798:	add	r3, r3, r3, lsl #2
+    b79c:	cmp	r8, r3, lsl #1
+    b7a0:	bne	b870 <main+0x794>
+    b7a4:	ldr	r0, [pc, #2316]	; c0b8 <main+0xfdc>
+    b7a8:	ldr	r1, [pc, #2364]	; c0ec <main+0x1010>
+    b7ac:	mov	r2, #8
+    b7b0:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b7b4:	ldr	r0, [pc, #2300]	; c0b8 <main+0xfdc>
+    b7b8:	mov	r1, r8
+    b7bc:	bl	98f8 <std::ostream::operator<<(int)@plt>
+    b7c0:	ldr	r1, [pc, #2344]	; c0f0 <main+0x1014>
+    b7c4:	mov	r2, #7
+    b7c8:	mov	r6, r0
+    b7cc:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b7d0:	ldr	r2, [r6]
+    b7d4:	ldr	r3, [r2, #-12]
+    b7d8:	add	r3, r6, r3
+    b7dc:	ldr	r4, [r3, #124]	; 0x7c
+    b7e0:	cmp	r4, #0
+    b7e4:	beq	bf44 <main+0xe68>
+    b7e8:	ldrb	r3, [r4, #28]
+    b7ec:	cmp	r3, #0
+    b7f0:	ldrbne	r1, [r4, #39]	; 0x27
+    b7f4:	bne	b864 <main+0x788>
+    b7f8:	strb	r3, [r5, r3]
+    b7fc:	add	r3, r3, #1
+    b800:	cmp	r3, #256	; 0x100
+    b804:	bne	b7f8 <main+0x71c>
+    b808:	add	r7, r4, #29
+    b80c:	ldr	ip, [r4]
+    b810:	mov	r0, r4
+    b814:	mov	r1, r5
+    b818:	ldr	r2, [fp, #-1204]	; 0xfffffb4c
+    b81c:	mov	r3, r7
+    b820:	mov	lr, pc
+    b824:	ldr	pc, [ip, #28]
+    b828:	mov	r3, #1
+    b82c:	strb	r3, [r4, #28]
+    b830:	mov	r1, r7
+    b834:	mov	r0, r5
+    b838:	mov	r2, #256	; 0x100
+    b83c:	bl	9a84 <memcmp@plt>
+    b840:	cmp	r0, #0
+    b844:	movne	r3, #2
+    b848:	strbne	r3, [r4, #28]
+    b84c:	mov	r0, r4
+    b850:	ldr	r3, [r4]
+    b854:	mov	r1, #10
+    b858:	mov	lr, pc
+    b85c:	ldr	pc, [r3, #24]
+    b860:	mov	r1, r0
+    b864:	mov	r0, r6
+    b868:	bl	9988 <std::ostream::put(char)@plt>
+    b86c:	bl	9940 <std::ostream::flush()@plt>
+    b870:	sub	r4, fp, #120	; 0x78
+    b874:	mov	r0, r4
+    b878:	bl	9dcc <now()>
+    b87c:	ldr	r2, [fp, #-1220]	; 0xfffffb3c
+    b880:	ldr	r7, [pc, #2136]	; c0e0 <main+0x1004>
+    b884:	ldm	r2, {r0, r1}
+    b888:	mov	r6, #0
+    b88c:	ldm	r4, {r2, r3}
+    b890:	stm	sp, {r6, r7}
+    b894:	bl	9cc4 <diffToNanoseconds(timespec, timespec, double)>
+    b898:	mov	r2, r0
+    b89c:	mov	r3, r1
+    b8a0:	ldr	r0, [fp, #-1172]	; 0xfffffb6c
+    b8a4:	ldr	r1, [fp, #-1168]	; 0xfffffb70
+    b8a8:	bl	9a30 <__aeabi_dadd@plt>
+    b8ac:	add	r8, r8, #1
+    b8b0:	cmp	r8, #32
+    b8b4:	str	r0, [fp, #-1172]	; 0xfffffb6c
+    b8b8:	str	r1, [fp, #-1168]	; 0xfffffb70
+    b8bc:	bne	b550 <main+0x474>
+    b8c0:	ldr	r7, [fp, #-1200]	; 0xfffffb50
+    b8c4:	add	r0, r7, #4
+    b8c8:	bl	98bc <std::basic_filebuf<char, std::char_traits<char> >::close()@plt>
+    b8cc:	cmp	r0, #0
+    b8d0:	beq	bf2c <main+0xe50>
+    b8d4:	sub	r4, fp, #128	; 0x80
+    b8d8:	mov	r0, r4
+    b8dc:	bl	9dcc <now()>
+    b8e0:	ldr	ip, [fp, #-1224]	; 0xfffffb38
+    b8e4:	ldr	r5, [pc, #2036]	; c0e0 <main+0x1004>
+    b8e8:	ldm	r4, {r2, r3}
+    b8ec:	ldm	ip, {r0, r1}
+    b8f0:	mov	r4, #0
+    b8f4:	stm	sp, {r4, r5}
+    b8f8:	bl	9cc4 <diffToNanoseconds(timespec, timespec, double)>
+    b8fc:	mov	r9, r0
+    b900:	mov	sl, r1
+    b904:	mov	r2, #10
+    b908:	ldr	r0, [pc, #1960]	; c0b8 <main+0xfdc>
+    b90c:	ldr	r1, [pc, #2016]	; c0f4 <main+0x1018>
+    b910:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b914:	ldr	r0, [pc, #1948]	; c0b8 <main+0xfdc>
+    b918:	mov	r1, r8
+    b91c:	bl	98f8 <std::ostream::operator<<(int)@plt>
+    b920:	ldr	r1, [pc, #1992]	; c0f0 <main+0x1014>
+    b924:	mov	r2, #7
+    b928:	mov	r7, r0
+    b92c:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b930:	ldr	r2, [r7]
+    b934:	ldr	r3, [r2, #-12]
+    b938:	add	r3, r7, r3
+    b93c:	ldr	r5, [r3, #124]	; 0x7c
+    b940:	cmp	r5, #0
+    b944:	beq	bfe8 <main+0xf0c>
+    b948:	ldrb	r3, [r5, #28]
+    b94c:	cmp	r3, #0
+    b950:	subeq	r4, fp, #884	; 0x374
+    b954:	ldrbne	r1, [r5, #39]	; 0x27
+    b958:	bne	b9c8 <main+0x8ec>
+    b95c:	strb	r3, [r4, r3]
+    b960:	add	r3, r3, #1
+    b964:	cmp	r3, #256	; 0x100
+    b968:	bne	b95c <main+0x880>
+    b96c:	add	r6, r5, #29
+    b970:	ldr	ip, [r5]
+    b974:	mov	r0, r5
+    b978:	mov	r1, r4
+    b97c:	add	r2, r4, #256	; 0x100
+    b980:	mov	r3, r6
+    b984:	mov	lr, pc
+    b988:	ldr	pc, [ip, #28]
+    b98c:	mov	r3, #1
+    b990:	strb	r3, [r5, #28]
+    b994:	mov	r1, r6
+    b998:	mov	r0, r4
+    b99c:	mov	r2, #256	; 0x100
+    b9a0:	bl	9a84 <memcmp@plt>
+    b9a4:	cmp	r0, #0
+    b9a8:	movne	r3, #2
+    b9ac:	strbne	r3, [r5, #28]
+    b9b0:	mov	r0, r5
+    b9b4:	ldr	r3, [r5]
+    b9b8:	mov	r1, #10
+    b9bc:	mov	lr, pc
+    b9c0:	ldr	pc, [r3, #24]
+    b9c4:	mov	r1, r0
+    b9c8:	mov	r0, r7
+    b9cc:	bl	9988 <std::ostream::put(char)@plt>
+    b9d0:	bl	9940 <std::ostream::flush()@plt>
+    b9d4:	ldr	r0, [pc, #1756]	; c0b8 <main+0xfdc>
+    b9d8:	ldr	r1, [pc, #1816]	; c0f8 <main+0x101c>
+    b9dc:	mov	r2, #6
+    b9e0:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    b9e4:	mov	r0, r9
+    b9e8:	mov	r1, sl
+    b9ec:	mov	r2, #0
+    b9f0:	ldr	r3, [pc, #1796]	; c0fc <main+0x1020>
+    b9f4:	bl	9b14 <__aeabi_ddiv@plt>
+    b9f8:	mov	r9, r0
+    b9fc:	mov	r2, r0
+    ba00:	mov	r3, r1
+    ba04:	ldr	r0, [pc, #1708]	; c0b8 <main+0xfdc>
+    ba08:	mov	sl, r1
+    ba0c:	bl	9a18 <std::ostream& std::ostream::_M_insert<double>(double)@plt>
+    ba10:	ldr	r1, [pc, #1768]	; c100 <main+0x1024>
+    ba14:	mov	r2, #11
+    ba18:	mov	r4, r0
+    ba1c:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    ba20:	mov	r0, r8
+    ba24:	bl	98c8 <__aeabi_i2d@plt>
+    ba28:	mov	r2, r9
+    ba2c:	mov	r3, sl
+    ba30:	bl	9b14 <__aeabi_ddiv@plt>
+    ba34:	str	r0, [fp, #-1196]	; 0xfffffb54
+    ba38:	str	r1, [fp, #-1192]	; 0xfffffb58
+    ba3c:	ldr	r2, [fp, #-1196]	; 0xfffffb54
+    ba40:	ldr	r3, [fp, #-1192]	; 0xfffffb58
+    ba44:	mov	r0, r4
+    ba48:	bl	9a18 <std::ostream& std::ostream::_M_insert<double>(double)@plt>
+    ba4c:	ldr	r2, [r0]
+    ba50:	mov	r7, r0
+    ba54:	ldr	r3, [r2, #-12]
+    ba58:	add	r3, r0, r3
+    ba5c:	ldr	r5, [r3, #124]	; 0x7c
+    ba60:	cmp	r5, #0
+    ba64:	beq	bfe4 <main+0xf08>
+    ba68:	ldrb	r3, [r5, #28]
+    ba6c:	cmp	r3, #0
+    ba70:	subeq	r4, fp, #884	; 0x374
+    ba74:	ldrbne	r1, [r5, #39]	; 0x27
+    ba78:	bne	bae8 <main+0xa0c>
+    ba7c:	strb	r3, [r4, r3]
+    ba80:	add	r3, r3, #1
+    ba84:	cmp	r3, #256	; 0x100
+    ba88:	bne	ba7c <main+0x9a0>
+    ba8c:	add	r6, r5, #29
+    ba90:	ldr	ip, [r5]
+    ba94:	mov	r0, r5
+    ba98:	mov	r1, r4
+    ba9c:	add	r2, r4, #256	; 0x100
+    baa0:	mov	r3, r6
+    baa4:	mov	lr, pc
+    baa8:	ldr	pc, [ip, #28]
+    baac:	mov	r3, #1
+    bab0:	strb	r3, [r5, #28]
+    bab4:	mov	r1, r6
+    bab8:	mov	r0, r4
+    babc:	mov	r2, #256	; 0x100
+    bac0:	bl	9a84 <memcmp@plt>
+    bac4:	cmp	r0, #0
+    bac8:	movne	r3, #2
+    bacc:	strbne	r3, [r5, #28]
+    bad0:	mov	r0, r5
+    bad4:	ldr	r3, [r5]
+    bad8:	mov	r1, #10
+    badc:	mov	lr, pc
+    bae0:	ldr	pc, [r3, #24]
+    bae4:	mov	r1, r0
+    bae8:	mov	r0, r7
+    baec:	bl	9988 <std::ostream::put(char)@plt>
+    baf0:	bl	9940 <std::ostream::flush()@plt>
+    baf4:	ldr	r0, [pc, #1468]	; c0b8 <main+0xfdc>
+    baf8:	ldr	r1, [pc, #1540]	; c104 <main+0x1028>
+    bafc:	bl	99a0 <std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)@plt>
+    bb00:	ldr	r1, [pc, #1536]	; c108 <main+0x102c>
+    bb04:	bl	99a0 <std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)@plt>
+    bb08:	ldr	r1, [pc, #1476]	; c0d4 <main+0xff8>
+    bb0c:	bl	99a0 <std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)@plt>
+    bb10:	mov	r4, r0
+    bb14:	mov	r2, #0
+    bb18:	ldr	r3, [pc, #1500]	; c0fc <main+0x1020>
+    bb1c:	ldr	r0, [fp, #-1180]	; 0xfffffb64
+    bb20:	ldr	r1, [fp, #-1176]	; 0xfffffb68
+    bb24:	bl	9b14 <__aeabi_ddiv@plt>
+    bb28:	mov	r2, r0
+    bb2c:	mov	r3, r1
+    bb30:	mov	r0, r4
+    bb34:	bl	9a18 <std::ostream& std::ostream::_M_insert<double>(double)@plt>
+    bb38:	ldr	r1, [pc, #1428]	; c0d4 <main+0xff8>
+    bb3c:	bl	99a0 <std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)@plt>
+    bb40:	mov	r4, r0
+    bb44:	mov	r2, #0
+    bb48:	ldr	r3, [pc, #1452]	; c0fc <main+0x1020>
+    bb4c:	ldr	r0, [fp, #-1188]	; 0xfffffb5c
+    bb50:	ldr	r1, [fp, #-1184]	; 0xfffffb60
+    bb54:	bl	9b14 <__aeabi_ddiv@plt>
+    bb58:	mov	r2, r0
+    bb5c:	mov	r3, r1
+    bb60:	mov	r0, r4
+    bb64:	bl	9a18 <std::ostream& std::ostream::_M_insert<double>(double)@plt>
+    bb68:	ldr	r1, [pc, #1380]	; c0d4 <main+0xff8>
+    bb6c:	mov	r2, #1
+    bb70:	mov	r4, r0
+    bb74:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    bb78:	mov	r2, #0
+    bb7c:	ldr	r3, [pc, #1400]	; c0fc <main+0x1020>
+    bb80:	ldr	r0, [fp, #-1172]	; 0xfffffb6c
+    bb84:	ldr	r1, [fp, #-1168]	; 0xfffffb70
+    bb88:	bl	9b14 <__aeabi_ddiv@plt>
+    bb8c:	mov	r2, r0
+    bb90:	mov	r3, r1
+    bb94:	mov	r0, r4
+    bb98:	bl	9a18 <std::ostream& std::ostream::_M_insert<double>(double)@plt>
+    bb9c:	ldr	r1, [pc, #1328]	; c0d4 <main+0xff8>
+    bba0:	mov	r2, #1
+    bba4:	mov	r4, r0
+    bba8:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    bbac:	mov	r0, r4
+    bbb0:	mov	r2, r9
+    bbb4:	mov	r3, sl
+    bbb8:	bl	9a18 <std::ostream& std::ostream::_M_insert<double>(double)@plt>
+    bbbc:	ldr	r1, [pc, #1296]	; c0d4 <main+0xff8>
+    bbc0:	mov	r2, #1
+    bbc4:	mov	r4, r0
+    bbc8:	bl	9a48 <std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, int)@plt>
+    bbcc:	mov	r0, r4
+    bbd0:	ldr	r2, [fp, #-1196]	; 0xfffffb54
+    bbd4:	ldr	r3, [fp, #-1192]	; 0xfffffb58
+    bbd8:	bl	9a18 <std::ostream& std::ostream::_M_insert<double>(double)@plt>
+    bbdc:	ldr	r2, [r0]
+    bbe0:	mov	r7, r0
+    bbe4:	ldr	r3, [r2, #-12]
+    bbe8:	add	r3, r0, r3
+    bbec:	ldr	r5, [r3, #124]	; 0x7c
+    bbf0:	cmp	r5, #0
+    bbf4:	beq	bfe0 <main+0xf04>
+    bbf8:	ldrb	r3, [r5, #28]
+    bbfc:	cmp	r3, #0
+    bc00:	subeq	r4, fp, #884	; 0x374
+    bc04:	ldrbne	r1, [r5, #39]	; 0x27
+    bc08:	bne	bc78 <main+0xb9c>
+    bc0c:	strb	r3, [r4, r3]
+    bc10:	add	r3, r3, #1
+    bc14:	cmp	r3, #256	; 0x100
+    bc18:	bne	bc0c <main+0xb30>
+    bc1c:	add	r6, r5, #29
+    bc20:	ldr	ip, [r5]
+    bc24:	mov	r0, r5
+    bc28:	mov	r1, r4
+    bc2c:	add	r2, r4, #256	; 0x100
+    bc30:	mov	r3, r6
+    bc34:	mov	lr, pc
+    bc38:	ldr	pc, [ip, #28]
+    bc3c:	mov	r3, #1
+    bc40:	strb	r3, [r5, #28]
+    bc44:	mov	r1, r6
+    bc48:	mov	r0, r4
+    bc4c:	mov	r2, #256	; 0x100
+    bc50:	bl	9a84 <memcmp@plt>
+    bc54:	cmp	r0, #0
+    bc58:	movne	r3, #2
+    bc5c:	strbne	r3, [r5, #28]
+    bc60:	mov	r0, r5
+    bc64:	ldr	r3, [r5]
+    bc68:	mov	r1, #10
+    bc6c:	mov	lr, pc
+    bc70:	ldr	pc, [r3, #24]
+    bc74:	mov	r1, r0
+    bc78:	mov	r0, r7
+    bc7c:	bl	9988 <std::ostream::put(char)@plt>
+    bc80:	bl	9940 <std::ostream::flush()@plt>
+    bc84:	ldr	r3, [pc, #1152]	; c10c <main+0x1030>
+    bc88:	ldr	r1, [fp, #-1200]	; 0xfffffb50
+    bc8c:	add	r2, r3, #20
+    bc90:	str	r3, [fp, #-1160]	; 0xfffffb78
+    bc94:	ldr	r3, [pc, #1140]	; c110 <main+0x1034>
+    bc98:	str	r2, [r1, #140]	; 0x8c
+    bc9c:	add	r0, r1, #4
+    bca0:	str	r3, [fp, #-1156]	; 0xfffffb7c
+    bca4:	bl	98bc <std::basic_filebuf<char, std::char_traits<char> >::close()@plt>
+    bca8:	ldr	r3, [fp, #-1200]	; 0xfffffb50
+    bcac:	add	r0, r3, #60	; 0x3c
+    bcb0:	bl	9964 <std::__basic_file<char>::~__basic_file()@plt>
+    bcb4:	ldr	r7, [fp, #-1200]	; 0xfffffb50
+    bcb8:	ldr	r3, [pc, #1108]	; c114 <main+0x1038>
+    bcbc:	add	r0, r7, #32
+    bcc0:	str	r3, [fp, #-1156]	; 0xfffffb7c
+    bcc4:	bl	9ad8 <std::locale::~locale()@plt>
+    bcc8:	ldr	r3, [pc, #1096]	; c118 <main+0x103c>
+    bccc:	add	r0, r7, #140	; 0x8c
+    bcd0:	ldmib	r3, {r2, ip}
+    bcd4:	str	r2, [fp, #-1160]	; 0xfffffb78
+    bcd8:	ldr	r1, [r2, #-12]
+    bcdc:	ldr	r3, [pc, #1080]	; c11c <main+0x1040>
+    bce0:	str	ip, [r7, r1]
+    bce4:	str	r3, [fp, #-1020]	; 0xfffffc04
+    bce8:	bl	99e8 <std::ios_base::~ios_base()@plt>
+    bcec:	sub	r0, fp, #164	; 0xa4
+    bcf0:	bl	9a00 <cv::VideoWriter::~VideoWriter()@plt>
+    bcf4:	ldr	r0, [fp, #-348]	; 0xfffffea4
+    bcf8:	cmp	r0, #0
+    bcfc:	beq	bd10 <main+0xc34>
+    bd00:	mvn	r1, #0
+    bd04:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    bd08:	cmp	r0, #1
+    bd0c:	beq	bf18 <main+0xe3c>
+    bd10:	ldr	r3, [fp, #-328]	; 0xfffffeb8
+    bd14:	mov	r0, #0
+    bd18:	str	r0, [fp, #-336]	; 0xfffffeb0
+    bd1c:	str	r0, [fp, #-340]	; 0xfffffeac
+    bd20:	str	r0, [fp, #-344]	; 0xfffffea8
+    bd24:	str	r0, [fp, #-352]	; 0xfffffea0
+    bd28:	str	r0, [r3]
+    bd2c:	sub	r4, fp, #372	; 0x174
+    bd30:	ldr	r2, [fp, #-324]	; 0xfffffebc
+    bd34:	add	r3, r4, #52	; 0x34
+    bd38:	cmp	r2, r3
+    bd3c:	str	r0, [fp, #-348]	; 0xfffffea4
+    bd40:	moveq	r4, r0
+    bd44:	beq	b2d8 <main+0x1fc>
+    bd48:	mov	r0, r2
+    bd4c:	bl	9a9c <cv::fastFree(void*)@plt>
+    bd50:	mov	r4, #0
+    bd54:	b	b2d8 <main+0x1fc>
+    bd58:	sub	r1, fp, #140	; 0x8c
+    bd5c:	add	r0, r1, #4
+    bd60:	bl	9ba4 <cv::Ptr<CvCapture>::delete_obj()@plt>
+    bd64:	ldr	r0, [fp, #-132]	; 0xffffff7c
+    bd68:	bl	9a9c <cv::fastFree(void*)@plt>
+    bd6c:	b	b168 <main+0x8c>
+    bd70:	sub	r0, fp, #284	; 0x11c
+    bd74:	bl	994c <cv::Mat::deallocate()@plt>
+    bd78:	b	b2f4 <main+0x218>
+    bd7c:	ldr	r0, [pc, #820]	; c0b8 <main+0xfdc>
+    bd80:	ldr	r1, [pc, #920]	; c120 <main+0x1044>
+    bd84:	bl	99a0 <std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)@plt>
+    bd88:	ldr	r2, [r0]
+    bd8c:	mov	r8, r0
+    bd90:	ldr	r3, [r2, #-12]
+    bd94:	add	r3, r0, r3
+    bd98:	ldr	r5, [r3, #124]	; 0x7c
+    bd9c:	cmp	r5, #0
+    bda0:	beq	c04c <main+0xf70>
+    bda4:	ldrb	r3, [r5, #28]
+    bda8:	cmp	r3, #0
+    bdac:	subeq	r4, fp, #628	; 0x274
+    bdb0:	ldrbne	r1, [r5, #39]	; 0x27
+    bdb4:	bne	be24 <main+0xd48>
+    bdb8:	strb	r3, [r4, r3]
+    bdbc:	add	r3, r3, #1
+    bdc0:	cmp	r3, #256	; 0x100
+    bdc4:	bne	bdb8 <main+0xcdc>
+    bdc8:	add	r6, r5, #29
+    bdcc:	ldr	ip, [r5]
+    bdd0:	mov	r0, r5
+    bdd4:	mov	r1, r4
+    bdd8:	add	r2, r4, #256	; 0x100
+    bddc:	mov	r3, r6
+    bde0:	mov	lr, pc
+    bde4:	ldr	pc, [ip, #28]
+    bde8:	mov	r3, #1
+    bdec:	strb	r3, [r5, #28]
+    bdf0:	mov	r1, r6
+    bdf4:	mov	r0, r4
+    bdf8:	mov	r2, #256	; 0x100
+    bdfc:	bl	9a84 <memcmp@plt>
+    be00:	cmp	r0, #0
+    be04:	movne	r3, #2
+    be08:	strbne	r3, [r5, #28]
+    be0c:	mov	r0, r5
+    be10:	ldr	r3, [r5]
+    be14:	mov	r1, #10
+    be18:	mov	lr, pc
+    be1c:	ldr	pc, [r3, #24]
+    be20:	mov	r1, r0
+    be24:	mov	r0, r8
+    be28:	bl	9988 <std::ostream::put(char)@plt>
+    be2c:	bl	9940 <std::ostream::flush()@plt>
+    be30:	ldr	r0, [pc, #640]	; c0b8 <main+0xfdc>
+    be34:	ldr	r1, [pc, #744]	; c124 <main+0x1048>
+    be38:	bl	99a0 <std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)@plt>
+    be3c:	ldr	r1, [r7]
+    be40:	bl	99a0 <std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)@plt>
+    be44:	ldr	r1, [pc, #732]	; c128 <main+0x104c>
+    be48:	bl	99a0 <std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)@plt>
+    be4c:	ldr	r2, [r0]
+    be50:	mov	r7, r0
+    be54:	ldr	r3, [r2, #-12]
+    be58:	add	r3, r0, r3
+    be5c:	ldr	r5, [r3, #124]	; 0x7c
+    be60:	cmp	r5, #0
+    be64:	beq	c048 <main+0xf6c>
+    be68:	ldrb	r3, [r5, #28]
+    be6c:	cmp	r3, #0
+    be70:	subeq	r4, fp, #628	; 0x274
+    be74:	ldrbne	r1, [r5, #39]	; 0x27
+    be78:	bne	bee8 <main+0xe0c>
+    be7c:	strb	r3, [r4, r3]
+    be80:	add	r3, r3, #1
+    be84:	cmp	r3, #256	; 0x100
+    be88:	bne	be7c <main+0xda0>
+    be8c:	add	r6, r5, #29
+    be90:	ldr	ip, [r5]
+    be94:	mov	r0, r5
+    be98:	mov	r1, r4
+    be9c:	add	r2, r4, #256	; 0x100
+    bea0:	mov	r3, r6
+    bea4:	mov	lr, pc
+    bea8:	ldr	pc, [ip, #28]
+    beac:	mov	r3, #1
+    beb0:	strb	r3, [r5, #28]
+    beb4:	mov	r1, r6
+    beb8:	mov	r0, r4
+    bebc:	mov	r2, #256	; 0x100
+    bec0:	bl	9a84 <memcmp@plt>
+    bec4:	cmp	r0, #0
+    bec8:	movne	r3, #2
+    becc:	strbne	r3, [r5, #28]
+    bed0:	mov	r0, r5
+    bed4:	ldr	r3, [r5]
+    bed8:	mov	r1, #10
+    bedc:	mov	lr, pc
+    bee0:	ldr	pc, [r3, #24]
+    bee4:	mov	r1, r0
+    bee8:	mov	r0, r7
+    beec:	bl	9988 <std::ostream::put(char)@plt>
+    bef0:	bl	9940 <std::ostream::flush()@plt>
+    bef4:	mvn	r4, #0
+    bef8:	b	b32c <main+0x250>
+    befc:	ldr	r3, [fp, #-1160]	; 0xfffffb78
+    bf00:	ldr	r0, [r3, #-12]
+    bf04:	add	r0, r4, r0
+    bf08:	ldr	r1, [r0, #20]
+    bf0c:	orr	r1, r1, #4
+    bf10:	bl	9b50 <std::basic_ios<char, std::char_traits<char> >::clear(std::_Ios_Iostate)@plt>
+    bf14:	b	b400 <main+0x324>
+    bf18:	sub	r1, fp, #372	; 0x174
+    bf1c:	add	r0, r1, #4
+    bf20:	bl	994c <cv::Mat::deallocate()@plt>
+    bf24:	b	bd10 <main+0xc34>
+    bf28:	bl	9904 <std::__throw_bad_cast()@plt>
+    bf2c:	ldr	r3, [fp, #-1160]	; 0xfffffb78
+    bf30:	mov	r1, #4
+    bf34:	ldr	r0, [r3, #-12]
+    bf38:	add	r0, r7, r0
+    bf3c:	bl	98a4 <std::basic_ios<char, std::char_traits<char> >::setstate(std::_Ios_Iostate)@plt>
+    bf40:	b	b8d4 <main+0x7f8>
+    bf44:	bl	9904 <std::__throw_bad_cast()@plt>
+    bf48:	ldr	r3, [pc, #476]	; c12c <main+0x1050>
+    bf4c:	cmp	r3, #0
+    bf50:	beq	bff4 <main+0xf18>
+    bf54:	sub	r0, r0, #4
+    bf58:	mvn	r1, #0
+    bf5c:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    bf60:	cmp	r0, #0
+    bf64:	bgt	b190 <main+0xb4>
+    bf68:	mov	r0, r4
+    bf6c:	sub	r1, fp, #47	; 0x2f
+    bf70:	bl	9ac0 <std::string::_Rep::_M_destroy(std::allocator<char> const&)@plt>
+    bf74:	b	b190 <main+0xb4>
+    bf78:	ldr	r2, [fp, #-1200]	; 0xfffffb50
+    bf7c:	mov	r4, r0
+    bf80:	add	r0, r2, #60	; 0x3c
+    bf84:	bl	9964 <std::__basic_file<char>::~__basic_file()@plt>
+    bf88:	ldr	r6, [fp, #-1200]	; 0xfffffb50
+    bf8c:	add	r0, r6, #4
+    bf90:	bl	9970 <std::basic_streambuf<char, std::char_traits<char> >::~basic_streambuf()@plt>
+    bf94:	ldr	r3, [pc, #380]	; c118 <main+0x103c>
+    bf98:	add	r0, r6, #140	; 0x8c
+    bf9c:	ldr	r2, [r3, #4]
+    bfa0:	ldr	r1, [r3, #8]
+    bfa4:	str	r2, [fp, #-1160]	; 0xfffffb78
+    bfa8:	ldr	r3, [r2, #-12]
+    bfac:	str	r1, [r6, r3]
+    bfb0:	bl	9af0 <std::basic_ios<char, std::char_traits<char> >::~basic_ios()@plt>
+    bfb4:	sub	r0, fp, #164	; 0xa4
+    bfb8:	bl	9a00 <cv::VideoWriter::~VideoWriter()@plt>
+    bfbc:	sub	ip, fp, #372	; 0x174
+    bfc0:	add	r0, ip, #4
+    bfc4:	bl	af54 <cv::Mat::~Mat()>
+    bfc8:	sub	r0, fp, #284	; 0x11c
+    bfcc:	bl	af54 <cv::Mat::~Mat()>
+    bfd0:	sub	r0, fp, #140	; 0x8c
+    bfd4:	bl	9a0c <cv::VideoCapture::~VideoCapture()@plt>
+    bfd8:	mov	r0, r4
+    bfdc:	bl	9ab4 <__cxa_end_cleanup@plt>
+    bfe0:	bl	9904 <std::__throw_bad_cast()@plt>
+    bfe4:	bl	9904 <std::__throw_bad_cast()@plt>
+    bfe8:	bl	9904 <std::__throw_bad_cast()@plt>
+    bfec:	mov	r4, r0
+    bff0:	b	bfd0 <main+0xef4>
+    bff4:	ldr	r0, [r4, #8]
+    bff8:	sub	r3, r0, #1
+    bffc:	str	r3, [r4, #8]
+    c000:	b	bf60 <main+0xe84>
+    c004:	bl	9904 <std::__throw_bad_cast()@plt>
+    c008:	mov	r4, r0
+    c00c:	mov	r0, r6
+    c010:	bl	9b80 <std::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string()@plt>
+    c014:	b	bfd0 <main+0xef4>
+    c018:	mov	r4, r0
+    c01c:	b	bfc8 <main+0xeec>
+    c020:	mov	r4, r0
+    c024:	mov	r0, r5
+    c028:	bl	9a0c <cv::VideoCapture::~VideoCapture()@plt>
+    c02c:	b	c00c <main+0xf30>
+    c030:	mov	r4, r0
+    c034:	ldr	r0, [fp, #-1200]	; 0xfffffb50
+    c038:	bl	9a3c <std::basic_ofstream<char, std::char_traits<char> >::~basic_ofstream()@plt>
+    c03c:	b	bfb4 <main+0xed8>
+    c040:	mov	r4, r0
+    c044:	b	bf88 <main+0xeac>
+    c048:	bl	9904 <std::__throw_bad_cast()@plt>
+    c04c:	bl	9904 <std::__throw_bad_cast()@plt>
+    c050:	mov	r4, r0
+    c054:	b	bfb4 <main+0xed8>
+    c058:	ldr	r3, [pc, #204]	; c12c <main+0x1050>
+    c05c:	cmp	r3, #0
+    c060:	beq	c130 <main+0x1054>
+    c064:	sub	r0, r0, #4
+    c068:	mvn	r1, #0
+    c06c:	bl	9b2c <__gnu_cxx::__exchange_and_add(int volatile*, int)@plt>
+    c070:	cmp	r0, #0
+    c074:	bgt	b3b8 <main+0x2dc>
+    c078:	mov	r0, r4
+    c07c:	sub	r1, fp, #48	; 0x30
+    c080:	bl	9ac0 <std::string::_Rep::_M_destroy(std::allocator<char> const&)@plt>
+    c084:	b	b3b8 <main+0x2dc>
+    c088:	mov	r4, r0
+    c08c:	mov	r0, r5
+    c090:	bl	9b80 <std::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string()@plt>
+    c094:	b	bfbc <main+0xee0>
+    c098:	mov	r4, r0
+    c09c:	b	bfbc <main+0xee0>
+    c0a0:	mov	r4, r0
+    c0a4:	sub	r0, fp, #164	; 0xa4
+    c0a8:	bl	9a00 <cv::VideoWriter::~VideoWriter()@plt>
+    c0ac:	b	bfbc <main+0xee0>
+    c0b0:	.word	0x00014818
+    c0b4:	.word	0x0000016f
+    c0b8:	.word	0x00014838
+    c0bc:	.word	0x0000c244
+    c0c0:	.word	0x0000c294
+    c0c4:	.word	0x40340000
+    c0c8:	.word	0x31564c46
+    c0cc:	.word	0x0000c2a8
+    c0d0:	.word	0x0000c2c0
+    c0d4:	.word	0x0000c2c4
+    c0d8:	.word	0x0000c2c8
+    c0dc:	.word	0x0000c2cc
+    c0e0:	.word	0x3ff00000
+    c0e4:	.word	0x406fe000
+    c0e8:	.word	0x66666667
+    c0ec:	.word	0x0000c2d0
+    c0f0:	.word	0x0000c2dc
+    c0f4:	.word	0x0000c2e4
+    c0f8:	.word	0x0000c2f0
+    c0fc:	.word	0x41cdcd65
+    c100:	.word	0x0000c2f8
+    c104:	.word	0x0000c304
+    c108:	.word	0x0000c308
+    c10c:	.word	0x00014914
+    c110:	.word	0x00014948
+    c114:	.word	0x000148d0
+    c118:	.word	0x00014828
+    c11c:	.word	0x00014938
+    c120:	.word	0x0000c204
+    c124:	.word	0x0000c22c
+    c128:	.word	0x0000c238
+    c12c:	.word	0x00009a90
+    c130:	ldr	r0, [r4, #8]
+    c134:	sub	r3, r0, #1
+    c138:	str	r3, [r4, #8]
+    c13c:	b	c070 <main+0xf94>
+    c140:	b	c098 <main+0xfbc>
+    c144:	b	bfec <main+0xf10>
+    c148:	b	bfec <main+0xf10>
+    c14c:	bl	9904 <std::__throw_bad_cast()@plt>
+
+0000c150 <__libc_csu_fini>:
+    c150:	bx	lr
+
+0000c154 <__libc_csu_init>:
+    c154:	push	{r4, r5, r6, r7, r8, sl, lr}
+    c158:	sub	sp, sp, #4
+    c15c:	mov	r8, r1
+    c160:	mov	r7, r2
+    c164:	mov	sl, r0
+    c168:	bl	9864 <_init>
+    c16c:	ldr	r1, [pc, #72]	; c1bc <__libc_csu_init+0x68>
+    c170:	ldr	r3, [pc, #72]	; c1c0 <__libc_csu_init+0x6c>
+    c174:	ldr	r2, [pc, #72]	; c1c4 <__libc_csu_init+0x70>
+    c178:	rsb	r3, r1, r3
+    c17c:	add	r2, pc, r2
+    c180:	asrs	r5, r3, #2
+    c184:	add	r2, r2, r1
+    c188:	beq	c1b4 <__libc_csu_init+0x60>
+    c18c:	mov	r6, r2
+    c190:	mov	r4, #0
+    c194:	mov	r0, sl
+    c198:	mov	r1, r8
+    c19c:	mov	r2, r7
+    c1a0:	mov	lr, pc
+    c1a4:	ldr	pc, [r6, r4, lsl #2]
+    c1a8:	add	r4, r4, #1
+    c1ac:	cmp	r4, r5
+    c1b0:	bcc	c194 <__libc_csu_init+0x40>
+    c1b4:	add	sp, sp, #4
+    c1b8:	pop	{r4, r5, r6, r7, r8, sl, pc}
+    c1bc:	.word	0xfffffe80
+    c1c0:	.word	0xfffffe90
+    c1c4:	.word	0x00008560
+
+0000c1c8 <atexit>:
+    c1c8:	ldr	r3, [pc, #24]	; c1e8 <atexit+0x20>
+    c1cc:	ldr	r2, [pc, #24]	; c1ec <atexit+0x24>
+    c1d0:	add	r3, pc, r3
+    c1d4:	mov	r1, #0
+    c1d8:	ldr	r2, [r3, r2]
+    c1dc:	cmp	r2, #0
+    c1e0:	ldrne	r2, [r2]
+    c1e4:	b	9b08 <__cxa_atexit@plt>
+    c1e8:	.word	0x0000850c
+    c1ec:	.word	0x00000124
+
+Disassembly of section .fini:
+
+0000c1f0 <_fini>:
+    c1f0:	push	{lr}		; (str lr, [sp, #-4]!)
+    c1f4:	sub	sp, sp, #4
+    c1f8:	add	sp, sp, #4
+    c1fc:	ldmfd	sp!, {pc}
