@@ -208,7 +208,7 @@ class RunSystem(object):
             try:
                 k = paramiko.RSAKey.from_private_key_file(keyfile)
             except paramiko.PasswordRequiredException:
-                k = paramiko.RSAKey.from_private_key_file(keyfile,password=getpass.getpass(prompt='SSH keyfile password: '))
+                k = paramiko.RSAKey.from_private_key_file(keyfile,password="BergLadderPlantScoop")
         else:
             k = None
 

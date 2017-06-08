@@ -127,8 +127,45 @@ float MeanShift::Epanechnikov_kernel()
 }
 
 
-#ifdef __ARM_NEON__
+#if defined __ARM_NEON__ && defined DSP
 //NEON implementation of pdf_representation
+cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
+{
+    cv::Mat pdf_model(3, 16, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
+    cv::Vec3b *bin_values = new cv::Vec3b[RECT_COLS_PADDED];
+
+    int row_index = rect.y;
+    int col_index;
+
+    for (int i = 0; i < RECT_ROWS; i++) {
+        col_index = rect.x;
+        for (int j = 0; j < rect.width; j += 16) {
+            uint8x16x3_t pixels = vld3q_u8(&frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
+
+            pixels.val[1] = vshrq_n_u8(pixels.val[1], CFG_2LOG_NUM_BINS);
+            pixels.val[2] = vshrq_n_u8(pixels.val[2], CFG_2LOG_NUM_BINS);
+            vst3q_u8(&bin_values[j][0], pixels);
+
+            col_index += 16;
+        }
+        col_index = rect.x;
+
+        for (int j = 0; j < RECT_COLS; j++) {
+            float kernel_val = kernel.at<float>(i, j);
+            dynrange(dynrangefile, __FUNCTION__, kernel_val);
+
+            pdf_model.at<float>(1, bin_values[j][1]) += kernel_val;
+            pdf_model.at<float>(2, bin_values[j][2]) += kernel_val;
+
+            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(1, bin_values[j][1]));
+            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(2, bin_values[j][2]));
+            col_index++;
+        }
+        row_index++;
+    }
+    return pdf_model;
+}
+#elif defined __ARM_NEON__
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
     cv::Mat pdf_model(3, 16, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
@@ -168,35 +205,6 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     }
     return pdf_model;
 }
-//#elif defined DSP
-//// DSP implementation of pdf_representation
-//cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
-//{
-//    cv::Mat pdf_model(3, CFG_NUM_BINS, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
-//
-//    for (uint8_t y = 0; y < RECT_ROWS; y++) {
-//        for (uint8_t x = 0; x < RECT_COLS; x++) {
-//            poolKernel[y*RECT_COLS+x] = kernel.at<float>(y,x);
-//        }
-//    }
-//
-//    for (int k = 0; k < 3; k++) {
-//        for (uint8_t y = 0; y < RECT_ROWS; y++) {
-//            for (uint8_t x = 0; x < RECT_COLS; x++) {
-//                poolFrame[y * RECT_COLS + x] = frame.at<cv::Vec3b>(rect.y + y, rect.x + x)[k];
-//            }
-//        }
-//
-//        pool_notify_Execute(1);
-//        pool_notify_Wait();
-//
-//        for (uint8_t bin = 0; bin < CFG_NUM_BINS; bin++) {
-//            pdf_model.at<float>(k, bin) = poolWeight[bin];
-//        }
-//    }
-//
-//    return pdf_model;
-//}
 #else
 //Original implementation of pdf_representation
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
@@ -358,11 +366,11 @@ void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidat
 
 #if defined DSP_ONLY || defined DSP
 // DSP implementation of CalWeight
-void MeanShift::CalWeightDSP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, const int k)
+void MeanShift::PDFCalWeightDSP(const uchar bgr[3][RECT_SIZE], const int k)
 {
     //Transfer target_model, target_candidate and the pixels in the current rectangle to shared memory pool
     memcpy(poolModel, target_model.ptr<float>(k), CFG_NUM_BINS * sizeof(float));
-    memcpy(poolCandidate, target_candidate.ptr<float>(k), CFG_NUM_BINS * sizeof(float));
+    memcpy(poolKernel, kernel.ptr<float>(0), RECT_SIZE * sizeof(float));
     memcpy(poolFrame, bgr[k], RECT_SIZE);
 
     pool_notify_Execute(1);
@@ -433,7 +441,7 @@ void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candida
 
 
 // Main CalWeight function when NOT using DSP
-cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv::Rect &rec)
+cv::Mat MeanShift::PDFCalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv::Rect &rec)
 {
 #ifdef TIMING2
     perftime_t startTime, endTime;
@@ -460,15 +468,15 @@ cv::Mat MeanShift::CalWeight(const cv::Mat &frame, cv::Mat &target_candidate, cv
     // Distribute work over platforms
 #ifdef DSP_ONLY
     // All colours to be processed by DSP
-    CalWeightDSP(bgr, target_candidate, 0);
+    PDFCalWeightDSP(bgr, 0);
     mulWeights(weight, poolWeight);
-    CalWeightDSP(bgr, target_candidate, 1);
+    PDFCalWeightDSP(bgr, 1);
     mulWeights(weight, poolWeight);
-    CalWeightDSP(bgr, target_candidate, 2);
+    PDFCalWeightDSP(bgr, 2);
     mulWeights(weight, poolWeight);
 #elif defined DSP
     // Blue to be processed by DSP
-    CalWeightDSP(bgr, target_candidate, 0);
+    PDFCalWeightDSP(bgr, 0);
 
 #ifdef __ARM_NEON__
     // Process green and red using NEON
@@ -524,7 +532,12 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         startTime = now();
 #endif
 
+//Todo: erg lelijk
+#if !defined DSP_ONLY
         cv::Mat target_candidate = pdf_representation(next_frame, target_Region);
+#else
+        cv::Mat target_candidate;
+#endif
 
 #ifdef TIMING
         endTime = now();
@@ -532,7 +545,7 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         startTime = now();
 #endif
         DEBUGP("Calling CalWeight...");
-        cv::Mat weight = CalWeight(next_frame, target_candidate, target_Region);
+        cv::Mat weight = PDFCalWeight(next_frame, target_candidate, target_Region);
 
 #ifdef TIMING
         endTime = now();

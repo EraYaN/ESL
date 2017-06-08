@@ -21,7 +21,6 @@ LIBS=-lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video 
 #   ----------------------------------------------------------------------------
 DEFS :=        -DARMCC               \
                -DDEBUGPRINT2         \
-               -DDSP                 \
                -DOS_LINUX            \
                -DMAX_DSPS=1          \
                -DMAX_PROCESSORS=2    \
@@ -39,6 +38,7 @@ DEFS :=        -DARMCC               \
                -DCHNL_ZCPY_LINK      \
                -DZCPY_LINK           \
                -DKFILE_DEFAULT       \
+               -DDSP          \
                -DDA8XXGEM            \
                -DDA8XXGEM_PHYINTERFACE=SHMEM_INTERFACE
 
@@ -88,8 +88,8 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	-fno-omit-frame-pointer			\
 	-mapcs							\
 	-mabi=aapcs-linux				\
-    -mfpu=neon                      \
 	-mfloat-abi=softfp				\
+    -mfpu=neon                      \
     -ftree-vectorize                \
 	-ffast-math						\
 	-std=$(CPPSTD)					\
