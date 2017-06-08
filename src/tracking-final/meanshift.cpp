@@ -358,6 +358,9 @@ void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidat
     }
 #endif
 }
+#else 
+{
+}
 #endif
 
 

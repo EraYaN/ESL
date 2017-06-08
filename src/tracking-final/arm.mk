@@ -22,6 +22,7 @@ LIBS=-lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video 
 DEFS :=        -DARMCC               \
                -DFIXEDPOINT2          \
                -DDSP                 \
+               -DDSP_ONLY2            \
                -DDEBUGPRINT2          \
                -DOS_LINUX            \
                -DMAX_DSPS=1          \
