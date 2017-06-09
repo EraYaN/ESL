@@ -101,8 +101,6 @@ float * poolWeight = NULL;
 float * poolModel = NULL;
 float * poolKernel = NULL;
 
-Uchar8 DSPDone = 0;
-
 /** ============================================================================
 *  @func   pool_notify_Notify
 *
@@ -469,10 +467,7 @@ NORMAL_API DSP_STATUS pool_notify_Wait()
 #ifdef DEBUG
     printf("Entered pool_notify_Wait ()\n");
 #endif
-    if (DSPDone == 0)
-    {
-        sem_wait(&sem);
-    }
+    sem_wait(&sem);
 
     return status;
 }
@@ -655,7 +650,6 @@ STATIC Void pool_notify_Notify(Uint32 eventNo, Pvoid arg, Pvoid info)
     if ((int)info == 0) { // DSP complete
         if (VERBOSE_EXECUTE) printf("Result of DSP is in! \t ");
         sem_post(&sem);
-        DSPDone = 1;
     }
     else {            // DSP result is back
                       // printf("Result on DSP is %d\n", (int)info);

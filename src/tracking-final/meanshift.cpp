@@ -43,6 +43,7 @@ MeanShift::~MeanShift()
 #endif
 }
 
+
 void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
 {
     DEBUGP("Init target frame started...");
@@ -110,8 +111,9 @@ float MeanShift::Epanechnikov_kernel()
 }
 
 
-#if defined __ARM_NEON__ && defined DSP
-//NEON implementation of pdf_representation
+#if defined __ARM_NEON__
+// NEON implementation of pdf_representation
+// If the DSP is used, blue (index 0) will not be processed.
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
     cv::Mat pdf_model(3, 16, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
@@ -125,44 +127,9 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
         for (int j = 0; j < rect.width; j += 16) {
             uint8x16x3_t pixels = vld3q_u8(&frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
 
-            pixels.val[1] = vshrq_n_u8(pixels.val[1], CFG_2LOG_NUM_BINS);
-            pixels.val[2] = vshrq_n_u8(pixels.val[2], CFG_2LOG_NUM_BINS);
-            vst3q_u8(&bin_values[j][0], pixels);
-
-            col_index += 16;
-        }
-        col_index = rect.x;
-
-        for (int j = 0; j < RECT_COLS; j++) {
-            float kernel_val = kernel.at<float>(i, j);
-            dynrange(dynrangefile, __FUNCTION__, kernel_val);
-
-            pdf_model.at<float>(1, bin_values[j][1]) += kernel_val;
-            pdf_model.at<float>(2, bin_values[j][2]) += kernel_val;
-
-            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(1, bin_values[j][1]));
-            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(2, bin_values[j][2]));
-            col_index++;
-        }
-        row_index++;
-    }
-    return pdf_model;
-}
-#elif defined __ARM_NEON__
-cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
-{
-    cv::Mat pdf_model(3, 16, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
-    cv::Vec3b *bin_values = new cv::Vec3b[RECT_COLS_PADDED];
-
-    int row_index = rect.y;
-    int col_index;
-
-    for (int i = 0; i < RECT_ROWS; i++) {
-        col_index = rect.x;
-        for (int j = 0; j < rect.width; j += 16) {
-            uint8x16x3_t pixels = vld3q_u8(&frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
-
+#ifndef DSP
             pixels.val[0] = vshrq_n_u8(pixels.val[0], CFG_2LOG_NUM_BINS);
+#endif
             pixels.val[1] = vshrq_n_u8(pixels.val[1], CFG_2LOG_NUM_BINS);
             pixels.val[2] = vshrq_n_u8(pixels.val[2], CFG_2LOG_NUM_BINS);
             vst3q_u8(&bin_values[j][0], pixels);
@@ -174,14 +141,15 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
         for (int j = 0; j < RECT_COLS; j++) {
             float kernel_val = kernel.at<float>(i, j);
             dynrange(dynrangefile, __FUNCTION__, kernel_val);
-
+#ifndef DSP
             pdf_model.at<float>(0, bin_values[j][0]) += kernel_val;
-            pdf_model.at<float>(1, bin_values[j][1]) += kernel_val;
-            pdf_model.at<float>(2, bin_values[j][2]) += kernel_val;
-
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(0, bin_values[j][0]));
+#endif
+            pdf_model.at<float>(1, bin_values[j][1]) += kernel_val;
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(1, bin_values[j][1]));
+            pdf_model.at<float>(2, bin_values[j][2]) += kernel_val;
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(2, bin_values[j][2]));
+
             col_index++;
         }
         row_index++;
@@ -189,7 +157,8 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     return pdf_model;
 }
 #else
-//Original implementation of pdf_representation
+// Original implementation of pdf_representation.
+// If the DSP is used, blue (index 0) will not be processed.
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
     DEBUGP("PDF Representation started...");
@@ -206,21 +175,29 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 
         for (int j = 0; j < rect.width; j++) {
             curr_pixel_value = frame.at<cv::Vec3b>(row_index, col_index);
+#ifndef DSP
             bin_value[0] = (curr_pixel_value[0] / CFG_BIN_WIDTH);
+#endif
             bin_value[1] = (curr_pixel_value[1] / CFG_BIN_WIDTH);
             bin_value[2] = (curr_pixel_value[2] / CFG_BIN_WIDTH);
 
 #ifdef FIXEDPOINT
+#ifndef DSP
             pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j) >> F_E_TO_P;
+#endif
             pdf_model.at<basetype_t>(1, bin_value[1]) += kernel.at<basetype_t>(i, j) >> F_E_TO_P;
             pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j) >> F_E_TO_P;           
 #else
+#ifndef DSP
             pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j);
+#endif
             pdf_model.at<basetype_t>(1, bin_value[1]) += kernel.at<basetype_t>(i, j);
             pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j);
 #endif
 
+#ifndef DSP
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(0, bin_value[0]));
+#endif
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(1, bin_value[1]));
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(2, bin_value[2]));
             col_index++;
@@ -477,7 +454,6 @@ cv::Mat MeanShift::PDFCalWeight(const cv::Mat &frame, cv::Mat &target_candidate,
 #elif defined DSP
     // Blue to be processed by DSP
     PDFCalWeightDSP(bgr, 0);
-
 #ifdef __ARM_NEON__
     // Process green and red using NEON
     CalWeightNEON(bgr, target_candidate, rec, weight, 1);
