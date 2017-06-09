@@ -46,6 +46,8 @@ Starting from the optimised implementation, very little rewriting had to be done
     Note that the subsequent calculation of \texttt{pdf\_model} itself cannot be performed using NEON as its memory access pattern is highly irregular due to the use of bin values as an index.
 
     \item[\texttt{CalWeightNEON}], where pre-calculating the multiplier for each bin, as previously discussed, is done for four values at once. As NEON only supports calculation of reciprocals and reciprocal square roots, the operation $c = \sqrt{a \mathbin{/} b}$ was rewritten to $c = 1 \mathbin{/} \sqrt{b \cdot 1 \mathbin{/} a}$ to obtain NEON-implementable code. Like in \texttt{pdf\_representation}, calculating weights could not be performed using NEON due to its irregular indexing of the multiplier array.
+
+    \item[\texttt{track}], in which the loop is completely vectorised. The set-on-greater-than and multiply operations in the original implementation were replaced by NEON's greater-than (resulting in a bitmask of all ones/all zeros) and bit select operation, causing significant speedup.
 \end{description}
 
 As expected, the various utilisations of NEON to vectorise operations did cause another jump in performance, yielding $t_k = \SI{0.508}{\second}$ and $t = \SI{2.600}{\second}$. Since only a small part of the total program could be vectorized, mostly due to the irregular access patterns inherent to the algorithm, performance increase over the optimised implementation might be slower than expected.
