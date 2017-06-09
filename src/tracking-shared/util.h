@@ -27,6 +27,7 @@
 #define RECT_COLSx3 258
 #define RECT_COLS_PADDED 96 //((RECT_COLS / 16 + 1) * 16)
 #define RECT_CENTRE 28.5f //(static_cast<float>((RECT_ROWS - 1) / 2.0)) //static_cast<float>((RECT_ROWS - 1) / 2.0);
+#define RECT_CENTRE_REC 0.0350877193f
 #define RECT_NEXTCOL_OFFSET 1662 //((next_frame.cols - RECT_COLS) * 3);
 
 //TODO verify if allowed to change, default: 8

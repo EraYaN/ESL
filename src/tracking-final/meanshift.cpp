@@ -543,8 +543,6 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         float delta_x = 0.0;
         float sum_wij = 0.0;
         float delta_y = 0.0;
-        //float centre = static_cast<float>((RECT_ROWS - 1) / 2.0);
-        float centre = RECT_CENTRE;
         double mult = 0.0;
 
         next_rect.x = target_Region.x;
@@ -552,19 +550,57 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         next_rect.width = RECT_COLS;
         next_rect.height = RECT_ROWS;
 
+#ifdef __ARM_NEON__
+        float32x4_t norm_j_vec, temp_vec, weight_vec;
+        float32x4_t zero_vec = { 0, 0, 0, 0 };
+        float32x4_t delta_x_vec = { 0, 0, 0, 0 };
+        float32x4_t delta_y_vec = { 0, 0, 0, 0 };
+        float32x4_t sum_wij_vec = { 0, 0, 0, 0 };
+        uint32x4_t mult_vec;
+#endif
+
         for (int i = 0; i < RECT_ROWS; i++) {
+            float norm_i = static_cast<float>(i - RECT_CENTRE) / RECT_CENTRE;
+            float norm_i_sq = norm_i * norm_i;
+
+#ifdef __ARM_NEON__
+            float32x4_t norm_i_sq_vec = vdupq_n_f32(norm_i_sq);
+
+            for (int j = 0; j < RECT_COLS; j+=4) {
+                float32x4_t j_vec = { j, j + 1, j + 2, j + 3 };
+                norm_j_vec = vmulq_n_f32(vsubq_f32(j_vec, vdupq_n_f32(RECT_CENTRE)), RECT_CENTRE_REC);
+                temp_vec = vaddq_f32(norm_i_sq_vec, vmulq_f32(norm_j_vec, norm_j_vec));
+                // Create bitmask of all zeros or all ones depending on less than comparison.
+                mult_vec = vcltq_f32(temp_vec, vdupq_n_f32(1.f));
+                // Weight equals weight or zero.
+                weight_vec = vbslq_f32(mult_vec, vld1q_f32((float32_t*)&weight.ptr<float>(i)[j]), zero_vec);
+                // Calculate deltas and sum.
+                delta_x_vec = vaddq_f32(delta_x_vec, vmulq_f32(weight_vec, norm_j_vec));
+                delta_y_vec = vaddq_f32(delta_y_vec, vmulq_n_f32(weight_vec, norm_i));
+                sum_wij_vec = vaddq_f32(sum_wij_vec, weight_vec);
+            }
+#else
             for (int j = 0; j < RECT_COLS; j++) {
-                float norm_i = static_cast<float>(i - centre) / centre;
-                float norm_j = static_cast<float>(j - centre) / centre;
+                float norm_j = static_cast<float>(j - RECT_CENTRE) / RECT_CENTRE;
                 mult = pow(norm_i, 2) + pow(norm_j, 2) > 1.0 ? 0.0 : 1.0;
+                std::cout << mult << std::endl;
                 delta_x += static_cast<float>(norm_j*weight.at<float>(i, j)*mult);
                 delta_y += static_cast<float>(norm_i*weight.at<float>(i, j)*mult);
                 sum_wij += static_cast<float>(weight.at<float>(i, j)*mult);
-            }
+            }         
+#endif
         }
+#ifdef __ARM_NEON__
+        for (int k = 0; k < 4; k++)
+        {
+            delta_x += vgetq_lane_f32(delta_x_vec, k);
+            delta_y += vgetq_lane_f32(delta_y_vec, k);
+            sum_wij += vgetq_lane_f32(sum_wij_vec, k);
+        }
+#endif
 
-        next_rect.x += static_cast<int>((delta_x / sum_wij)*centre);
-        next_rect.y += static_cast<int>((delta_y / sum_wij)*centre);
+        next_rect.x += static_cast<int>((delta_x / sum_wij)*RECT_CENTRE);
+        next_rect.y += static_cast<int>((delta_y / sum_wij)*RECT_CENTRE);
 
         if (abs(next_rect.x - target_Region.x) < 1 && abs(next_rect.y - target_Region.y) < 1) {
             break;
