@@ -209,13 +209,15 @@ $(OBJDIR_R)/%.obj : %.c
 $(OBJDIR_R)/%.obj : %.s62
 	@$(BASE_COMPILER)/bin/$(CC) $(DEFS) $(CFLAGS_R) $(CINCLUDES) -fr$(OBJDIR_R) $<
 
-.PHONY: clean
+.PHONY: clean rebuild
 clean:
 	@rm -f *.cdb
 	@rm -f *cfg.*
 	@rm -f *cfg_c.*
 	@rm -f ./$(OBJDIR_D)/*
 	@rm -f ./$(OBJDIR_R)/* *~
+
+rebuild: clean all
 
 send: $(BINDIR_R)/$(BIN)
 	scp -oKexAlgorithms=+diffie-hellman-group1-sha1 $(BINDIR_R)/$(BIN) root@192.168.0.202:/home/root/esLAB/.

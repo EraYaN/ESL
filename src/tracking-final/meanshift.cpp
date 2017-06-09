@@ -528,9 +528,7 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         startTime = now();
 #endif
 
-        float delta_x = 0.0;
-        float sum_wij = 0.0;
-        float delta_y = 0.0;
+        
 
         next_rect.x = target_Region.x;
         next_rect.y = target_Region.y;
@@ -544,15 +542,35 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         float32x4_t delta_y_vec = { 0, 0, 0, 0 };
         float32x4_t sum_wij_vec = { 0, 0, 0, 0 };
         uint32x4_t mult_vec;
-#else
-        double mult = 0.0;
 #endif
 
-        for (int i = 0; i < RECT_ROWS; i++) {
-            float norm_i = static_cast<float>(i - RECT_CENTRE) / RECT_CENTRE;
-            float norm_i_sq = norm_i * norm_i;
+#ifdef FIXEDPOINT
+        basetype_t norm_i = -CFG_WEIGHT_ONE;//to_fixed(-1, F_C_RANGE);
+        basetype_t norm_i_sq;
+        basetype_t norm_step = 9;//to_fixed(1 / RECT_CENTRE, F_C_RANGE);
+        basetype_t delta_x = 0;// to_fixed(0, F_C_RANGE);
+        basetype_t sum_wij = 0;// to_fixed(0, F_C_RANGE);
+        basetype_t delta_y = 0;// to_fixed(0, F_C_RANGE);
+        /*float norm_i = -1;
+        float norm_i_sq = 1;
+        float norm_step = 1 / RECT_CENTRE;
+        float delta_x = 0;
+        float sum_wij = 0;
+        float delta_y = 0;*/
+#else
+        float norm_i = -1;
+        float norm_i_sq;
+        float norm_step = static_cast<float>(1 / RECT_CENTRE);
+        float delta_x = 0.0;
+        float sum_wij = 0.0;
+        float delta_y = 0.0;
+#endif
+
+        for (int i = 0; i < RECT_ROWS; i++) {           
 
 #ifdef __ARM_NEON__
+            norm_i = static_cast<float>(i - RECT_CENTRE) / RECT_CENTRE;
+            norm_i_sq = norm_i * norm_i;
             float32x4_t norm_i_sq_vec = vdupq_n_f32(norm_i_sq);
 
             for (int j = 0; j < RECT_COLS; j+=4) {
@@ -570,25 +588,48 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
             }
 #else
 #ifdef FIXEDPOINT
+            
+            norm_i_sq = F_C_MULT(norm_i,norm_i);
+            basetype_t norm_j = -CFG_WEIGHT_ONE;
+            for (int j = 0; j < RECT_COLS; j++) {                
+                basetype_t mult = norm_i_sq + F_C_MULT(norm_j, norm_j) > CFG_WEIGHT_ONE ? 0x00000000 : 0xFFFFFFFF;
+                basetype_t w = weight.at<basetype_t>(i, j);
+                //DEBUGP("Selected Weight: " << w);
+                basetype_t wm = w & mult;  
+                delta_x += F_C_MULT(norm_j, wm);
+                delta_y += F_C_MULT(norm_i, wm);
+                sum_wij += wm;
+                norm_j += norm_step;
+            }
+            norm_i += norm_step;
+
+            /*norm_i_sq = norm_i*norm_i;
+            float norm_j = -1;
             for (int j = 0; j < RECT_COLS; j++) {
-                float norm_j = static_cast<float>(j - RECT_CENTRE) / RECT_CENTRE;
-                mult = norm_i_sq + pow(norm_j, 2) > 1.0 ? 0.0 : 1.0;
+                float mult = norm_i_sq + pow(norm_j, 2) > 1.0 ? 0.f : 1.f;
                 float w = to_float(weight.at<basetype_t>(i, j), F_C_RANGE);
                 //DEBUGP("Selected Weight: " << w);
-                float wm = w*mult;
-                delta_x += static_cast<float>(norm_j*wm);
-                delta_y += static_cast<float>(norm_i*wm);
-                sum_wij += static_cast<float>(wm);
+                float wm = w * mult;
+                delta_x += norm_j * wm;
+                delta_y += norm_i * wm;
+                sum_wij += wm;
+                norm_j += norm_step;
             }
+            norm_i += norm_step;*/
+
 #else
-            for (int j = 0; j < RECT_COLS; j++) {
-                float norm_j = static_cast<float>(j - RECT_CENTRE) / RECT_CENTRE;
-                mult = norm_i_sq + pow(norm_j, 2) > 1.0 ? 0.0 : 1.0;
+            norm_i = static_cast<float>(i - RECT_CENTRE) / RECT_CENTRE;
+            norm_i_sq = norm_i * norm_i;
+            float norm_j = -1;
+            for (int j = 0; j < RECT_COLS; j++) {                
+                float mult = norm_i_sq + pow(norm_j, 2) > 1.0 ? 0.0 : 1.0;
                 DEBUGP("Selected Weight: " << norm_j*weight.at<float>(i, j));
                 delta_x += static_cast<float>(norm_j*weight.at<float>(i, j)*mult);
                 delta_y += static_cast<float>(norm_i*weight.at<float>(i, j)*mult);
                 sum_wij += static_cast<float>(weight.at<float>(i, j)*mult);
+                norm_j += norm_step;
             }
+            norm_i += norm_step;
 #endif        
 #endif
         }
@@ -601,9 +642,27 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
             sum_wij += vgetq_lane_f32(sum_wij_vec, k);
         }
 #endif
-
+#ifdef FIXEDPOINT
+        if (sum_wij != 0) {
+            next_rect.x += F_C_MULT(F_C_DIVD(delta_x, sum_wij), 7296) >> F_C_FRAC;
+            next_rect.y += F_C_MULT(F_C_DIVD(delta_y, sum_wij), 7296) >> F_C_FRAC;
+        } else {
+            std::cout << "." << std::endl;
+        }
+        /*if (sum_wij != 0) {
+            next_rect.x += static_cast<int>((to_float(delta_x, F_C_RANGE)/to_float(sum_wij, F_C_RANGE))*RECT_CENTRE);
+            next_rect.y += static_cast<int>((to_float(delta_y, F_C_RANGE)/to_float(sum_wij, F_C_RANGE))*RECT_CENTRE);
+        }
+        else {
+            std::cout << "." << std::endl;
+        }*/
+        /*next_rect.x += static_cast<int>((delta_x/sum_wij)*RECT_CENTRE);
+        next_rect.y += static_cast<int>((delta_y/sum_wij)*RECT_CENTRE);*/
+        
+#else
         next_rect.x += static_cast<int>((delta_x / sum_wij)*RECT_CENTRE);
         next_rect.y += static_cast<int>((delta_y / sum_wij)*RECT_CENTRE);
+#endif
 
         if (abs(next_rect.x - target_Region.x) < 1 && abs(next_rect.y - target_Region.y) < 1) {
             break;

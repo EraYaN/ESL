@@ -47,31 +47,43 @@ int main() {
     perftime_t end;
     double nanoseconds;
     start = now();
-    for (int i = 0; i < 1e9; i++) {
+    for (int i = 0; i < 1e8; i++) {
         res = F_C_MULT(test1_fixed,test2_fixed);
     }
     end = now();
     nanoseconds = diffToNanoseconds(start, end);
 
-    std::cout << "Time for billion MULT " << nanoseconds / 1e6 << " ms." << std::endl;
+    std::cout << "Time for 100 million MULT " << nanoseconds / 1e6 << " ms." << std::endl;
 
     start = now();
-    for (int i = 0; i < 1e9; i++) {
+    for (int i = 0; i < 1e8; i++) {
         res = F_C_DIVD(test1_fixed, test2_fixed);
     }
     end = now();
     nanoseconds = diffToNanoseconds(start, end);
 
-    std::cout << "Time for billion DIVD " << nanoseconds / 1e6 << " ms." << std::endl;
+    std::cout << "Time for 100 million DIVD " << nanoseconds / 1e6 << " ms." << std::endl;
 
     start = now();
-    for (int i = 0; i < 1e9; i++) {
+    for (int i = 0; i < 1e8; i++) {
         res = F_C_SQRT(test1_fixed, F_C_BITS + 1);
     }
     end = now();
     nanoseconds = diffToNanoseconds(start, end);
 
-    std::cout << "Time for billion SQRT " << nanoseconds / 1e6 << " ms." << std::endl;
+    std::cout << "Time for 100 million SQRT " << nanoseconds / 1e6 << " ms." << std::endl;
+    
+    start = now();
+    float resf;
+    float t = to_float(test1_fixed, F_C_RANGE);
+    for (int i = 0; i < 1e8; i++) {
+        resf = std::sqrt(t);
+    }
+    to_fixed(resf, F_C_RANGE);
+    end = now();
+    nanoseconds = diffToNanoseconds(start, end);
+
+    std::cout << "Time for 100 million SQRT2 " << nanoseconds / 1e6 << " ms." << std::endl;
 
     std::cout << "Done" << std::endl;
     std::cin.get();

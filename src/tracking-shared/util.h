@@ -40,15 +40,18 @@
 
 #ifdef FIXEDPOINT
 #define CFG_PDF_SCALAR_OFFSET cv::Scalar(1) //for fixed point 0/0.1*(2^16-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(1048576) //for fixed point 1/2048*((2^32)-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(4194304) //for fixed point 1/512*((2^32)-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(8388608) //for fixed point 1/256*((2^32)-1)
+//#define CFG_WEIGHT_ONE 1048576 //for fixed point 1/2048*((2^32)-1)
+//#define CFG_WEIGHT_ONE 4194304 //for fixed point 1/512*((2^32)-1)
+//#define CFG_WEIGHT_ONE 8388608 //for fixed point 1/256*((2^32)-1)
 
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(16) //for fixed point 1/2048*((2^16)-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(64) //for fixed point 1/512*((2^16)-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(128) //for fixed point 1/256*((2^16)-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(256) //for fixed point 1/128*((2^16)-1)
-#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(512) //for fixed point 1/64*((2^16)-1)
+//#define CFG_WEIGHT_ONE 16 //for fixed point 1/2048*((2^16)-1)
+//#define CFG_WEIGHT_ONE 64 //for fixed point 1/512*((2^16)-1)
+//#define CFG_WEIGHT_ONE 128 //for fixed point 1/256*((2^16)-1)
+#define CFG_WEIGHT_ONE 256 //for fixed point 1/128*((2^16)-1)
+//#define CFG_WEIGHT_ONE 512 //for fixed point 1/64*((2^16)-1)
+
+#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(CFG_WEIGHT_ONE)
+
 
 #else
 #if defined DSP && defined __ARM_NEON__
@@ -84,7 +87,7 @@ typedef double longbasetype_t;
 #define F_E_RANGE (F_E_UPPER)
 
 //CalWeight
-#define F_C_BITS 6
+#define F_C_BITS 7
 #define F_C_UPPER std::pow(2,F_C_BITS) // 32-11=21 bit for fractional part, 11 for the integer value.
 #define F_C_LOWER (-F_C_UPPER) // -8
 #define F_C_RANGE (F_C_UPPER)
@@ -96,9 +99,9 @@ typedef double longbasetype_t;
 #define F_P_RANGE (F_P_UPPER)
 
 //div (pre div bitshift to the left)
-#define F_C_FRAC (sizeof(basetype_t)*8)-(F_C_BITS+1)
-#define F_P_FRAC (sizeof(basetype_t)*8)-(F_P_BITS+1)
-#define F_E_FRAC (sizeof(basetype_t)*8)-(F_E_BITS+1)
+#define F_C_FRAC ((sizeof(basetype_t)*8)-(F_C_BITS+1))
+#define F_P_FRAC ((sizeof(basetype_t)*8)-(F_P_BITS+1))
+#define F_E_FRAC ((sizeof(basetype_t)*8)-(F_E_BITS+1))
 
 //conv (bit shifts to the right)
 #define F_E_TO_P (F_P_BITS-F_E_BITS)

@@ -20,8 +20,8 @@ LIBS=-lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video 
 #   Compiler symbol definitions (Put a 2 behind the options that you want disbaled)
 #   ----------------------------------------------------------------------------
 DEFS :=        -DARMCC               \
-               -DFIXEDPOINT2          \
-               -DDSP                 \
+               -DFIXEDPOINT          \
+               -DDSP2                 \
                -DDSP_ONLY2            \
                -DDEBUGPRINT2          \
                -DOS_LINUX            \
@@ -97,7 +97,7 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	--sysroot=$(SYSROOT)
 
 # Set NEON enabled here.
-CFLAGS += -mfpu=neon
+#CFLAGS += -mfpu=neon
 
 all: checkdirs $(EXEC)
 
@@ -118,10 +118,12 @@ $(OUTDIR) $(sort $(BUILD_DIR)):
 send: $(EXEC)
 	scp -oKexAlgorithms=+diffie-hellman-group1-sha1 $(EXEC) root@192.168.0.202:/home/root/esLAB/.
 
-.PHONY: clean all
+.PHONY: clean all rebuild
 clean:
 	rm -rf $(OUTDIR) $(EXEC) *~
 	rm -rf /tmp/tracking_result.avi /tmp/tracking_result.coords /tmp/dynrange.csv
+
+rebuild: clean all
 	
 info:
 	echo $(SRC)
