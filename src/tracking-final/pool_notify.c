@@ -10,11 +10,13 @@
 #include <pool.h>
 #include <mpcs.h>
 #include <notify.h>
-#include<util_global_dsp.h>
+
+
+#include <util.h>
+#include <util_global_dsp.h>
 #if defined (DA8XXGEM)
 #include <loaderdefs.h>
 #endif
-
 
 /*  ----------------------------------- Application Header              */
 #include "pool_notify.h"
@@ -142,7 +144,7 @@ sem_t sem;
 */
 
 
-NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit bufferSizes, IN Uint8 processorId, IN Char8 * strBuffersize)
+NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit bufferSizes, IN Char8 * strBuffersize)
 {
     DSP_STATUS      status = DSP_SOK;
     Uint32          numArgs = NUM_ARGS;
@@ -163,7 +165,7 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
     // Attach the Dsp with which the transfers have to be done.
     if (DSP_SUCCEEDED(status))
     {
-        status = PROC_attach(processorId, NULL);
+        status = PROC_attach(PROCESSOR_ID, NULL);
         if (DSP_FAILED(status))
         {
             printf("PROC_attach () failed. Status = [0x%x]\n", (int)status);
@@ -175,14 +177,14 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
 
     // Open the pool.
     if (DSP_SUCCEEDED(status)) {
-        size[0] = bufferSizes.frameAligned; //Frame
-        size[1] = bufferSizes.regionAligned; //Weight and kernel
-        size[2] = bufferSizes.modelAligned; //Targetmodel
+        size[0] = bufferSizes.frameAligned;  // Frame
+        size[1] = bufferSizes.regionAligned; // Weight and kernel
+        size[2] = bufferSizes.modelAligned;  // Targetmodel
         poolAttrs.bufSizes = (Uint32 *)&size;
         poolAttrs.numBuffers = (Uint32 *)&numBufs;
         poolAttrs.numBufPools = NUM_BUF_SIZES;
         poolAttrs.exactMatchReq = FALSE;
-        status = POOL_open(POOL_makePoolId(processorId, SAMPLE_POOL_ID), &poolAttrs);
+        status = POOL_open(POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID), &poolAttrs);
         if (DSP_FAILED(status)) {
             printf("POOL_open () failed. Status = [0x%x]\n", (int)status);
         }
@@ -190,14 +192,14 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
 
     // Allocate the data buffer for the frame to be used for the application.
     if (DSP_SUCCEEDED(status)) {
-        status = POOL_alloc(POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+        status = POOL_alloc(POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
             (Void **)&poolFrame,
             bufferSizes.frameAligned);
 
-        /* Get the translated DSP address to be sent to the DSP. */
+        // Get the translated DSP address to be sent to the DSP.
         if (DSP_SUCCEEDED(status)) {
             status = POOL_translateAddr(
-                POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+                POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
                 &dspFrame,
                 AddrType_Dsp,
                 (Void *)poolFrame,
@@ -216,14 +218,14 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
 
     //Allocate databuffer for targetModel
     if (DSP_SUCCEEDED(status)) {
-        status = POOL_alloc(POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+        status = POOL_alloc(POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
             (Void **)&poolModel,
             bufferSizes.modelAligned);
 
-        /* Get the translated DSP address to be sent to the DSP. */
+        // Get the translated DSP address to be sent to the DSP.
         if (DSP_SUCCEEDED(status)) {
             status = POOL_translateAddr(
-                POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+                POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
                 &dspModel,
                 AddrType_Dsp,
                 (Void *)poolModel,
@@ -243,14 +245,14 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
 
     //Allocate databuffer for kernel
     if (DSP_SUCCEEDED(status)) {
-        status = POOL_alloc(POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+        status = POOL_alloc(POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
             (Void **)&poolKernel,
             bufferSizes.regionAligned);
 
-        /* Get the translated DSP address to be sent to the DSP. */
+        // Get the translated DSP address to be sent to the DSP.
         if (DSP_SUCCEEDED(status)) {
             status = POOL_translateAddr(
-                POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+                POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
                 &dspKernel,
                 AddrType_Dsp,
                 (Void *)poolKernel,
@@ -270,14 +272,14 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
 
     //Allocate databuffer for weight
     if (DSP_SUCCEEDED(status)) {
-        status = POOL_alloc(POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+        status = POOL_alloc(POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
             (Void **)&poolWeight,
             bufferSizes.regionAligned);
 
-        /* Get the translated DSP address to be sent to the DSP. */
+        // Get the translated DSP address to be sent to the DSP.
         if (DSP_SUCCEEDED(status)) {
             status = POOL_translateAddr(
-                POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+                POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
                 &dspWeight,
                 AddrType_Dsp,
                 (Void *)poolWeight,
@@ -299,7 +301,7 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
     *  complete.
     */
     if (DSP_SUCCEEDED(status)) {
-        status = NOTIFY_register(processorId,
+        status = NOTIFY_register(PROCESSOR_ID,
             pool_notify_IPS_ID,
             pool_notify_IPS_EVENTNO,
             (FnNotifyCbck)pool_notify_Notify,
@@ -310,14 +312,11 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
         }
     }
 
-    /*
-    *  Load the executable on the DSP.
-    */
-
+    // Load the executable on the DSP.
     if (DSP_SUCCEEDED(status)) {
         args[0] = strBuffersize;
         {
-            status = PROC_load(processorId, dspExecutable, numArgs, args);
+            status = PROC_load(PROCESSOR_ID, dspExecutable, numArgs, args);
         }
 
         if (DSP_FAILED(status)) {
@@ -325,22 +324,20 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
         }
     }
 
-    /*
-    *  Start execution on DSP.
-    */
+    // Start execution on DSP.
     if (DSP_SUCCEEDED(status)) {
-        status = PROC_start(processorId);
+        status = PROC_start(PROCESSOR_ID);
         if (DSP_FAILED(status)) {
             printf("PROC_start () failed. Status = [0x%x]\n",
                 (int)status);
         }
     }
 
-    /*
-    *  Wait for the DSP-side application to indicate that it has completed its
-    *  setup. The DSP-side application sends notification of the IPS event
-    *  when it is ready to proceed with further execution of the application.
-    */
+
+    // Wait for the DSP-side application to indicate that it has completed its
+    // setup. The DSP-side application sends notification of the IPS event
+    // when it is ready to proceed with further execution of the application.
+
     printf("Waiting for DSP\n");
     if (DSP_SUCCEEDED(status)) {
         // wait for initialization 
@@ -353,7 +350,7 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
     *
     */
     //Transfer frame
-    status = NOTIFY_notify(processorId,
+    status = NOTIFY_notify(PROCESSOR_ID,
         pool_notify_IPS_ID,
         pool_notify_IPS_EVENTNO,
         (Uint32)dspFrame);
@@ -364,8 +361,8 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
             (int)status);
     }
 
-    //Transfer model
-    status = NOTIFY_notify(processorId,
+    // Transfer model
+    status = NOTIFY_notify(PROCESSOR_ID,
         pool_notify_IPS_ID,
         pool_notify_IPS_EVENTNO,
         (Uint32)dspModel);
@@ -376,8 +373,8 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
             (int)status);
     }
 
-    //Transfer weight
-    status = NOTIFY_notify(processorId,
+    // Transfer weight
+    status = NOTIFY_notify(PROCESSOR_ID,
         pool_notify_IPS_ID,
         pool_notify_IPS_EVENTNO,
         (Uint32)dspWeight);
@@ -388,8 +385,8 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
             (int)status);
     }
 
-    //Transfer kernel
-    status = NOTIFY_notify(processorId,
+    // Transfer kernel
+    status = NOTIFY_notify(PROCESSOR_ID,
         pool_notify_IPS_ID,
         pool_notify_IPS_EVENTNO,
         (Uint32)dspKernel);
@@ -431,7 +428,6 @@ long long get_usec(void)
 // NORMAL_API DSP_STATUS pool_notify_Execute(void)
 NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 info)
 {
-    Uint8 processorId = 0;
     DSP_STATUS status = DSP_SOK;
 
     //TODO[c]: timinglong long start;
@@ -443,7 +439,7 @@ NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 info)
     // printf(" Result is %d \n", sum_dsp(pool_notify_DataBuf,pool_notify_BufferSize));
     // #endif!
 
-    NOTIFY_notify(processorId, pool_notify_IPS_ID, pool_notify_IPS_EVENTNO, info);
+    NOTIFY_notify(PROCESSOR_ID, pool_notify_IPS_ID, pool_notify_IPS_EVENTNO, info);
     // #endif
     //TODO[c]: timingprintf("Sum execution time %lld us.\n", get_usec() - start);
 
@@ -461,7 +457,6 @@ NORMAL_API DSP_STATUS pool_notify_Execute(IN Uint8 info)
 // NORMAL_API DSP_STATUS pool_notify_Wait(void)
 NORMAL_API DSP_STATUS pool_notify_Wait()
 {
-    Uint8 processorId = 0;
     DSP_STATUS status = DSP_SOK;
 
 #ifdef DEBUG
@@ -484,7 +479,7 @@ NORMAL_API DSP_STATUS pool_notify_Wait()
 *  @modif  None
 *  ============================================================================
 */
-NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
+NORMAL_API Void pool_notify_Delete(bufferInit bufferSizes)
 {
     DSP_STATUS status = DSP_SOK;
     DSP_STATUS tmpStatus = DSP_SOK;
@@ -496,7 +491,7 @@ NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
     /*
     *  Stop execution on DSP.
     */
-    status = PROC_stop(processorId);
+    status = PROC_stop(PROCESSOR_ID);
     if (DSP_FAILED(status)) {
         printf("PROC_stop () failed. Status = [0x%x]\n", (int)status);
     }
@@ -504,7 +499,7 @@ NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
     /*
     *  Unregister for notification of event registered earlier.
     */
-    tmpStatus = NOTIFY_unregister(processorId,
+    tmpStatus = NOTIFY_unregister(PROCESSOR_ID,
         pool_notify_IPS_ID,
         pool_notify_IPS_EVENTNO,
         (FnNotifyCbck)pool_notify_Notify,
@@ -518,7 +513,7 @@ NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
     /*
     *  Free the memory allocated for the data buffer.
     */
-    tmpStatus = POOL_free(POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+    tmpStatus = POOL_free(POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
         (Void *)poolFrame,
         bufferSizes.frameAligned);
     if (DSP_SUCCEEDED(status) && DSP_FAILED(tmpStatus)) {
@@ -527,7 +522,7 @@ NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
             (int)status);
     }
 
-    tmpStatus = POOL_free(POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+    tmpStatus = POOL_free(POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
         (Void *)poolWeight,
         bufferSizes.regionAligned);
     if (DSP_SUCCEEDED(status) && DSP_FAILED(tmpStatus)) {
@@ -536,7 +531,7 @@ NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
             (int)status);
     }
 
-    tmpStatus = POOL_free(POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+    tmpStatus = POOL_free(POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
         (Void *)poolModel,
         bufferSizes.modelAligned);
     if (DSP_SUCCEEDED(status) && DSP_FAILED(tmpStatus)) {
@@ -545,7 +540,7 @@ NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
             (int)status);
     }
 
-    tmpStatus = POOL_free(POOL_makePoolId(processorId, SAMPLE_POOL_ID),
+    tmpStatus = POOL_free(POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID),
         (Void *)poolKernel,
         bufferSizes.regionAligned);
     if (DSP_SUCCEEDED(status) && DSP_FAILED(tmpStatus)) {
@@ -557,7 +552,7 @@ NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
     /*
     *  Close the pool
     */
-    tmpStatus = POOL_close(POOL_makePoolId(processorId, SAMPLE_POOL_ID));
+    tmpStatus = POOL_close(POOL_makePoolId(PROCESSOR_ID, SAMPLE_POOL_ID));
     if (DSP_SUCCEEDED(status) && DSP_FAILED(tmpStatus)) {
         status = tmpStatus;
         printf("POOL_close () failed. Status = [0x%x]\n", (int)status);
@@ -566,7 +561,7 @@ NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
     /*
     *  Detach from the processor
     */
-    tmpStatus = PROC_detach(processorId);
+    tmpStatus = PROC_detach(PROCESSOR_ID);
     if (DSP_SUCCEEDED(status) && DSP_FAILED(tmpStatus)) {
         status = tmpStatus;
         printf("PROC_detach () failed. Status = [0x%x]\n", (int)status);
@@ -598,7 +593,6 @@ NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
 NORMAL_API Void pool_notify_Init(IN Char8 *dspExecutable, bufferInit bufferSizes, IN Char8 *strBuffersize)
 {
     DSP_STATUS status = DSP_SOK;
-    Uint8      processorId = 0;
 
 #ifdef DEBUG
     printf("========== Sample Application : pool_notify ==========\n");
@@ -610,20 +604,12 @@ NORMAL_API Void pool_notify_Init(IN Char8 *dspExecutable, bufferInit bufferSizes
     }
 
     //  Validate the buffer size and number of iterations specified.
-    //pool_notify_BufferSize = DSPLINK_ALIGN ( atoi (strBuffersize),DSPLINK_BUF_ALIGN);
 #ifdef DEBUG
     printf("Allocated a buffer of %d bytes\n", (int)pool_notify_BufferSize);
 #endif
 
-    /*processorId = 0;
-    if (pool_notify_BufferSize == 0) {
-    status = DSP_EINVALIDARG;
-    printf("ERROR! Invalid arguments specified for  ");
-    printf("     Buffer size    = %d\n", (int)pool_notify_BufferSize);
-    }*/
-
     // Specify the dsp executable file name and the buffer size for pool_notify creation phase.
-    status = pool_notify_Create(dspExecutable, bufferSizes, 0, strBuffersize);
+    status = pool_notify_Create(dspExecutable, bufferSizes, strBuffersize);
 
     if (!DSP_SUCCEEDED(status)) {
         printf("ERROR! pool_notify_Create() failed!\n");
@@ -647,13 +633,11 @@ STATIC Void pool_notify_Notify(Uint32 eventNo, Pvoid arg, Pvoid info)
     printf("Notification %8d \n", (int)info);
 #endif
     // Post the semaphore.
-    if ((int)info == 0) { // DSP complete
-        if (VERBOSE_EXECUTE) printf("Result of DSP is in! \t ");
+    if ((int)info == 0) { // DSP finished
+        DEBUGP("Result of DSP is in! \t ");
         sem_post(&sem);
     }
-    else {            // DSP result is back
-                      // printf("Result on DSP is %d\n", (int)info);
-        // if (VERBOSE_EXECUTE) printf("Result counter = %d\n", (int)info);
+    else {
         printf("ERROR wrong result of DSP = %d\n", (int)info);
     }
 }

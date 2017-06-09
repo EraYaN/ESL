@@ -60,9 +60,6 @@
 #endif
 #endif
 
-//TODO use DEBUGP macro
-#define VERBOSE_EXECUTE 0
-
 #ifdef DEBUGPRINT
 #define DEBUGP(x) do { std::cout << x << std::endl; } while (0)
 #else 

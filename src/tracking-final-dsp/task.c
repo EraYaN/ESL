@@ -21,7 +21,7 @@
 #include <util_global_dsp.h> 
 #include <math.h>
 
-//Declaration of pointers to shared memory
+// Declaration of pointers to shared memory
 unsigned char *frame;
 float *weight;
 float *model;
@@ -91,7 +91,7 @@ Int Task_create(Task_TransferInfo ** infoPtr)
         }
     }
 
-    //Calculation of sizes of shared memory
+    // Calculation of sizes of shared memory
     modelsize = 48 * sizeof(float);
     weightsize = RECT_SIZE * sizeof(float);
 
@@ -132,14 +132,14 @@ void CalWeight(unsigned char *restrict frame, float *restrict weight, float *res
     int x=0, y=0, xy=0, bin;
     unsigned char curr_pixel;
 
-    //Calculation of multipliers with forced unenrolling pragma's
+    // Calculation of multipliers with forced unenrolling pragma's
 #pragma MUST_ITERATE(CFG_NUM_BINS, CFG_NUM_BINS,)
 #pragma UNROLL(CFG_NUM_BINS)
     for (bin = 0; bin < CFG_NUM_BINS; bin++) {
         multipliers[bin] = sqrt(model[bin]/candidate[bin]);
     }
 
-    //Calculation of weights with coalesced loops for software pipelining.
+    // Calculation of weights with coalesced loops for software pipelining.
 #pragma MUST_ITERATE(RECT_SIZE, RECT_SIZE,)
     for (xy = 0; xy < RECT_SIZE; xy++) {
         curr_pixel = frame[y*RECT_COLS+x];
@@ -157,10 +157,10 @@ Int Task_execute(Task_TransferInfo * info)
 {
 
     while(communicating) {
-        //wait for semaphore
+        // wait for semaphore
         SEM_pend(&(info->notifySemObj), SYS_FOREVER);
 
-        //invalidate cache
+        // invalidate cache
         BCACHE_inv((Ptr)frame, RECT_SIZE, TRUE);
         BCACHE_inv((Ptr)model, modelsize, TRUE);
         BCACHE_inv((Ptr)weight, weightsize, TRUE);
@@ -168,13 +168,13 @@ Int Task_execute(Task_TransferInfo * info)
 
         pdf_representation(frame, kernel);
 
-        //call the functionality to be performed by dsp
+        // call the functionality to be performed by dsp
         CalWeight(frame, weight, candidate, model);
 
-        //Writeback to shared memory
+        // Writeback to shared memory
         BCACHE_wbInv((Ptr)weight, weightsize, TRUE);
 
-        //notify that we are done
+        // notify that we are done
         NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO, (Uint32)0);
 }
     return SYS_OK;
@@ -182,7 +182,7 @@ Int Task_execute(Task_TransferInfo * info)
 
 Int Task_delete(Task_TransferInfo * info)
 {
-    Int    status     = SYS_OK;
+    Int status = SYS_OK;
     /*
      *  Unregister notification for the event callback used to get control and
      *  data buffer pointers from the GPP-side.
@@ -193,10 +193,8 @@ Int Task_delete(Task_TransferInfo * info)
                                 (FnNotifyCbck) Task_notify,
                                 info);
 
-    /* Free the info structure */
-    MEM_free (DSPLINK_SEGID,
-              info,
-              sizeof (Task_TransferInfo));
+    // Free the info structure
+    MEM_free (DSPLINK_SEGID, info, sizeof(Task_TransferInfo));
     info = NULL;
 
     return status;
@@ -212,17 +210,13 @@ static Void Task_notify(Uint32 eventNo, Ptr arg, Ptr info)
     count++;
     if (count == 1) {
         frame = (unsigned char*)info;
-    }
-    if (count == 2) {
+    } else if (count == 2) {
         model = (float*)info;
-    }
-    if (count == 3) {
+    } else if (count == 3) {
         weight = (float*)info;
-    }
-    if (count == 4) {
+    } else if (count == 4) {
         kernel = (float *)info;
-    }
-    else if (count>4) {
+    } else if (count>4) {
         if ((int)info == DSP_END_CALCULATIONS) {
             communicating = 0;
         }

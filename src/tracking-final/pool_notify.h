@@ -11,12 +11,12 @@
 
 
 /** ============================================================================
- *  @const  ID_PROCESSOR
+ *  @const  PROCESSOR_ID
  *
  *  @desc   The processor id of the processor being used.
  *  ============================================================================
  */
-#define ID_PROCESSOR       0
+#define PROCESSOR_ID       0
 
  //Pointers to shared databuffers
 extern Uchar8 * poolFrame;
@@ -67,7 +67,7 @@ public:
 *  @see    pool_notify_Delete
 *  ============================================================================
 */
-NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit bufferSizes, IN Uint8 processorId, IN Char8 * strBuffersize);
+NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit bufferSizes, IN Char8 * strBuffersize);
 
 /** ============================================================================
 *  @func   pool_notify_Execute
@@ -120,7 +120,7 @@ NORMAL_API DSP_STATUS pool_notify_Wait();
 *  @see    pool_notify_Create
 *  ============================================================================
 */
-NORMAL_API Void pool_notify_Delete(IN Uint8 processorId, bufferInit bufferSizes);
+NORMAL_API Void pool_notify_Delete(bufferInit bufferSizes);
 
 
 /** ============================================================================

@@ -19,7 +19,6 @@
 #include <util_global_dsp.h>
 #include "pool_notify.h"
 #endif
-// DataStruct *pool_notify_DataBuf; // extern defined in pool_notify.h
 
 
 MeanShift::MeanShift()
@@ -352,7 +351,7 @@ void MeanShift::PDFCalWeightDSP(const uchar bgr[3][RECT_SIZE], const int k)
 
     pool_notify_Execute(DSP_DO_CALCULATIONS);
 
-    if (VERBOSE_EXECUTE) printf("pool_notify_Execute() done: %f\n", poolWeight[0]);
+    DEBUGP("pool_notify_Execute()\n");
 }
 #endif
 

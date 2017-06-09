@@ -2,7 +2,6 @@
 #include <timing.h>
 #include <iostream>
 #include <fstream>
-#include "util.h"
 
 #ifndef ARMCC
 #include "markers.h"
@@ -188,7 +187,7 @@ int main(int argc, char ** argv)
 #if defined DSP_ONLY || defined DSP
     pool_notify_Execute(DSP_END_CALCULATIONS);
     pool_notify_Wait();
-    pool_notify_Delete(ID_PROCESSOR, bufferSizes);
+    pool_notify_Delete(bufferSizes);
 #endif
 
     endTime = now();
