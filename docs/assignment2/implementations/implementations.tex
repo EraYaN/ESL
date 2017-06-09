@@ -57,7 +57,9 @@ As expected, the various utilisations of NEON to vectorise operations did cause 
 An implementation on the DSP was also made, mainly as a step-up to an implementation where work is divided between the ARM and the DSP.
 Two of the most performance critical functions (pdf\_representation and CalWeight) were ported to the DSP after which an attempt was made at optimizing their performance on the DSP.
 In this section, the shared pool memory management and compiler optimizations are discussed.
+
 \subsubsection{Shared memory}
+
 
 \subsubsection{Compiler options}
 For optimizing the compiler, the hand-tuning manual provided by Texas Instruments was used \cite{handtuning}.
@@ -78,8 +80,10 @@ for (xy = 0; xy < RECT_SIZE; xy++) {
     }
 }
 \end{lstlisting} 
-This change, like the other changes discussed in this section, unfortunately had very little impact on the performance.
+This change, like the other changes discussed in this section, unfortunately had very little (if any) impact on the performance.
+
 \subsection{Balanced}
+Because two processors are present on the Beagleboard in the form of a DSP and the ARM processor the possibility of processing the frames in parallel was investigated.
 
 \subsection{Fixed-point}
 To implement fixed-point arithmetic, we first need to know the dynamic range of all the values in the kernels.
