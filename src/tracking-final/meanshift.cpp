@@ -253,7 +253,7 @@ void MeanShift::split(const cv::Mat &frame, cv::Rect &rect, uchar bgr[3][RECT_SI
 // Wait for the DSP to finish and process results
 void MeanShift::mulWeights(cv::Mat &weight, float *poolWeight)
 {
-     pool_notify_Wait();
+    pool_notify_Wait();
 
 #ifdef __ARM_NEON__
     float32_t* weight_ptr;
@@ -350,7 +350,7 @@ void MeanShift::PDFCalWeightDSP(const uchar bgr[3][RECT_SIZE], const int k)
     memcpy(poolKernel, kernel.ptr<float>(0), RECT_SIZE * sizeof(float));
     memcpy(poolFrame, bgr[k], RECT_SIZE);
 
-    pool_notify_Execute(1);
+    pool_notify_Execute(DSP_DO_CALCULATIONS);
 
     if (VERBOSE_EXECUTE) printf("pool_notify_Execute() done: %f\n", poolWeight[0]);
 }

@@ -186,6 +186,8 @@ int main(int argc, char ** argv)
     MCPROF_STOP();
 #endif
 #if defined DSP_ONLY || defined DSP
+    pool_notify_Execute(DSP_END_CALCULATIONS);
+    pool_notify_Wait();
     pool_notify_Delete(ID_PROCESSOR, bufferSizes);
 #endif
 

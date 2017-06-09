@@ -653,7 +653,7 @@ STATIC Void pool_notify_Notify(Uint32 eventNo, Pvoid arg, Pvoid info)
     }
     else {            // DSP result is back
                       // printf("Result on DSP is %d\n", (int)info);
-        if (VERBOSE_EXECUTE) printf("Result counter = %d\n", (int)info);
-        // printf("ERROR wrong result of DSP!\n");
+        // if (VERBOSE_EXECUTE) printf("Result counter = %d\n", (int)info);
+        printf("ERROR wrong result of DSP = %d\n", (int)info);
     }
 }

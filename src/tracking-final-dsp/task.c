@@ -22,14 +22,16 @@
 #include <math.h>
 
 //Declaration of pointers to shared memory
-unsigned char* frame;
-float * weight;
-float * model;
-float candidate[CFG_NUM_BINS] = { 1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10 };
+unsigned char *frame;
+float *weight;
+float *model;
 //float candidate[CFG_NUM_BINS] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-float * kernel;
+float candidate[CFG_NUM_BINS] = { 1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10 };
+float *kernel;
 int weightsize;
 int modelsize;
+
+int communicating = 1;
 
 extern Uint16 MPCSXFER_BufferSize;
 
@@ -105,9 +107,6 @@ Int Task_create(Task_TransferInfo ** infoPtr)
     return status;
 }
 
-
-int communicating = 1;
-
 void pdf_representation(unsigned char *restrict frame, float *restrict kernel)
 {
     int x, y;
@@ -157,37 +156,27 @@ void CalWeight(unsigned char *restrict frame, float *restrict weight, float *res
 Int Task_execute(Task_TransferInfo * info)
 {
 
-    static int counter = 1;
+    while(communicating) {
+        //wait for semaphore
+        SEM_pend(&(info->notifySemObj), SYS_FOREVER);
 
+        //invalidate cache
+        BCACHE_inv((Ptr)frame, RECT_SIZE, TRUE);
+        BCACHE_inv((Ptr)model, modelsize, TRUE);
+        BCACHE_inv((Ptr)weight, weightsize, TRUE);
+        BCACHE_inv((Ptr)kernel, weightsize, TRUE);
 
-    while(1) {
-        if(communicating){
-            //wait for semaphore
-            SEM_pend(&(info->notifySemObj), SYS_FOREVER);
+        pdf_representation(frame, kernel);
 
-            //invalidate cache
-            BCACHE_inv((Ptr)frame, RECT_SIZE, TRUE);
-            BCACHE_inv((Ptr)model, modelsize, TRUE);
-            BCACHE_inv((Ptr)weight, weightsize, TRUE);
-            BCACHE_inv((Ptr)kernel, weightsize, TRUE);
+        //call the functionality to be performed by dsp
+        CalWeight(frame, weight, candidate, model);
 
-            pdf_representation(frame, kernel);
+        //Writeback to shared memory
+        BCACHE_wbInv((Ptr)weight, weightsize, TRUE);
 
-            //call the functionality to be performed by dsp
-            CalWeight(frame, weight, candidate, model);
-
-            //Writeback to shared memory
-            BCACHE_wbInv((Ptr)weight, weightsize, TRUE);
-
-            //notify that we are done
-            NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO, (Uint32)0);
-
-            //notify the result
-            NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO, counter++);
-            // }
-            communicating--;
-        }
-    }
+        //notify that we are done
+        NOTIFY_notify(ID_GPP,MPCSXFER_IPS_ID,MPCSXFER_IPS_EVENTNO, (Uint32)0);
+}
     return SYS_OK;
 }
 
@@ -234,8 +223,9 @@ static Void Task_notify(Uint32 eventNo, Ptr arg, Ptr info)
         kernel = (float *)info;
     }
     else if (count>4) {
-        // communicating = ((count -3) == (int)info);
-        communicating += (int)info;
+        if ((int)info == DSP_END_CALCULATIONS) {
+            communicating = 0;
+        }
     }
 
     SEM_post(&(mpcsInfo->notifySemObj));
