@@ -1,0 +1,22 @@
+\begin{tikzpicture}
+    \node (frame) [sensorbig] {Frame};
+    \node (model) [sensor, below = of frame] {Model};
+    \node (weight) [sensorbig, below = of model] {Weight};
+    \node (kernel) [sensorbig, below = of weight] {Kernel};
+
+    \begin{pgfonlayer}{background}
+        % Compute a few helper coordinates
+        \path (frame.west |- frame.north)+(-0.25,0.5) node (a) {};
+        \path (kernel.east |- kernel.south)+(0.25,-0.5) node (b) {};
+
+        \path[part] (a) rectangle (b);
+        \path (frame.north |- a.east) node [anchor=north] (datastruct) {DataStruct};
+    \end{pgfonlayer}
+
+    \begin{pgfonlayer}{backgroundstack}
+        \path (a)+(-0.25,0.5) node (astack) {};
+        \path (b)+(0.25,-0.5) node (bstack) {};
+
+        \path[stack] (astack) rectangle (bstack);
+    \end{pgfonlayer}
+\end{tikzpicture}

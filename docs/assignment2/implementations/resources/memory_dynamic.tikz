@@ -1,0 +1,37 @@
+\begin{tikzpicture}
+    \node (frame) [sensorbig] {Frame};
+    \node (model) [sensor, below =1.25cm of frame] {Model};
+    \node (weight) [sensorbig, below =1.25cm of model] {Weight};
+    \node (kernel) [sensorbig, below =1.25cm of weight] {Kernel};
+
+    \begin{pgfonlayer}{background}
+        \path (frame.west |- frame.north)+(-0.25,0.5) node (aframe) {};
+        \path (frame.east |- frame.south)+(0.25,-0.5) node (bframe) {};
+
+        \path (model.west |- model.north)+(-0.25,0.5) node (amodel) {};
+        \path (model.east |- model.south)+(0.25,-0.5) node (bmodel) {};
+
+        \path (weight.west |- weight.north)+(-0.25,0.5) node (aweight) {};
+        \path (weight.east |- weight.south)+(0.25,-0.5) node (bweight) {};
+
+        \path (kernel.west |- kernel.north)+(-0.25,0.5) node (akernel) {};
+        \path (kernel.east |- kernel.south)+(0.25,-0.5) node (bkernel) {};
+
+        \path[part] (aframe) rectangle (bframe);
+        \path[part] (amodel) rectangle (bmodel);
+        \path[part] (aweight) rectangle (bweight);
+        \path[part] (akernel) rectangle (bkernel);
+
+        \path (frame.north |- aframe.east) node [anchor=north] (poolframe) {PoolFrame};
+        \path (model.north |- amodel.east) node [anchor=north] (poolmodel) {PoolModel};
+        \path (weight.north |- aweight.east) node [anchor=north] (poolweight) {PoolWeight};
+        \path (kernel.north |- akernel.east) node [anchor=north] (poolkernel) {PoolKernel};
+    \end{pgfonlayer}
+
+    \begin{pgfonlayer}{backgroundstack}
+        \path (aframe)+(-0.25,0.5) node (astack) {};
+        \path (bkernel)+(0.25,-0.5) node (bstack) {};
+
+        \path[stack] (astack) rectangle (bstack);
+    \end{pgfonlayer}
+\end{tikzpicture}

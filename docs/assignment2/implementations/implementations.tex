@@ -60,6 +60,24 @@ In this section, the shared pool memory management and compiler optimizations ar
 
 \subsubsection{Shared memory}
 
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \subimport{resources/}{memory_static.tikz}
+        \caption{Struct, size fixed at compile time}
+        \label{fig:memory-static}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \subimport{resources/}{memory_dynamic.tikz}
+        \caption{Different shared Pools, size fixed at run time}
+        \label{fig:memory-dynamic}
+    \end{subfigure}
+    \caption{Different Shared Memory Implementations}
+    \label{fig:memory}
+\end{figure}
+
 
 \subsubsection{Compiler options}
 For optimizing the compiler, the hand-tuning manual provided by Texas Instruments was used \cite{handtuning}.
