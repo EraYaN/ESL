@@ -9,6 +9,9 @@
 #define CALWEIGHT          0
 #define PDF_REPRESENTATION 1
 
+#define DSP_DO_CALCULATIONS 1
+#define DSP_END_CALCULATIONS 8
+
 typedef struct DataStruct
 {
     uint32_t next_frame_rect[RECT_SIZE]; // cols*float with next_frame
