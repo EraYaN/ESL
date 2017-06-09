@@ -1,5 +1,6 @@
 #include <iostream>
 #include "util.h"
+#include "timing.h"
 #include <limits>
 #include "FixedPointTools.h"
 
@@ -29,19 +30,48 @@ int main() {
     printDebug(test2, test2_fixed, F_C_RANGE);
     std::cout << "Test1*Test2" << std::endl;
 
-    basetype_t result = static_cast<basetype_t>((static_cast<longbasetype_t>(test1_fixed)*static_cast<longbasetype_t>(test2_fixed)) >> F_C_FRAC);
+    basetype_t result = F_C_MULT(test1_fixed, test2_fixed);
 
     printDebug(test1*test2, result, F_C_RANGE);
     std::cout << "Test1/Test2" << std::endl;
     
-    printDebug(test1/test2, static_cast<basetype_t>((static_cast<longbasetype_t>(test1_fixed) << F_C_FRAC)/ static_cast<longbasetype_t>(test2_fixed)), F_C_RANGE);
+    printDebug(test1/test2, F_C_DIVD(test1_fixed,test2_fixed), F_C_RANGE);
     std::cout << "sqrt(Test1)" << std::endl;
     /*std::cout << (static_cast<longbasetype_t>(test1_fixed)) << std::endl;
     std::cout << (static_cast<longbasetype_t>(test1_fixed) << (F_C_BITS + 1)) << std::endl;
     std::cout << sqrtF2F(static_cast<longbasetype_t>(test1_fixed) << ((F_C_BITS + 1))) << std::endl;
     std::cout << (sqrtF2F(static_cast<longbasetype_t>(test1_fixed) << ((F_C_BITS + 1))) >> ((F_C_BITS + 1))) << std::endl;*/
     printDebug(std::sqrt(test1), F_C_SQRT(test1_fixed), F_C_RANGE);
+    basetype_t res;
+    perftime_t start;
+    perftime_t end;
+    double nanoseconds;
+    start = now();
+    for (int i = 0; i < 1e9; i++) {
+        res = F_C_MULT(test1_fixed,test2_fixed);
+    }
+    end = now();
+    nanoseconds = diffToNanoseconds(start, end);
 
+    std::cout << "Time for billion MULT " << nanoseconds / 1e6 << " ms." << std::endl;
+
+    start = now();
+    for (int i = 0; i < 1e9; i++) {
+        res = F_C_DIVD(test1_fixed, test2_fixed);
+    }
+    end = now();
+    nanoseconds = diffToNanoseconds(start, end);
+
+    std::cout << "Time for billion DIVD " << nanoseconds / 1e6 << " ms." << std::endl;
+
+    start = now();
+    for (int i = 0; i < 1e9; i++) {
+        res = F_C_SQRT(test1_fixed, F_C_BITS + 1);
+    }
+    end = now();
+    nanoseconds = diffToNanoseconds(start, end);
+
+    std::cout << "Time for billion SQRT " << nanoseconds / 1e6 << " ms." << std::endl;
 
     std::cout << "Done" << std::endl;
     std::cin.get();

@@ -313,8 +313,10 @@ void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidat
     DEBUGP("Calculating multipliers...");
     for (int bin = 0; bin < CFG_NUM_BINS; bin++) {        
 #ifdef FIXEDPOINT
-        basetype_t val_candidate = target_candidate.at<basetype_t>(k, bin) >> F_P_TO_C;
-        basetype_t val_model = target_model.at<basetype_t>(k, bin) >> F_P_TO_C;
+        float val_candidate = to_float(target_candidate.at<basetype_t>(k, bin),F_P_RANGE);
+        float val_model = to_float(target_model.at<basetype_t>(k, bin), F_P_RANGE);
+        //basetype_t val_candidate = target_candidate.at<basetype_t>(k, bin) >> F_P_TO_C;
+        //basetype_t val_model = target_model.at<basetype_t>(k, bin) >> F_P_TO_C;
         dynrange(dynrangefile, "Ca", to_float(target_candidate.at<basetype_t>(k, bin),F_P_RANGE));
         dynrange(dynrangefile, "Cb", to_float(target_model.at<basetype_t>(k, bin), F_P_RANGE));
         dynrange(dynrangefile, "Cc", val_candidate);
@@ -323,7 +325,8 @@ void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidat
             multipliers[bin] = 0;// static_cast<basetype_t>(F_C_RANGE);
         }
         else {
-            multipliers[bin] = F_C_SQRT(F_C_DIVD(val_model,val_candidate));
+            //multipliers[bin] = to_fixed(std::sqrt(to_float(F_C_DIVD(val_model,val_candidate),F_C_RANGE)),F_C_RANGE);
+            multipliers[bin] = to_fixed(std::sqrt(val_model/val_candidate), F_C_RANGE);
         }
         dynrange(dynrangefile, "Cm", multipliers[bin]);
 #else

@@ -13,9 +13,9 @@
 #define F_E_DIVD(x,y) static_cast<basetype_t>((static_cast<longbasetype_t>(x) << F_E_FRAC) / (static_cast<longbasetype_t>(y)))
 #define F_P_DIVD(x,y) static_cast<basetype_t>((static_cast<longbasetype_t>(x) << F_P_FRAC) / (static_cast<longbasetype_t>(y)))
 
-#define F_C_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_C_BITS+1)) >> (F_C_BITS + 1))
-#define F_E_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_E_BITS+1)) >> (F_E_BITS + 1))
-#define F_P_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_P_BITS+1)) >> (F_P_BITS + 1))
+#define F_C_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_C_BITS+1), F_C_BITS+1) )
+#define F_E_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_E_BITS+1), 0) >> (F_E_BITS + 1))
+#define F_P_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_P_BITS+1), 0) >> (F_P_BITS + 1))
 
 template <typename T>
 inline float to_float(T value, float range) {
@@ -30,7 +30,7 @@ inline basetype_t to_fixed(float value, float range) {
     return static_cast<basetype_t>(CLAMP(value, -range, range) / range * std::numeric_limits<basetype_t>::max() + 0.5f); // +0.5f is te proberen of std::floor ipv static_cast
 }
 
-inline longbasetype_t sqrtF2F(longbasetype_t x)
+inline longbasetype_t sqrtF2F(longbasetype_t x,int shift)
 {
     uint32_t t, q, b, r;
     r = x;
@@ -47,7 +47,7 @@ inline longbasetype_t sqrtF2F(longbasetype_t x)
         r <<= 1;
         b >>= 1;
     }
-    q >>= 8;
+    q >>= (8 + shift);
     return q;
 }
 
