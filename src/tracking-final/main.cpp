@@ -17,18 +17,6 @@
 #include <util.h>
 //#include <cstdio>
 
-/*void enable_runfast()
-{
-    static const unsigned int x = 0x04086060;
-    static const unsigned int y = 0x03000000;
-    int r;
-    asm volatile("fmrx     %0, fpscr          \n\t"
-                 "and      %0, %0, %1         \n\t"
-                 "orr      %0, %0, %2         \n\t"
-                 "fmxr     fpscr, %0          \n\t"
-        : "=r"(r)
-        : "r"(x), "r"(y));
-}*/
 
 #if defined DSP_ONLY || defined DSP
 //Constructor for bufferInit class. Calculates all required buffer sizes for memory allocation
@@ -64,7 +52,6 @@ int main(int argc, char ** argv)
 #else
     double freq = 1;
 #endif
-    //enable_runfast();
 
     cv::VideoCapture frame_capture;
     char *dspExecutable = NULL;

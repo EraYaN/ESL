@@ -54,12 +54,31 @@ As expected, the various utilisations of NEON to vectorise operations did cause 
 
 
 \subsection{DSP}
-
+An implementation on the DSP was also made, mainly as a step-up to an implementation where work is divided between the ARM and the DSP.
+Two of the most performance critical functions (pdf\_representation and CalWeight) were ported to the DSP after which an attempt was made at optimizing their performance on the DSP.
+In this section, the shared pool memory management and compiler optimizations are discussed.
 \subsubsection{Shared memory}
 
 \subsubsection{Compiler options}
+For optimizing the compiler, the hand-tuning manual provided by Texas Instruments was used \cite{handtuning}.
+Apart from the standard -O3 flag the only other flag that provided a slight (though barely noticeable) speed-up was the -mt flag that allows the compiler to assume that in one function there won't be "pointer-based parameter writes to a memory location that is read by any other pointer-based parameter to the same function" \cite{handtuning}.
+This flag was safe to use because it was made sure that the parameters in both pdf\_representation and CalWeight were write or read-only. Flags that were suggested by the hand-tuning manual but were not used were -mh and -mo. The -mh flag could not be used because there was no padding on both sides of the buffers to allow for speculative loads. The -mo flag was tested but seemed to significantly slow down the code and was therefore not used.
 
+In order to find possible low-level optimizations the code was compiled with the –s –mw –mv6400 flags after which the resulting assembly with compiler comments was inspected. The compiler was mostly sophisticated enough to optimize most loops by itself as the number of loop iterations for all loops in the functions was already set at compile time. For clarity the MUST\_ITERATE pragma's were still included in the DSP code wherever applicable. For the same clarity reasons the function parameters in pdf\_representation and CalWeight were supplied with a restrict qualifier even though the -mt compiler flag should already take care of that.
 
+An attempt was also made at optimally utilising the software pipelining functions of the DSP. During inspection of the assembly it was found that most loops were disqualified for software pipelining due to containing function calls or control-code. After some experimentation the loop in CalWeight that was disqualified for containing control code was able to qualify for software pipelining by coalescing the loop as found in \cref{lst:coalesced}. The resulting software pipelining had both a partitioned and unpartitioned of 3 and a loop carried dependency bound of 3. 
+\begin{lstlisting}[style=c, caption=Coalesced loop for weight calculation, label=lst:coalesced]
+for (xy = 0; xy < RECT_SIZE; xy++) {
+    curr_pixel = frame[y*RECT_COLS+x];
+    weight[y*RECT_COLS+x] = multipliers[curr_pixel>>4];
+    if (++x == RECT_COLS)
+    {
+        x = 0;
+        y = y + 1;
+    }
+}
+\end{lstlisting} 
+This change, like the other changes discussed in this section, unfortunately had very little impact on the performance.
 \subsection{Balanced}
 
 \subsection{Fixed-point}
