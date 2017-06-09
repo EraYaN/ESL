@@ -11,7 +11,11 @@
 The following text lists each of the implementations that were created along with a short discussion of the results.
 
 \subsection{Naive}
-The naive implementation was provided for the assignment. Many details regarding it have been discussed in the previous section. For the rest of the report, its runtime averaged over a total of five runs will be used as a reference time for calculating speed-ups. These times are measured as $t_k = \SI{10.137}{\second}$ and $t = \SI{12.318}{\second}$ for kernel time and total time respectively. Note that this means that a significant part of the execution time is not spent in the computation kernel and the application speed-up is therefore limited to a theoretical maximum of 5.5x.
+The naive implementation was provided for the assignment.
+Many details regarding it have been discussed in the previous section.
+For the rest of the report, its runtime averaged over a total of five runs will be used as a reference time for calculating speed-ups.
+These times are measured as $t_k = \SI{10.137}{\second}$ and $t = \SI{12.318}{\second}$ for kernel time and total time respectively.
+Note that this means that a significant part of the execution time is not spent in the computation kernel and the application speed-up is therefore limited to a theoretical maximum of 5.6x.
 
 \subsection{Optimised}
 The optimised implementation contains two major improvements:
@@ -28,9 +32,9 @@ Other, less significant optimisations are
      \item defining loop limits as constants so the compiler might optimise them;
      \item reducing superfluous memory access by avoiding multiple assignments and/or reads of variables and
      \item avoiding the passing of data from function to function when it can be accessed within the \texttt{MeanShift} class.
- \end{itemize}
+\end{itemize}
 
- This first step will prove to be the most important in terms of performance gain, resulting in $t_k = \SI{0.708}{\second}$ and $t = \SI{2.798}{\second}$.
+This first step will prove to be the most important in terms of performance gain, resulting in $t_k = \SI{0.708}{\second}$ and $t = \SI{2.798}{\second}$ (which is a kernal speed-up of 14.3x and an application speed-up of 4.4x).
 
 \subsection{NEON}
 Starting from the optimised implementation, very little rewriting had to be done to make the algorithm suitable for NEON execution. For this implementation, most loops were simply modified to process 4 (32-bit \texttt{float}) or even 16 (8-bit \texttt{unsigned char}) values in every iteration. The following parts of the program utilize NEON:
