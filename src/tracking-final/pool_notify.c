@@ -51,9 +51,9 @@
 *  @desc   Number of buffers in first buffer pool.
 *  ============================================================================
 */
-#define NUM_BUF_POOL0                  1
-#define NUM_BUF_POOL1                  1
-#define NUM_BUF_POOL2                  2
+#define NUM_BUF_POOL0                  1 //Frame sized
+#define NUM_BUF_POOL1                  2 //Weight sized
+#define NUM_BUF_POOL2                  1 //Model sized
 
 /*  ============================================================================
 *  @const   pool_notify_INVALID_ID
@@ -99,8 +99,9 @@
 Uchar8 * poolFrame = NULL;
 float * poolWeight = NULL;
 float * poolModel = NULL;
-float * poolCandidate = NULL;
+float * poolKernel = NULL;
 
+Uchar8 DSPDone = 0;
 
 /** ============================================================================
 *  @func   pool_notify_Notify
@@ -150,7 +151,7 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
     Void *          dspFrame = NULL;
     Void *          dspWeight = NULL;
     Void *          dspModel = NULL;
-    Void *          dspCandidate = NULL;
+    Void *          dspKernel = NULL;
     Uint32          numBufs[NUM_BUF_SIZES] = { NUM_BUF_POOL0,NUM_BUF_POOL1, NUM_BUF_POOL2 };
     Uint32          size[NUM_BUF_SIZES];
     SMAPOOL_Attrs   poolAttrs;
@@ -177,8 +178,8 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
     // Open the pool.
     if (DSP_SUCCEEDED(status)) {
         size[0] = bufferSizes.frameAligned; //Frame
-        size[1] = bufferSizes.regionAligned; //Weight
-        size[2] = bufferSizes.modelAligned; //Targetmodel and targetcandidate
+        size[1] = bufferSizes.regionAligned; //Weight and kernel
+        size[2] = bufferSizes.modelAligned; //Targetmodel
         poolAttrs.bufSizes = (Uint32 *)&size;
         poolAttrs.numBuffers = (Uint32 *)&numBufs;
         poolAttrs.numBufPools = NUM_BUF_SIZES;
@@ -242,29 +243,29 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
     }
 
 
-    //Allocate databuffer for targetCandidate
+    //Allocate databuffer for kernel
     if (DSP_SUCCEEDED(status)) {
         status = POOL_alloc(POOL_makePoolId(processorId, SAMPLE_POOL_ID),
-            (Void **)&poolCandidate,
-            bufferSizes.modelAligned);
+            (Void **)&poolKernel,
+            bufferSizes.regionAligned);
 
         /* Get the translated DSP address to be sent to the DSP. */
         if (DSP_SUCCEEDED(status)) {
             status = POOL_translateAddr(
                 POOL_makePoolId(processorId, SAMPLE_POOL_ID),
-                &dspCandidate,
+                &dspKernel,
                 AddrType_Dsp,
-                (Void *)poolCandidate,
+                (Void *)poolKernel,
                 AddrType_Usr);
 
             if (DSP_FAILED(status)) {
-                printf("POOL_translateAddr () DataBuf candidate failed."
+                printf("POOL_translateAddr () DataBuf kernel failed."
                     " Status = [0x%x]\n",
                     (int)status);
             }
         }
         else {
-            printf("POOL_alloc() DataBuf candidate failed. Status = [0x%x]\n", (int)status);
+            printf("POOL_alloc() DataBuf kernel failed. Status = [0x%x]\n", (int)status);
         }
     }
 
@@ -389,14 +390,14 @@ NORMAL_API DSP_STATUS pool_notify_Create(IN Char8 *dspExecutable, bufferInit buf
             (int)status);
     }
 
-    //Transfer candidate
+    //Transfer kernel
     status = NOTIFY_notify(processorId,
         pool_notify_IPS_ID,
         pool_notify_IPS_EVENTNO,
-        (Uint32)dspCandidate);
+        (Uint32)dspKernel);
     if (DSP_FAILED(status))
     {
-        printf("NOTIFY_notify () DataBuf candidate failed."
+        printf("NOTIFY_notify () DataBuf kernel failed."
             " Status = [0x%x]\n",
             (int)status);
     }
@@ -468,8 +469,10 @@ NORMAL_API DSP_STATUS pool_notify_Wait()
 #ifdef DEBUG
     printf("Entered pool_notify_Wait ()\n");
 #endif
-
-    sem_wait(&sem);
+    if (DSPDone == 0)
+    {
+        sem_wait(&sem);
+    }
 
     return status;
 }
@@ -548,11 +551,11 @@ NORMAL_API Void pool_notify_Delete(Uint8 processorId, bufferInit bufferSizes)
     }
 
     tmpStatus = POOL_free(POOL_makePoolId(processorId, SAMPLE_POOL_ID),
-        (Void *)poolCandidate,
-        bufferSizes.modelAligned);
+        (Void *)poolKernel,
+        bufferSizes.regionAligned);
     if (DSP_SUCCEEDED(status) && DSP_FAILED(tmpStatus)) {
         status = tmpStatus;
-        printf("POOL_free () DataBuf candidate failed. Status = [0x%x]\n",
+        printf("POOL_free () DataBuf kernel failed. Status = [0x%x]\n",
             (int)status);
     }
 
@@ -652,6 +655,7 @@ STATIC Void pool_notify_Notify(Uint32 eventNo, Pvoid arg, Pvoid info)
     if ((int)info == 0) { // DSP complete
         if (VERBOSE_EXECUTE) printf("Result of DSP is in! \t ");
         sem_post(&sem);
+        DSPDone = 1;
     }
     else {            // DSP result is back
                       // printf("Result on DSP is %d\n", (int)info);

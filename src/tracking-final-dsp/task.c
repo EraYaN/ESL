@@ -25,7 +25,9 @@
 unsigned char* frame;
 float * weight;
 float * model;
-float * candidate;
+float candidate[CFG_NUM_BINS] = { 1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10,1e-10 };
+//float candidate[CFG_NUM_BINS] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+float * kernel;
 int weightsize;
 int modelsize;
 
@@ -106,6 +108,24 @@ Int Task_create(Task_TransferInfo ** infoPtr)
 
 int communicating = 1;
 
+void pdf_representation(unsigned char *restrict frame, float *restrict kernel)
+{
+    int x, y;
+    unsigned char curr_pixel_value;
+    int bin_value;
+
+#pragma MUST_ITERATE(RECT_ROWS,RECT_ROWS,)
+    for (y = 0; y < RECT_ROWS; y++) {
+#pragma MUST_ITERATE(RECT_COLS,RECT_COLS,)
+        for (x = 0; x < RECT_COLS; x++) {
+            curr_pixel_value = frame[y*RECT_COLS + x];
+
+            bin_value = (curr_pixel_value >>4);
+
+            candidate[bin_value] = candidate[bin_value] + kernel[y*RECT_COLS + x];
+        }
+    }
+}
 
 void CalWeight(unsigned char *restrict frame, float *restrict weight, float *restrict candidate, float *restrict model)
 {
@@ -149,7 +169,9 @@ Int Task_execute(Task_TransferInfo * info)
             BCACHE_inv((Ptr)frame, RECT_SIZE, TRUE);
             BCACHE_inv((Ptr)model, modelsize, TRUE);
             BCACHE_inv((Ptr)weight, weightsize, TRUE);
-            BCACHE_inv((Ptr)candidate, modelsize, TRUE);
+            BCACHE_inv((Ptr)kernel, weightsize, TRUE);
+
+            pdf_representation(frame, kernel);
 
             //call the functionality to be performed by dsp
             CalWeight(frame, weight, candidate, model);
@@ -209,7 +231,7 @@ static Void Task_notify(Uint32 eventNo, Ptr arg, Ptr info)
         weight = (float*)info;
     }
     if (count == 4) {
-        candidate = (float *)info;
+        kernel = (float *)info;
     }
     else if (count>4) {
         // communicating = ((count -3) == (int)info);

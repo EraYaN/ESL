@@ -11,7 +11,7 @@
 #ifdef WRITE_DYN_RANGE
 #define PROGRESSFRAMES 1
 #else
-#define PROGRESSFRAMES 16
+#define PROGRESSFRAMES 4
 #endif
 #endif
 
@@ -27,7 +27,6 @@
 #define RECT_COLSx3 258
 #define RECT_COLS_PADDED 96 //((RECT_COLS / 16 + 1) * 16)
 #define RECT_CENTRE 28.5f //(static_cast<float>((RECT_ROWS - 1) / 2.0)) //static_cast<float>((RECT_ROWS - 1) / 2.0);
-#define RECT_CENTRE_REC 0.0350877193f
 #define RECT_NEXTCOL_OFFSET 1662 //((next_frame.cols - RECT_COLS) * 3);
 
 //TODO verify if allowed to change, default: 8
@@ -39,28 +38,13 @@
 #define CFG_BIN_WIDTH 16 // (CFG_PIXEL_RANGE/CFG_BIN_WIDTH)
 
 #ifdef FIXEDPOINT
-#define CFG_PDF_SCALAR_OFFSET cv::Scalar(1) //for fixed point 0/0.1*(2^16-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(1048576) //for fixed point 1/2048*((2^32)-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(4194304) //for fixed point 1/512*((2^32)-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(8388608) //for fixed point 1/256*((2^32)-1)
-
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(16) //for fixed point 1/2048*((2^16)-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(64) //for fixed point 1/512*((2^16)-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(128) //for fixed point 1/256*((2^16)-1)
-//#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(256) //for fixed point 1/128*((2^16)-1)
-#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(512) //for fixed point 1/64*((2^16)-1)
-
+#define CFG_PDF_SCALAR_OFFSET cv::Scalar(0) //for fixed point 0/0.1*(2^16-1)
+#define CFG_WEIGHT_SCALAR_OFFSET 32 //for fixed point 1/2048*((2^16)-1)
 #else
-#if defined DSP && defined __ARM_NEON__
-#define CFG_PDF_SCALAR_OFFSET  cv::Scalar(1e-10f)
-#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(1.0000) //cv::Scalar(1.0000)
-#else
-#define CFG_PDF_SCALAR_OFFSET 0.f
+#define CFG_PDF_SCALAR_OFFSET 0.f //cv::Scalar(1e-10f)
 #define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(1.0000) //cv::Scalar(1.0000)
 #endif
-#endif
 
-//TODO use DEBUGP macro
 #define VERBOSE_EXECUTE 0
 
 #ifdef DEBUGPRINT
@@ -118,5 +102,6 @@ typedef double longbasetype_t;
 #define CV_BASETYPE CV_32F
 #endif
 #endif
+
 
 #endif /* UTIL_H_ */

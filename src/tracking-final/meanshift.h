@@ -30,12 +30,12 @@ public:
     void Init_target_frame(const cv::Mat &frame, const cv::Rect &rect);
     float Epanechnikov_kernel();
     cv::Mat pdf_representation(const cv::Mat &frame, const cv::Rect &rect);
-    cv::Mat CalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
+    cv::Mat PDFCalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
 
 #if defined DSP_ONLY || defined DSP
     void split(const cv::Mat &frame, cv::Rect &rect, uchar bgr[3][RECT_SIZE]);
     void mulWeights(cv::Mat &weight, float *poolWeight);
-    void CalWeightDSP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, const int k);
+    void PDFCalWeightDSP(const uchar bgr[3][RECT_SIZE], const int k);
 #endif
 
 #ifdef DSP
