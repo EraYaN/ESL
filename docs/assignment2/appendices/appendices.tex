@@ -31,6 +31,24 @@
 
 \subsection{Robin}
 
+\section{Build configurations}
+\begin{table}
+	\centering
+	\begin{tabular}{llll}
+	\toprule
+						& Flags						& project					& makefile			\\
+	\midrule
+	Naive				& \texttt{}					& \texttt{tracking}			& \texttt{arm.mk}	\\
+	Optimised			& \texttt{}					& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	Optimised (fixp)	& \texttt{-DFIXED\_POINT}	& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	NEON				& \texttt{-mfpu=neon}		& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	DSP					& \texttt{-DDSP\_ONLY}		& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	DSP + Optimised		& \texttt{-DDSP}			& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	DSP + NEON			& \texttt{-DDSP -mfpu=neon}	& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	\bottomrule
+	\end{tabular}
+\end{table}
+
 
 \end{appendices}
 \end{document}
