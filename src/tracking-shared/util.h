@@ -1,6 +1,10 @@
 #if !defined (UTIL_H_)
 #define UTIL_H_
 
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#endif
+
 #define CSV_SEPARATOR ","
 #define LINE_MARKER "@"
 
@@ -72,6 +76,12 @@
 
 #include <stdint.h>
 #ifdef FIXEDPOINT
+
+#ifdef __ARM_NEON__
+typedef int16x8_t basetype_vec_t;
+typedef int32x4_t longbasetype_vec_t;
+#endif
+
 typedef int16_t basetype_t;
 typedef int32_t longbasetype_t;
 

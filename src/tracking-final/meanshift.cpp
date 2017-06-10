@@ -115,7 +115,10 @@ float MeanShift::Epanechnikov_kernel()
 // If the DSP is used, blue (index 0) will not be processed.
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
 {
+    DEBUGP("PDF Representation started...");
     cv::Mat pdf_model(3, 16, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
+
+    uint8x16x3_t pixels;
     cv::Vec3b *bin_values = new cv::Vec3b[RECT_COLS_PADDED];
 
     int row_index = rect.y;
@@ -124,7 +127,7 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     for (int i = 0; i < RECT_ROWS; i++) {
         col_index = rect.x;
         for (int j = 0; j < rect.width; j += 16) {
-            uint8x16x3_t pixels = vld3q_u8(&frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
+            pixels = vld3q_u8(&frame.ptr<cv::Vec3b>(row_index)[col_index][0]);
 
 #ifndef DSP
             pixels.val[0] = vshrq_n_u8(pixels.val[0], CFG_2LOG_NUM_BINS);
@@ -135,19 +138,27 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
 
             col_index += 16;
         }
-        col_index = rect.x;
 
+        col_index = rect.x;
         for (int j = 0; j < RECT_COLS; j++) {
-            float kernel_val = kernel.at<float>(i, j);
+
+#ifdef FIXEDPOINT
+            basetype_t kernel_val = kernel.at<basetype_t>(i, j) >> F_E_TO_P;
+#else
+            basetype_t kernel_val = kernel.at<basetype_t>(i, j);
+#endif;
+#ifndef DSP
+            pdf_model.at<basetype_t>(0, bin_values[j][0]) += kernel_val;
+#endif
+            pdf_model.at<basetype_t>(1, bin_values[j][1]) += kernel_val;
+            pdf_model.at<basetype_t>(2, bin_values[j][2]) += kernel_val;
+
             dynrange(dynrangefile, __FUNCTION__, kernel_val);
 #ifndef DSP
-            pdf_model.at<float>(0, bin_values[j][0]) += kernel_val;
-            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(0, bin_values[j][0]));
+            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(0, bin_values[j][0]));
 #endif
-            pdf_model.at<float>(1, bin_values[j][1]) += kernel_val;
-            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(1, bin_values[j][1]));
-            pdf_model.at<float>(2, bin_values[j][2]) += kernel_val;
-            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<float>(2, bin_values[j][2]));
+            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(1, bin_values[j][1]));
+            dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(2, bin_values[j][2]));
 
             col_index++;
         }
@@ -163,8 +174,8 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
     DEBUGP("PDF Representation started...");
     cv::Mat pdf_model(3, 16, CV_BASETYPE, CFG_PDF_SCALAR_OFFSET);
 
-    cv::Vec3f curr_pixel_value;
-    cv::Vec3f bin_value;
+    cv::Vec3b curr_pixel_value;
+    cv::Vec3b bin_value;
 
     int row_index = rect.y;
     int col_index = rect.x;
@@ -181,18 +192,15 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
             bin_value[2] = (curr_pixel_value[2] / CFG_BIN_WIDTH);
 
 #ifdef FIXEDPOINT
-#ifndef DSP
-            pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j) >> F_E_TO_P;
-#endif
-            pdf_model.at<basetype_t>(1, bin_value[1]) += kernel.at<basetype_t>(i, j) >> F_E_TO_P;
-            pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j) >> F_E_TO_P;           
+            basetype_t kernel_value = kernel.at<basetype_t>(i, j) >> F_E_TO_P;
 #else
+            basetype_t kernel_value = kernel.at<basetype_t>(i, j);
+#endif
 #ifndef DSP
             pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j);
 #endif
             pdf_model.at<basetype_t>(1, bin_value[1]) += kernel.at<basetype_t>(i, j);
             pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j);
-#endif
 
 #ifndef DSP
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(0, bin_value[0]));
@@ -297,13 +305,8 @@ void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidat
         dynrange(dynrangefile, "Cb", to_float(target_model.at<basetype_t>(k, bin), F_P_RANGE));
         dynrange(dynrangefile, "Cc", val_candidate);
         dynrange(dynrangefile, "Cp", val_model);
-        if (val_candidate == 0) {
-            multipliers[bin] = 0;// static_cast<basetype_t>(F_C_RANGE);
-        }
-        else {
-            //multipliers[bin] = to_fixed(std::sqrt(to_float(F_C_DIVD(val_model,val_candidate),F_C_RANGE)),F_C_RANGE);
-            multipliers[bin] = to_fixed(std::sqrt(val_model/val_candidate), F_C_RANGE);
-        }
+
+        multipliers[bin] = to_fixed(std::sqrt(val_model/val_candidate), F_C_RANGE);
         dynrange(dynrangefile, "Cm", multipliers[bin]);
 #else
         multipliers[bin] = static_cast<basetype_t>(sqrt(target_model.at<basetype_t>(k, bin) / target_candidate.at<basetype_t>(k, bin)));
@@ -365,10 +368,30 @@ void MeanShift::CalWeightNEON(const uchar bgr[3][RECT_SIZE], cv::Mat &target_can
 void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
 #endif
 {
-    float32_t multipliers[CFG_NUM_BINS];
+    basetype_t multipliers[CFG_NUM_BINS];
     float32x4_t model_vec, candidate_vec, multiplier_vec;
 
     for (int bin = 0; bin < CFG_NUM_BINS; bin += 4) {
+
+#ifdef FIXEDPOINT
+        model_vec = to_float(vld1_s16(&target_model.ptr<basetype_t>(k)[bin]), F_P_RANGE);
+        candidate_vec = to_float(vld1_s16(&target_candidate.ptr<basetype_t>(k)[bin]), F_P_RANGE);
+        dynrange(dynrangefile, __FUNCTION__, model_vec);
+        dynrange(dynrangefile, __FUNCTION__, candidate_vec);
+
+        // The following calculates c = sqrt(a / b) = 1 / sqrt (b * 1 / a).
+        // Calculate model reciprocal 1 / a.
+        model_vec = vrecpeq_f32(model_vec);
+        dynrange(dynrangefile, __FUNCTION__, model_vec);
+
+        // Perform division (by means of multiplication) b * 1 / a
+        // and take reciprocal square root of result to obtain c.
+        multiplier_vec = vmulq_f32(candidate_vec, model_vec);
+        dynrange(dynrangefile, __FUNCTION__, multiplier_vec);
+        multiplier_vec = vrsqrteq_f32(multiplier_vec);
+        dynrange(dynrangefile, __FUNCTION__, multiplier_vec);
+        vst1_s16(&multipliers[bin], to_fixed(multiplier_vec, F_C_RANGE));
+#else
         model_vec = vld1q_f32((float32_t*)&target_model.ptr<float>(k)[bin]);
         candidate_vec = vld1q_f32((float32_t*)&target_candidate.ptr<float>(k)[bin]);
         dynrange(dynrangefile, __FUNCTION__, model_vec);
@@ -385,8 +408,8 @@ void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candida
         dynrange(dynrangefile, __FUNCTION__, multiplier_vec);
         multiplier_vec = vrsqrteq_f32(multiplier_vec);
         dynrange(dynrangefile, __FUNCTION__, multiplier_vec);
-
-        vst1q_f32(&multipliers[bin], multiplier_vec);
+        vst1q_f32((float32_t*)&multipliers[bin], multiplier_vec);
+#endif
     }
 
 #ifdef DSP
@@ -404,7 +427,11 @@ void MeanShift::CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candida
     for (int i = 0; i < RECT_ROWS; i++) {
         for (int j = 0; j < RECT_COLS; j++) {
             uchar curr_pixel = (next_frame.data[address]);
-            weight.at<float>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
+#ifdef FIXEDPOINT
+            weight.at<basetype_t>(i, j) = F_C_MULT(weight.at<basetype_t>(i, j), multipliers[curr_pixel >> CFG_2LOG_NUM_BINS]);
+#else
+            weight.at<basetype_t>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
+#endif
             dynrange(dynrangefile, __FUNCTION__, weight.at<float>(i));
             address += CFG_PIXEL_CHANNELS;
         }
@@ -527,8 +554,6 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         calWeightTime += diffToNanoseconds(startTime, endTime, 0);
         startTime = now();
 #endif
-
-        
 
         next_rect.x = target_Region.x;
         next_rect.y = target_Region.y;
