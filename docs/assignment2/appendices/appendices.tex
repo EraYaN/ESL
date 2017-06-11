@@ -18,13 +18,13 @@
 \section{Personal Analysis}\label{app:appendix-personal-analysis}
 
 \subsection{Casper}
-
+I worked on the basic DSP implementation where one shared \texttt{struct} was used to provide all the data for the DSP, so the calculations could be done there and the results where afterwards accepted by the GPP.
+Afterwards the shared memory pool was a bit differently arranged but the communication protocol was extended so it could handle different scenarios.
 
 \subsection{Erwin}
 I focussed on small optimisations and helping the somewhat stupid old compiler along, mostly indexing changes, constants in loop limits, minimizing memory accesses.
 The kind of stuff that get you from \SI{17.5}{\speedup} to almost \SI{20}{\speedup}.
-The second part is the fixed point implementation, including the dynamic range 
-
+The second part is the fixed point implementation, including the dynamic range, giving a very large speed-up.
 
 \subsection{Lars}
 Most of my efforts were focused on making implementations on DSP possible with shared memory and optimizing performance on the DSP side.
@@ -35,6 +35,7 @@ Although perhaps this should not come as a complete surprise as the compiler is 
 \subsection{Robin}
 My primary focus was the optimisation of the algorithm in general and the later implementation of the optimised version using NEON intrinsics.
 Like with the matrix-multiplication algorithm, NEON turned out to be the fastest way to run the algorithm, as it hardly introduces any overhead, but allows for executing a minimum of four operations at the same time.
+Even when fixed point turned out to give the biggest speed-up we had seen, implementing those changes in NEON just made it even faster.
 
 \section{Build configurations}
 \begin{table}[H]

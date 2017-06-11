@@ -11,12 +11,14 @@
 The following text lists each of the implementations that were created along with a short discussion of the results.
 Note that an incremental approach was taken, implying that changes to, as an example, the optimised version of the algorithm are also reflected by the NEON one, if applicable.
 
+
 \subsection{Naive}
 The naive implementation was provided for the assignment.
 Many details regarding it have been discussed in the previous section.
 For the rest of the report, its runtime averaged over a total of five runs will be used as a reference time for calculating speed-ups.
 These times are measured as $t_k = \SI{10.137}{\second}$ and $t = \SI{12.318}{\second}$ for kernel time and total time respectively.
 Note that this means that a significant part of the execution time is not spent in the computation kernel and the application speed-up is therefore limited to a theoretical maximum of 5.6x.
+
 
 \subsection{Optimised}
 The optimised implementation contains two major improvements:
@@ -46,7 +48,8 @@ Finally, the makefile was modified to include the \texttt{-ffast-math} compiler 
 Furthermore, the values of the architecture and platform specific compiler flags \texttt{-march}, \texttt{-mtune} and \texttt{-mcpu} were added and/or updated to actually reflect the used platform.
 Of course, the optimisation level was kept at \texttt{-O3}.
 
-This first step will prove to be the most important in terms of performance gain, resulting in $t_k = \SI{0.708}{\second}$ and $t = \SI{2.798}{\second}$ (which implies a kernal speed-up of 14.3x and an application speed-up of 4.4x).
+This first step will prove to be the most important in terms of performance gain, resulting in $t_k = \SI{0.708}{\second}$ and $t = \SI{2.798}{\second}$ (which implies a kernel speed-up of 14.3x and an application speed-up of 4.4x).
+
 
 \subsection{NEON}
 Starting from the optimised implementation, very little rewriting had to be done to make the algorithm suitable for NEON execution.
@@ -87,7 +90,7 @@ The main advantage of this is that only one pool is needed (and thus only 1 set-
 However the drawback from this method is the declaration of the size of the struct, the struct contains data arrays whose sizes must be known at compile time and are thus hardcoded into the software (which is fine for this application).
 The other memory sharing method is to allocate a single pool for each array, this way the size of the pools that are allocated can be calculated during runtime.
 However this requires multiple pointers to be send to the DSP at initialization, but all this takes place outside the timing, so it does not affect the timed performance.
-As seen in Assignment 1, the dynamically allocated matrix multiplication implementation was significantly faster, however the performance difference between these `static' and `dynamic' implementations was really neglectable, but still in favour of the `dynamic' method that used the multiple pools, so this method will be used.
+As seen in Assignment 1, the dynamically allocated matrix multiplication implementation was significantly faster, however the performance difference between these `static' and `dynamic' implementations was really negligible, but still in favour of the `dynamic' method that used the multiple pools, so this method was used.
 
 \begin{figure}[H]
     \subimport{resources/}{memory_static.tikz}
@@ -95,6 +98,11 @@ As seen in Assignment 1, the dynamically allocated matrix multiplication impleme
     \label{fig:memory}
 \end{figure}
 
+Note that storing a single colour channel in shared memory implies that these channels are readily available, like they were before it was decided to remove the \texttt{ch::split} call from \texttt{CalWeight}.
+Unfortunately, they are not, since the frame is read by OpenCV in an interleaved way, meaning sequential pixels are stored like \texttt{bgr bgr bgr}, etcetera.
+A de-interleaving procedure is therefore required to obtain the three channels in three separate arrays.
+Functions to accomplish this were implemented in both normal C++ and using NEON intrinsics, which have built in support for de-interleaving loads, which allow the user to load the colour channels of 16 pixels to three arrays with a single instruction.
+Although now only the current rectangle has to be de-interleaved/split, this operation still presents major overhead in using the DSP which will have a significant detrimental effect on its performance.
 
 \subsubsection{Compiler options}
 For optimizing the compiler, the hand-tuning manual provided by Texas Instruments was used \cite{handtuning}.
@@ -126,8 +134,13 @@ for (xy = 0; xy < RECT_SIZE; xy++) {
 
 This change, like the other changes discussed in this section, unfortunately had very little (if any) impact on the performance.
 
+
 \subsection{Balanced}
 Because two processors are present on the Beagleboard in the form of a DSP and the ARM processor the possibility of processing the frames in parallel was investigated.
+Load balancing was kept extremely simple, by just offloading the processing of a single colour value of every pixel in the current rectangle to the DSP using the shared memory pool.
+This approach was deemed sufficient as the execution times of the NEON and the DSP kernels roughly equalled 1:2.
+Later on it proved desirable to have a more fine-grained method of load-balancing, but initial efforts to implement this had little success and priority was given to perfect the fixed-point and NEON implementations of the code.
+
 
 \subsection{Fixed-point}
 To implement fixed-point arithmetic, we first need to know the dynamic range of all the values in the kernels.
