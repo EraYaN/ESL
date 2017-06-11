@@ -663,9 +663,9 @@ class RunSystem(object):
 if __name__ == '__main__':
     parser = ap.ArgumentParser(prog='ESLab RunSystem',description='ESLab RunSystem')
     parser.add_argument('--key-file', action="store", help='SSH Key file',default=None)
-    parser.add_argument('--user', action="store", help='SSH Username',default="erwin")
-    parser.add_argument('--host', action="store", help='SSH Host',default="erayan.duckdns.org")
-    parser.add_argument('--port', action="store", help='SSH Port',default=34522)
+    parser.add_argument('--user', action="store", help='SSH Username (default erwin)',default="erwin")
+    parser.add_argument('--host', action="store", help='SSH Host (default erayan.duckdns.org)',default="erayan.duckdns.org")
+    parser.add_argument('--port', action="store", help='SSH Port (default 34522)',default=34522)
     parser.add_argument('--sendsource', action="store_true", help='Should we upload the source to the BuildServer')
     parser.add_argument('--build', action="store_true", help='Should we build the executable for the BeagleBoard')
     parser.add_argument('--disassemble', action="store_true", help='Should we get the disassembly, requires --build.')
