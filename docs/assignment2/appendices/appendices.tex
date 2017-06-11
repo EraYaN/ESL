@@ -41,20 +41,20 @@ Like with the matrix-multiplication algorithm, NEON turned out to be the fastest
 	\centering
 	\begin{tabular}{>{\raggedright}p{2.5cm}l>{\raggedright}p{3cm}ll}
 	\toprule
-	\textbf{Name}								& \textbf{Variant}				& \textbf{Flags}							& \textbf{project}			& \textbf{makefile}	\\
+	\textbf{Name}								& \textbf{Variant}			 & \textbf{Flags}							& \textbf{project}			& \textbf{makefile}	\\
 	\midrule
-	Naive										& vanilla 						& \texttt{}									& \texttt{tracking}			& \texttt{arm.mk}	\\
-	Generate dynamic range file	(works with most)& - 							& \texttt{-DWRITE\_DYN\_RANGE}				& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	Enabled Debug printing	(works with all)    & - 							& \texttt{-DDEBUGPRINT}						& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	Optimised									& final 						& \texttt{}									& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	Optimised (Fixed-point)						& final-fp-e-9p1c11				& \texttt{-DFIXEDPOINT}	    				& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	(Auto) Compiler NEON						& final-autoneon 				& \texttt{-mfpu=neon}		    			& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	(Auto) Compiler NEON (Fixed-point)			& final-autoneon-fp-e-9p1c11	& \texttt{-DFIXEDPOINT -mfpu=neon}		    & \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	NEON										& final-neon 					& \texttt{-DNEON -mfpu=neon}		    	& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	NEON (Fixed-point)							& final-neon-fp-e-9p1c11		& \texttt{-DNEON -DFIXEDPOINT -mfpu=neon}	& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	DSP											& final-dsponly					& \texttt{-DDSP\_ONLY}						& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	DSP + Optimised								& final-dsp 					& \texttt{-DDSP}							& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	DSP + NEON									& final-dsp-neon 				& \texttt{-DDSP -mfpu=neon}					& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	Naive										& vanilla 					 & \texttt{}								& \texttt{tracking}			& \texttt{arm.mk}	\\
+	Generate dynamic range file	(works with most)& - 						 & \texttt{-DWRITE\_DYN\_RANGE}				& \texttt{tracking-final}	& -	\\
+	Enabled Debug printing	(works with all)    & - 						 & \texttt{-DDEBUGPRINT}					& \texttt{tracking-final}	& -	\\
+	Optimised									& final 					 & \texttt{}								& \texttt{tracking-final}	& \texttt{arm.final.mk}	\\
+	Optimised (Fixed-point)						& final-fp-e-9p1c11			 & \texttt{-DFIXEDPOINT}	    			& \texttt{tracking-final}	& \texttt{arm. final-fp-e-9p1c11.mk}	\\
+	(Auto) Compiler NEON						& final-autoneon 			 & \texttt{-mfpu=neon}		    			& \texttt{tracking-final}	& \texttt{arm.final-autoneon .mk}	\\
+	(Auto) Compiler NEON (Fixed-point)			& final-autoneon-fp-e-9p1c11 & \texttt{-DFIXEDPOINT -mfpu=neon}		    & \texttt{tracking-final}	& \texttt{arm.final-autoneon-fp-e-9p1c11.mk}	\\
+	NEON										& final-neon 				 & \texttt{-DNEON -mfpu=neon}		    	& \texttt{tracking-final}	& \texttt{arm.final-neon.mk}	\\
+	NEON (Fixed-point)							& final-neon-fp-e-9p1c11	 & \texttt{-DNEON -DFIXEDPOINT -mfpu=neon}	& \texttt{tracking-final}	& \texttt{arm.final-neon-fp-e-9p1c11.mk}	\\
+	DSP											& final-dsponly				 & \texttt{-DDSP\_ONLY}						& \texttt{tracking-final}	& \texttt{arm.final-dsponly.mk}	\\
+	DSP + Optimised								& final-dsp 				 & \texttt{-DDSP}							& \texttt{tracking-final}	& \texttt{arm.final-dsp.mk}	\\
+	DSP + NEON									& final-dsp-neon 			 & \texttt{-DDSP -mfpu=neon}				& \texttt{tracking-final}	& \texttt{arm.final-dsp-neon.mk}	\\
 	\bottomrule
 	\end{tabular}
 \end{table}

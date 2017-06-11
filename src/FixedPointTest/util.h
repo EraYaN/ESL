@@ -1,5 +1,15 @@
 #if !defined (UTIL_H_)
 #define UTIL_H_
+#ifndef __ARM_NEON__
+#undef NEON
+#endif
+
+#ifdef NEON
+#include <arm_neon.h>
+#endif
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
 
 #define CSV_SEPARATOR ","
 #define LINE_MARKER "@"
@@ -11,7 +21,7 @@
 #ifdef WRITE_DYN_RANGE
 #define PROGRESSFRAMES 1
 #else
-#define PROGRESSFRAMES 4
+#define PROGRESSFRAMES 16
 #endif
 #endif
 
@@ -27,9 +37,9 @@
 #define RECT_COLSx3 258
 #define RECT_COLS_PADDED 96 //((RECT_COLS / 16 + 1) * 16)
 #define RECT_CENTRE 28.5f //(static_cast<float>((RECT_ROWS - 1) / 2.0)) //static_cast<float>((RECT_ROWS - 1) / 2.0);
+#define RECT_CENTRE_REC 0.0350877193f
 #define RECT_NEXTCOL_OFFSET 1662 //((next_frame.cols - RECT_COLS) * 3);
 
-//TODO verify if allowed to change, default: 8
 #define CFG_MAX_ITER 8
 #define CFG_NUM_BINS 16
 #define CFG_2LOG_NUM_BINS 4
@@ -38,14 +48,22 @@
 #define CFG_BIN_WIDTH 16 // (CFG_PIXEL_RANGE/CFG_BIN_WIDTH)
 
 #ifdef FIXEDPOINT
-#define CFG_PDF_SCALAR_OFFSET cv::Scalar(0) //for fixed point 0/0.1*(2^16-1)
-#define CFG_WEIGHT_SCALAR_OFFSET 32 //for fixed point 1/2048*((2^16)-1)
+#define CFG_PDF_SCALAR_OFFSET cv::Scalar(1) //for fixed point 0/0.1*(2^16-1)
+
+#define CFG_WEIGHT_ONE 16 //for fixed point 1/2048*((2^16)-1)
+
+#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(CFG_WEIGHT_ONE)
+
+
 #else
-#define CFG_PDF_SCALAR_OFFSET 0.f //cv::Scalar(1e-10f)
+#if defined DSP && defined NEON
+#define CFG_PDF_SCALAR_OFFSET  cv::Scalar(1e-10f)
+#define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(1.0000) //cv::Scalar(1.0000)
+#else
+#define CFG_PDF_SCALAR_OFFSET 0.f
 #define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(1.0000) //cv::Scalar(1.0000)
 #endif
-
-#define VERBOSE_EXECUTE 0
+#endif
 
 #ifdef DEBUGPRINT
 #define DEBUGP(x) do { std::cout << x << std::endl; } while (0)
@@ -58,7 +76,6 @@
 #ifdef FIXEDPOINT
 typedef int16_t basetype_t;
 typedef int32_t longbasetype_t;
-
 #else
 typedef float basetype_t;
 typedef double longbasetype_t;
@@ -71,7 +88,7 @@ typedef double longbasetype_t;
 #define F_E_RANGE (F_E_UPPER)
 
 //CalWeight
-#define F_C_BITS 6
+#define F_C_BITS 11
 #define F_C_UPPER std::pow(2,F_C_BITS) // 32-11=21 bit for fractional part, 11 for the integer value.
 #define F_C_LOWER (-F_C_UPPER) // -8
 #define F_C_RANGE (F_C_UPPER)
@@ -83,9 +100,9 @@ typedef double longbasetype_t;
 #define F_P_RANGE (F_P_UPPER)
 
 //div (pre div bitshift to the left)
-#define F_C_FRAC (sizeof(basetype_t)*8)-(F_C_BITS+1)
-#define F_P_FRAC (sizeof(basetype_t)*8)-(F_P_BITS+1)
-#define F_E_FRAC (sizeof(basetype_t)*8)-(F_E_BITS+1)
+#define F_C_FRAC ((sizeof(basetype_t)*8)-(F_C_BITS+1))
+#define F_P_FRAC ((sizeof(basetype_t)*8)-(F_P_BITS+1))
+#define F_E_FRAC ((sizeof(basetype_t)*8)-(F_E_BITS+1))
 
 //conv (bit shifts to the right)
 #define F_E_TO_P (F_P_BITS-F_E_BITS)
@@ -94,14 +111,17 @@ typedef double longbasetype_t;
 //all
 #define F_RANGE std::pow(2,F_C_BITS) //Everything clipped to this. (barring overflows)
 
+//identity
+
+#define F_IDENT "e" TOSTRING(F_E_BITS) "p" TOSTRING(F_P_BITS) "c" TOSTRING(F_C_BITS)
+
 #ifdef ARMCC
 #include <opencv2/core/core.hpp>
 #ifdef FIXEDPOINT
-#define CV_BASETYPE CV_16SC1
+#define CV_BASETYPE CV_16SC1 //Internal OpenCV datatype (single column short)
 #else
-#define CV_BASETYPE CV_32F
+#define CV_BASETYPE CV_32F //Internal OpenCV datatype (single column float)
 #endif
 #endif
-
 
 #endif /* UTIL_H_ */

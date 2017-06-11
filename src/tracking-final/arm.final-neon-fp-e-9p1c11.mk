@@ -11,7 +11,7 @@ DEFS += -DFIXEDPOINT         # Enable Fixed-point math
 
 #DEFS += -DTIMING             # Enable fine-grained TIMING for pdf, calweight and track.
 #DEFS += -DTIMING2            # Enable fine-grained TIMING for the balancing function.
-DEFS += -DDEBUGPRINT         # Enable DEBUG messages.
+#DEFS += -DDEBUGPRINT         # Enable DEBUG messages.
 #DEFS += -WRITE_DYN_RANGE     # Enable writing all intermediate values toa a dynrange.csv file. (very slow, does not work with every variant)
 
 include arm.base.targets.mk

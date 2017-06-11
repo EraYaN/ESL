@@ -323,7 +323,7 @@ class RunSystem(object):
                 sftp.close()
         return True
 
-    def Build(self):
+    def Build(self,makefile):
         if not self.build_server or not self.beagle_board:
             raise NotConnectedError('Please make sure the class made a successfull connection to the build server and the development board.')
         
@@ -336,11 +336,12 @@ class RunSystem(object):
             if exit_code != 0:
                 print('Dependency {0} build failed with exit code {1}'.format(bench,exit_code))
                 return False
-
-        print("Cleaning {project}.".format(**self.benchmark))
-        out,error,exit_code = self.BuildExecute("make clean -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
-        print("Building {project}.".format(**self.benchmark))
-        out,error,exit_code = self.BuildExecute("make all -C ~/projects/{project} -f arm.mk".format(**self.benchmark))
+        bench = self.benchmark
+        bench['makefile'] = makefile
+        print("Cleaning {project}.".format(**bench))
+        out,error,exit_code = self.BuildExecute("make clean -C ~/projects/{project} -f {makefile}".format(**bench))
+        print("Building {project}.".format(**bench))
+        out,error,exit_code = self.BuildExecute("make all -C ~/projects/{project} -f {makefile}".format(**bench))
         if exit_code != 0:
             print('Main {0} build failed with exit code {1}'.format(self.benchmark['project'],exit_code))
             return False
@@ -673,6 +674,7 @@ if __name__ == '__main__':
     parser.add_argument('--number-of-runs', action="store", type=int, help='The number of runs to do.', default=1)
     parser.add_argument('--benchmark', action="store", help='Benchmark to run',choices=list(benchmarks.keys()),default='vanilla')
     parser.add_argument('--variant', action="store", help='Variant name, used to save the results',default='default')
+    parser.add_argument('--makefile', action="store", help='Makefile name, used to build. Dependencies are always built with arm.mk',default='arm.mk')
     print("Starting...")
     try:
         opts = parser.parse_args(sys.argv[1:])
@@ -684,7 +686,7 @@ if __name__ == '__main__':
                     print('SendSource Failed.')
                     exit(1)
             if opts.build:
-                if not rs.Build():
+                if not rs.Build(opts.makefile):
                     print('Build Failed.')
                     exit(2)
                 if opts.disassemble:
