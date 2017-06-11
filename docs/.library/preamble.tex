@@ -20,7 +20,7 @@
 \usepackage{fontspec}
 \usepackage{pgfplots}
 \usepackage{tikz}
-\usepackage[binary-units=true]{siunitx}
+\usepackage[binary-units=true,quotient-mode=fraction]{siunitx}
 \usepackage{units}
 \usepackage{amsmath}
 \usepackage{mathtools}
@@ -60,7 +60,19 @@ smartlabels]{circuitikz}
 \newlength\figureheight
 \newlength\figurewidth
 
-\tikzset{every axis/.style={xticklabel style={align=right}}}
+\pgfplotsset{every axis/.style={xticklabel style={align=right}}}
+
+% Tikz settings and styles for the stack drawings of Casper:
+\pgfdeclarelayer{backgroundstack}
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{backgroundstack,background,main,foreground}
+
+% Define a few styles and constants
+\tikzstyle{sensor}=[draw, fill=blue!20, text width=5em, text centered, minimum width=2cm, minimum height=0.75cm,node distance=0.25cm]
+\tikzstyle{sensorbig}=[sensor, minimum width=2cm]
+\tikzstyle{stack} = [fill=blue!50, draw=black]
+\tikzstyle{part} = [fill=yellow!20,rounded corners, draw=black!50, dashed]
 
 \usepackage[
 %backend=bibtex,
@@ -73,7 +85,8 @@ citestyle=numeric,
     language=auto,
     backref=true,
     abbreviate=false,
-    date=iso8601
+    date=edtf,
+    seconds=true
 ]{biblatex}
 
 

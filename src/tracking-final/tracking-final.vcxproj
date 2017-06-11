@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{e3794d56-e12c-42cd-9bd6-a055f0beee9d}</ProjectGuid>
+    <Keyword>Linux</Keyword>
+    <RootNamespace>tracking_final</RootNamespace>
+    <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
+    <ApplicationType>Linux</ApplicationType>
+    <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
+    <TargetLinuxPlatform>Generic</TargetLinuxPlatform>
+    <LinuxProjectType>{FC1A4D80-50E9-41DA-9192-61C0DBAA00D2}</LinuxProjectType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <ConfigurationType>Makefile</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <ConfigurationType>Makefile</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NMakeIncludeSearchPath>$(SolutionDir)tracking-shared;$(SolutionDir)includes\opencv;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\usr;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux\2.6.18;$(SolutionDir)includes\codesourcery\arm-none-linux-gnueabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <RemoteBuildCommandLine>make -f arm.mk -C $(RemoteProjectDir)</RemoteBuildCommandLine>
+    <RemoteReBuildCommandLine>make rebuild -f arm.mk -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
+    <RemoteCleanCommandLine>make clean -f arm.mk -C $(RemoteProjectDir)</RemoteCleanCommandLine>
+    <RemoteBuildOutputs>$(RemoteProjectDir)/armMeanshiftExec</RemoteBuildOutputs>
+    <NMakePreprocessorDefinitions>ARMCC;FIXEDPOINT</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NMakeIncludeSearchPath>$(SolutionDir)tracking-shared;$(SolutionDir)includes\opencv;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\usr;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux;$(SolutionDir)includes\bbframework\platform\beagle-linux\tools\dsplink_linux_1_65_00_03\gpp\inc\sys\Linux\2.6.18;$(SolutionDir)includes\codesourcery\arm-none-linux-gnueabi\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <RemoteBuildCommandLine>make -f arm.mk -C $(RemoteProjectDir)</RemoteBuildCommandLine>
+    <RemoteReBuildCommandLine>make rebuild -f arm.mk -C $(RemoteProjectDir)</RemoteReBuildCommandLine>
+    <RemoteCleanCommandLine>make clean -f arm.mk -C $(RemoteProjectDir)</RemoteCleanCommandLine>
+    <RemoteBuildOutputs>$(RemoteProjectDir)/armMeanshiftExec</RemoteBuildOutputs>
+    <NMakePreprocessorDefinitions>ARMCC;FIXEDPOINT</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClInclude Include="FixedPointTools.h" />
+    <ClInclude Include="meanshift.h" />
+    <ClInclude Include="neon_util.h" />
+    <ClInclude Include="pool_notify.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="arm.base.setup.mk" />
+    <None Include="arm.base.targets.mk" />
+    <None Include="arm.final-autoneon-fp-e-9p1c11.mk" />
+    <None Include="arm.final-autoneon.mk" />
+    <None Include="arm.final-dsp-neon.mk" />
+    <None Include="arm.final-dsp.mk" />
+    <None Include="arm.final-dsponly.mk" />
+    <None Include="arm.final-fp-e-9p1c11.mk" />
+    <None Include="arm.final-neon-fp-e-9p1c11.mk" />
+    <None Include="arm.final-neon.mk" />
+    <None Include="arm.final.mk" />
+    <None Include="arm.mk" />
+    <None Include="pc.mk" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="meanshift.cpp" />
+    <ClCompile Include="pool_notify.c" />
+  </ItemGroup>
+  <ItemDefinitionGroup />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

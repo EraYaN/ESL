@@ -1,0 +1,22 @@
+%!TEX program = xelatex
+%!TEX spellcheck = en_GB
+\documentclass[final]{article}
+\input{../../.library/preamble.tex}
+\input{../../.library/style.tex}
+\addbibresource{../../.library/bibliography.bib}
+\begin{document}
+\section{Conclusion}
+Many different implementations of the tracking algorithm were discussed.
+The algorithm is a good fit for parallel processing using NEON and a DSP due to the inherent parallelism in processing the pixels of an image, but also contains some operations related to binning, which are detrimental to memory performance and in some cases require synchronisation.
+Like the previous assignment, implementations using NEON provide the most speed-up, reaching almost 50x when used in conjunction with fixed point arithmetic.
+Fixed point arithmetic in general roughly doubled the the speed-ups of floating point implementations.
+As it turns out, the additional overhead of de-interleaving a tracking rectangle into its three separate colour channels nullified any performance gain obtained due to the use of parallel processing with the DSP.
+
+\section{Further work}
+It is very likely that an implementation and load-balancing scheme that does not involve splitting a fraction of the image into BGR channels will bring DSP performance on par with the implementations running on just the ARM processor.
+Ideally, one would copy the entire frame to DSP shared memory, but unfortunately that is not possible due to size restrictions.
+Possible solutions for this are to re-compile DSP-Link (however non-trivial), or to send all rows of the current frame that are part of the current rectangle.
+Finally, perhaps the biggest performance boost that can be gained at this point is rewriting to DSP code to perform fixed-point arithmetic as this is what it is made for in the first place.
+
+
+\end{document}

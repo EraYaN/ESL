@@ -1,0 +1,76 @@
+%!TEX program = xelatex
+%!TEX spellcheck = en_GB
+\documentclass[final]{article}
+\input{../../.library/preamble.tex}
+\input{../../.library/style.tex}
+\addbibresource{../../.library/bibliography.bib}
+
+\begin{document}
+\section{Analysis}
+In order to determine what parts of the code were most important to improve, the basic application was profiled using gprof and MCprof \cite{phdthesisAshraf}.
+The results of the gprof profiling can be found in \cref{tab:gprof}.
+
+\begin{table}[H]
+\centering
+\caption{Gprof output for the basic application filtered on functions that are reported to last more than 0.00 seconds}
+\label{tab:gprof}
+\begin{tabular}{llllll}
+\toprule
+\textbf{Name} & \textbf{\% time} & \textbf{Self seconds} & \textbf{Calls} &  \textbf{Self ms/call} & \textbf{Total ms/call} \\
+\midrule
+\texttt{MeanShift::CalWeight} & 34.90   &   0.15  &    157&     0.96 &    0.96  \\
+\texttt{MeanShift::track} & 27.92    &   0.12   &    32 &    3.75  &  13.41 \\
+\texttt{MeanShift::pdf\_representation} & 27.92     &  0.12    &  158  &   0.76   &  1.01  \\
+\texttt{MeanShift::Epanechnikov\_kernel} & 9.31      &   0.04     & 158   &  0.25    & 0.25  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Unsurprisingly, all the functions that take a significant amount of times are the functions needed for the tracking algorithm.
+The function that has the most significant impact on performance is the \texttt{CalWeight} function, but both \texttt{pdf\_representation} and the calculations in track also take a large amount of time.
+Therefore, those three functions should be the focus when improving the application.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{resources/callgraphAll.pdf}
+\caption{Callgraph produced by MCProf}
+\label{fig:callgraph}
+\end{figure}
+
+A call graph produced by MCProf can be found in \cref{fig:callgraph}.
+Unfortunately, because MCProf only works on Intel processors it could not be run on the Beagleboard and was instead run on the server used for compilation.
+The difference in processing power between the server and the Beagleboard explains the difference between the gprof and MCProf profiling.
+The explanation for \texttt{CalWeight}'s dominance in the call graph can be found in \cref{tab:memprofile}.
+The \texttt{CalWeight} function has significantly more memory accesses than the other functions, which is likely due to the use of \texttt{cv::split}, which will be discussed in the next section.
+Although the server should outperform the Beagleboard with computations, this massive communications overhead handicaps the obtainable speed-up in the \texttt{CalWeight} function.
+A possible decrease in the amount of necessary memory accesses in the \texttt{CalWeight} function will most likely cause a significant performance improvement.
+
+\begin{table}[H]
+\centering
+\caption{Flat memory profile produced by MCProf}
+\label{tab:memprofile}
+\begin{tabular}{llll}
+\toprule
+\textbf{Name} & \textbf{Total} & \textbf{Reads} & \textbf{Writes}\\
+\midrule
+\texttt{MeanShift::CalWeight}   &  551678840  &   436089346   &  115589494\\
+\texttt{MeanShift::pdf\_representation}    &  40448790  &    26733846   &   13714944\\
+\texttt{main}   &    9293040   &    5895758    &  3397282\\
+\texttt{MeanShift::Epanechnikov\_kernel}    &   3552009       & 252870  &     3299139\\
+\texttt{MeanShift::track}   &    3429327   &    3407927      &   21400\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Furthermore, it is obvious that the algorithm exhibits inherent parallelism between individual pixels, which means both using NEON and distributing parts of the workload to the DSP should be possible.
+Unfortunately though, this is only part of the story, since the algorithm can primarily be classified as a histogramming problem.
+As a result, both \texttt{pdf\_representation} and \texttt{CalWeight} use a rather irregular memory access pattern, as the value of a pixel is used to index various arrays.
+This will limit the applicability of NEON, which requires sequentially stored data, and be detrimental to cache and memory performance in general.
+Also, although individual pixels can be processed separately, special care should be taken during calculation of the histogram as multiple pixels can and will map to the same bin.
+Moreover, the blue, green and red channels of a pixel all map to the same value in the weight matrix, which could also impose a need for synchronisation.
+For the optimised implementation in the next section ways are discussed to mitigate this problem, but it cannot be solved completely.
+
+Also note that although image processing is in theory a good fit for the used platform (using NEON and the DSP) and will allow for significant speed-up, the volumes of data that are to be processed in this particular case are quite low, being the amount of pixels present in the rectangle that is to be tracked.
+This means that especially communications overhead from and to the DSP will remain a significant factor and any pre- or post-processing that is to be performed will imply a noticeable performance hit.
+
+
+\end{document}

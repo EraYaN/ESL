@@ -1,0 +1,65 @@
+\begin{tikzpicture}
+%Static
+    \node (frame) [sensorbig] {Frame};
+    \node (model) [sensor, right = of frame] {Model};
+    \node (weight) [sensorbig, right = of model] {Weight};
+    \node (kernel) [sensorbig, right = of weight] {Kernel};
+
+    \node (label) [left = 1cm of frame] {Static:};
+
+    \begin{pgfonlayer}{background}
+        % Compute a few helper coordinates
+        \path (frame.west |- frame.north)+(-0.125,0.5) node (a) {};
+        \path (kernel.east |- kernel.south)+(0.125,-0.25) node (b) {};
+
+        \path[part] (a) rectangle (b);
+        \path (frame.north |- a.east) node [anchor=north] (datastruct) {DataStruct};
+    \end{pgfonlayer}
+
+    \begin{pgfonlayer}{backgroundstack}
+        \path (a)+(-0.125,0.25) node (astack) {};
+        \path (b)+(0.125,-0.25) node (bstack) {};
+
+        \path[stack] (astack) rectangle (bstack);
+    \end{pgfonlayer}
+
+
+%Dynamic
+    \node (frame) [sensorbig, below = 2cm of frame] {Frame};
+    \node (model) [sensor, right =0.5cm of frame] {Model};
+    \node (weight) [sensorbig, right =0.5cm of model] {Weight};
+    \node (kernel) [sensorbig, right =0.5cm of weight] {Kernel};
+
+    \node (label) [left = 1cm of frame] {Dynamic:};
+
+    \begin{pgfonlayer}{background}
+        \path (frame.west |- frame.north)+(-0.125,0.5) node (aframe) {};
+        \path (frame.east |- frame.south)+(0.125,-0.25) node (bframe) {};
+
+        \path (model.west |- model.north)+(-0.125,0.5) node (amodel) {};
+        \path (model.east |- model.south)+(0.125,-0.25) node (bmodel) {};
+
+        \path (weight.west |- weight.north)+(-0.125,0.5) node (aweight) {};
+        \path (weight.east |- weight.south)+(0.125,-0.25) node (bweight) {};
+
+        \path (kernel.west |- kernel.north)+(-0.125,0.5) node (akernel) {};
+        \path (kernel.east |- kernel.south)+(0.125,-0.25) node (bkernel) {};
+
+        \path[part] (aframe) rectangle (bframe);
+        \path[part] (amodel) rectangle (bmodel);
+        \path[part] (aweight) rectangle (bweight);
+        \path[part] (akernel) rectangle (bkernel);
+
+        \path (frame.north |- aframe.east) node [anchor=north] (poolframe) {PoolFrame};
+        \path (model.north |- amodel.east) node [anchor=north] (poolmodel) {PoolModel};
+        \path (weight.north |- aweight.east) node [anchor=north] (poolweight) {PoolWeight};
+        \path (kernel.north |- akernel.east) node [anchor=north] (poolkernel) {PoolKernel};
+    \end{pgfonlayer}
+
+    \begin{pgfonlayer}{backgroundstack}
+        \path (aframe)+(-0.125,0.25) node (astack) {};
+        \path (bkernel)+(0.125,-0.25) node (bstack) {};
+
+        \path[stack] (astack) rectangle (bstack);
+    \end{pgfonlayer}
+\end{tikzpicture}

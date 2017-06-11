@@ -391,3 +391,6 @@ script/**/*.jpg
 *.s62
 *.pickle
 pkg/
+tracking_result.*
+*.disassembly.txt
+*.csv

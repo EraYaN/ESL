@@ -23,7 +23,7 @@ int main (int argc, char ** argv)
 
     if (argc != 3) {
         printf ("Usage : %s <absolute path of DSP executable> "
-           "<Buffer Size> <number of transfers>\n",
+           "<Buffer Size>\n",
            argv [0]) ;
     }
     else {

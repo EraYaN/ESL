@@ -1,0 +1,17 @@
+%!TEX program = xelatex
+%!TEX spellcheck = en_GB
+\documentclass[final]{article}
+\input{../../.library/preamble.tex}
+\input{../../.library/style.tex}
+\addbibresource{../../.library/bibliography.bib}
+\begin{document}
+\section{Introduction}
+For the course IN4342 -- Embedded Systems Laboratory, a mean shift visual tracking algorithm application is provided with a BeagleBoard to run it on.
+These applications can be improved and significantly sped up by making optimal use of both the ARM SIMD instructions (NEON) and the digital signal processor (DSP) on the BeagleBoard.
+This report discusses the results of the speed-up efforts for the mean shift application.
+Attempts were made to speed-up the application by optimising it without the use of any additional features/hardware; by using NEON; by using the DSP and by using a combination of the two.
+Performance improvements by means of using a fixed point integer representation in stead of floating point were also investigated.
+First, the results of the profiling efforts will be discussed.
+Then, multiple areas of possible improvement will be identified in the code and implemented.
+Finally, the benchmarking results of the different implementations will be compared.
+\end{document}
