@@ -21,28 +21,40 @@
 
 
 \subsection{Erwin}
+I focussed on small optimisations and helping the somewhat stupid old compiler along, mostly indexing changes, constants in loop limits, minimizing memory accesses.
+The kind of stuff that get you from \SI{17.5}{\speedup} to almost \SI{20}{\speedup}.
+The second part is the fixed point implementation, including the dynamic range 
 
 
 \subsection{Lars}
-Most of my efforts were focused on making implementations on DSP possible with shared memory and optimizing performance on the DSP side. I was disappointed by the room for improvement left in compiler optimizations. Despite the large amount of time spent on optimizing the compiler for the DSP side of the application very little (if any) improvement was obtained. Although perhaps this should not come as a complete surprise as the compiler is designed to optimise the performance as much as it can by itself.
+Most of my efforts were focused on making implementations on DSP possible with shared memory and optimizing performance on the DSP side.
+I was disappointed by the room for improvement left in compiler optimizations.
+Despite the large amount of time spent on optimizing the compiler for the DSP side of the application very little (if any) improvement was obtained.
+Although perhaps this should not come as a complete surprise as the compiler is designed to optimise the performance as much as it can by itself.
 
 \subsection{Robin}
-My primary focus was the optimisation of the algorithm in general and the later implementation of the optimised version using NEON intrinsics. Like with the matrix-multiplication algorithm, NEON turned out to be the fastest way to run the algorithm, as it hardly introduces any overhead, but allows for executing a minimum of four operations at the same time.
+My primary focus was the optimisation of the algorithm in general and the later implementation of the optimised version using NEON intrinsics.
+Like with the matrix-multiplication algorithm, NEON turned out to be the fastest way to run the algorithm, as it hardly introduces any overhead, but allows for executing a minimum of four operations at the same time.
 
 \section{Build configurations}
-\begin{table}
+\begin{table}[H]
 	\centering
-	\begin{tabular}{llll}
+	\begin{tabular}{>{\raggedright}p{2.5cm}l>{\raggedright}p{3cm}ll}
 	\toprule
-						& Flags						& project					& makefile			\\
+	\textbf{Name}								& \textbf{Variant}				& \textbf{Flags}							& \textbf{project}			& \textbf{makefile}	\\
 	\midrule
-	Naive				& \texttt{}					& \texttt{tracking}			& \texttt{arm.mk}	\\
-	Optimised			& \texttt{}					& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	Optimised (fixp)	& \texttt{-DFIXED\_POINT}	& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	NEON				& \texttt{-mfpu=neon}		& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	DSP					& \texttt{-DDSP\_ONLY}		& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	DSP + Optimised		& \texttt{-DDSP}			& \texttt{tracking-final}	& \texttt{arm.mk}	\\
-	DSP + NEON			& \texttt{-DDSP -mfpu=neon}	& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	Naive										& vanilla 						& \texttt{}									& \texttt{tracking}			& \texttt{arm.mk}	\\
+	Generate dynamic range file	(works with most)& - 							& \texttt{-DWRITE\_DYN\_RANGE}				& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	Enabled Debug printing	(works with all)    & - 							& \texttt{-DDEBUGPRINT}						& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	Optimised									& final 						& \texttt{}									& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	Optimised (Fixed-point)						& final-fp-e-9p1c11				& \texttt{-DFIXEDPOINT}	    				& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	(Auto) Compiler NEON						& final-autoneon 				& \texttt{-mfpu=neon}		    			& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	(Auto) Compiler NEON (Fixed-point)			& final-autoneon-fp-e-9p1c11	& \texttt{-DFIXEDPOINT -mfpu=neon}		    & \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	NEON										& final-neon 					& \texttt{-DNEON -mfpu=neon}		    	& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	NEON (Fixed-point)							& final-neon-fp-e-9p1c11		& \texttt{-DNEON -DFIXEDPOINT -mfpu=neon}	& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	DSP											& final-dsponly					& \texttt{-DDSP\_ONLY}						& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	DSP + Optimised								& final-dsp 					& \texttt{-DDSP}							& \texttt{tracking-final}	& \texttt{arm.mk}	\\
+	DSP + NEON									& final-dsp-neon 				& \texttt{-DDSP -mfpu=neon}					& \texttt{tracking-final}	& \texttt{arm.mk}	\\
 	\bottomrule
 	\end{tabular}
 \end{table}

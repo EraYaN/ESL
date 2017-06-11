@@ -13,15 +13,16 @@
 	\caption{Performance figures for every combination of implementations}
 	\begin{tabular}{lrrrr}
 		\toprule
-							& $t_k$ [s]	& Speed-up [x]	& $t$ [s]	& Speed-up [x]	\\
+								& \textbf{$t_k$ [\si{\second}]}	& \textbf{Speed-up [\si{\speedup}]}	& \textbf{$t$ [\si{\second}]}	& \textbf{Speed-up [\si{\speedup}]} \\
 		\midrule
-		Naive				& 10.137	& -			 	& 12.318	& -				\\
-		Optimised			&  0.708	& 14.3		 	&  2.798	& 4.4			\\
-		Optimised (fixp)	& 			& 			 	& 			& 				\\
-		NEON				&  0.508	& 20.0		 	&  2.600	& 4.7			\\
-		DSP					& 			& 			 	& 			& 				\\
-		DSP + Optimised		& 			& 			 	& 			& 				\\
-		DSP + NEON			& 			& 			 	& 			& 				\\
+		Naive					& 10.137						& -			 						& 12.318						& -									\\
+		Optimised				&  0.708						& 14.3		 						&  2.798						& 4.4								\\
+		Optimised (Fixed-point)	&  0.318						& 31.9		 						&  2.405						& 5.1								\\
+		NEON					&  0.508						& 20.0		 						&  2.600						& 4.7								\\
+		NEON (Fixed-point)		&  								& 47.5		 						&  								& 									\\
+		DSP						& 								& 			 						& 								& 									\\
+		DSP + Optimised			& 								& 			 						& 								& 									\\
+		DSP + NEON				& 								& 			 						& 								& 									\\
 		\bottomrule
 	\end{tabular}
 	\label{tab:comparison}
