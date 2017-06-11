@@ -48,7 +48,7 @@ Finally, the makefile was modified to include the \texttt{-ffast-math} compiler 
 Furthermore, the values of the architecture and platform specific compiler flags \texttt{-march}, \texttt{-mtune} and \texttt{-mcpu} were added and/or updated to actually reflect the used platform.
 Of course, the optimisation level was kept at \texttt{-O3}.
 
-This first step will prove to be the most important in terms of performance gain, resulting in $t_k = \SI{0.708}{\second}$ and $t = \SI{2.798}{\second}$ (which implies a kernel speed-up of 14.3x and an application speed-up of 4.4x).
+This first step should prove to be an important in terms of performance gain.
 
 
 \subsection{NEON}
@@ -72,7 +72,7 @@ The following parts of the program utilize NEON:
     The set-on-greater-than and multiply operations in the original implementation were replaced by NEON's greater-than (resulting in a bitmask of all ones/all zeros) and bit select operation, causing significant speedup.
 \end{description}
 
-As expected, the various utilisations of NEON to vectorise operations did cause another jump in performance, yielding $t_k = \SI{0.508}{\second}$ and $t = \SI{2.600}{\second}$. Since only a small part of the total program could be vectorized, mostly due to the irregular access patterns inherent to the algorithm, performance increase over the optimised implementation might be slower than expected.
+The various utilisations of NEON to vectorise operations should cause another jump in performance. Since only a small part of the total program could be vectorized, mostly due to the irregular access patterns inherent to the algorithm, performance increase over the optimised implementation might be slower than expected.
 
 
 \subsection{DSP}
@@ -187,7 +187,7 @@ The normalized values are very small.
     \end{tabular}
 \end{table}
 
-The speed-up that was measured with a fixed-point implementation based on the \texttt{int16\_t} type, and all values using the largest range (\num{2048}) was about \SIrange{31.5}{32}{\speedup} times kernel speed-up.
+The speed-up that was measured with a fixed-point implementation based on the \texttt{int16\_t} type, and should be very significant.
 The next bottleneck is getting a faster conversion from the different ranges and a quick division that respects the fixed point nature of the values in the \texttt{int16\_t} datatype.
 Instead of doing a normal integer division, one needs to shift the nominator to keep the results in the correct fixed-point format.
 To implement fixed-point math properly the project would need parts of boost for the operator overloads to create a good class, so all the errors and other debugging issues go away.
