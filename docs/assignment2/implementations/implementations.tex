@@ -8,7 +8,8 @@
 \section{Implementations}
 \label{sec:implementations}
 
-The following text lists each of the implementations that were created along with a short discussion of the results. Note that an incremental approach was taken, implying that changes to, as an example, the optimised version of the algorithm are also reflected by the NEON one, if applicable.
+The following text lists each of the implementations that were created along with a short discussion of the results.
+Note that an incremental approach was taken, implying that changes to, as an example, the optimised version of the algorithm are also reflected by the NEON one, if applicable.
 
 \subsection{Naive}
 The naive implementation was provided for the assignment.
@@ -21,9 +22,16 @@ Note that this means that a significant part of the execution time is not spent 
 The optimised implementation contains two major improvements:
 
 \begin{enumerate}
-    \item The call to \texttt{cv::split} in \texttt{CalWeight} (l. 87), which splits the entire frame into three channels (arrays) for blue, green and red colour values, was completely removed. Having access to the three channels separately could potentially improve caching and memory access performance in \texttt{CalWeight} because of the elements being available in a sequential manner. However, splitting the entire frame in every iteration (for every call to \texttt{CalWeight}) is highly superfluous. Because \texttt{CalWeight} does not use the entire frame either, but just a subset defined by the current rectangle \texttt{rec}, it was decided to remove it altogether and access the frame directly using a call to \texttt{next\_frame.at<cv::Vec3b>(row\_index, col\_index)[k]}.
+    \item The call to \texttt{cv::split} in \texttt{CalWeight} (l. 87), which splits the entire frame into three channels (arrays) for blue, green and red colour values, was completely removed.
+    Having access to the three channels separately could potentially improve caching and memory access performance in \texttt{CalWeight} because of the elements being available in a sequential manner.
+    However, splitting the entire frame in every iteration (for every call to \texttt{CalWeight}) is highly superfluous.
+    Because \texttt{CalWeight} does not use the entire frame either, but just a subset defined by the current rectangle \texttt{rec}, it was decided to remove it altogether and access the frame directly using a call to \texttt{next\_frame.at<cv::Vec3b>(row\_index, col\_index)[k]}.
 
-    \item During \texttt{CalWeight}, the weight for every pixel in the rectangle is multiplied by a value based on an expression containing values from \texttt{target\_model} and \texttt{target\_candidate}. These values in turn depend on the \emph{bin} the current pixel falls in. Since the amount of bins is defined to be 16, there exist a total of 16 unique values resulting from the mentioned expression. The naive implementation, however, calculates a value for every pixel individually, resulting in a total of 58 x 86 x 3 = 14964 evaluations of an expression that contains the 'difficult' operations division and square root. The optimised implementation pre-calculates all 16 unique multiplier values, resulting in a large reduction in computational overhead.
+    \item During \texttt{CalWeight}, the weight for every pixel in the rectangle is multiplied by a value based on an expression containing values from \texttt{target\_model} and \texttt{target\_candidate}.
+    These values in turn depend on the \emph{bin} the current pixel falls in.
+    Since the amount of bins is defined to be 16, there exist a total of 16 unique values resulting from the mentioned expression.
+    The naive implementation, however, calculates a value for every pixel individually, resulting in a total of 58 x 86 x 3 = 14964 evaluations of an expression that contains the 'difficult' operations division and square root.
+    The optimised implementation pre-calculates all 16 unique multiplier values, resulting in a large reduction in computational overhead.
 \end{enumerate}
 
 Other, less significant optimisations are
@@ -34,22 +42,31 @@ Other, less significant optimisations are
      \item avoiding the passing of data from function to function when it can be accessed within the \texttt{MeanShift} class.
 \end{itemize}
 
-Finally, the makefile was modified to include the \texttt{-ffast-math} compiler flag to make sure the compiler optimises for the various mathematical operations present in the algorithm, as well as the \texttt{-ftree-vectorize} flag to allow the compiler to vectorize any operation that implies parallelism (like processing individual pixels). Furthermore, the values of the architecture and platform specific compiler flags \texttt{-march}, \texttt{-mtune} and \texttt{-mcpu} were added and/or updated to actually reflect the used platform. Of course, the optimisation level was kept at \texttt{-O3}.
+Finally, the makefile was modified to include the \texttt{-ffast-math} compiler flag to make sure the compiler optimises for the various mathematical operations present in the algorithm, as well as the \texttt{-ftree-vectorize} flag to allow the compiler to vectorize any operation that implies parallelism (like processing individual pixels).
+Furthermore, the values of the architecture and platform specific compiler flags \texttt{-march}, \texttt{-mtune} and \texttt{-mcpu} were added and/or updated to actually reflect the used platform.
+Of course, the optimisation level was kept at \texttt{-O3}.
 
 This first step will prove to be the most important in terms of performance gain, resulting in $t_k = \SI{0.708}{\second}$ and $t = \SI{2.798}{\second}$ (which implies a kernal speed-up of 14.3x and an application speed-up of 4.4x).
 
 \subsection{NEON}
-Starting from the optimised implementation, very little rewriting had to be done to make the algorithm suitable for NEON execution. For this implementation, most loops were simply modified to process 4 (32-bit \texttt{float}) or even 16 (8-bit \texttt{unsigned char}) values in every iteration. The following parts of the program utilize NEON:
+Starting from the optimised implementation, very little rewriting had to be done to make the algorithm suitable for NEON execution.
+For this implementation, most loops were simply modified to process 4 (32-bit \texttt{float}) or even 16 (8-bit \texttt{unsigned char}) values in every iteration.
+The following parts of the program utilize NEON:
 
 \begin{description}
     \item[\texttt{Init\_target\_frame},] where the normalisation of the Epanechnikov kernel is performed for four elements concurrently.
 
-    \item[\texttt{pdf\_representation},] where the calculation of the bin each pixel belongs to, depending on its BGR values, is calculated using NEON. Although this is hardly computationally intensive, being a division of each channel value by the amount of bins, which equals 16 (and therefore bin = value >> 4), the memory access pattern is a prime example of why one would like to use NEON, as it allows for loading the interleaved BGR channels to three separate arrays for further processing, with a single function call. Since each channel is represented by a single byte, 16 pixels of three channels each can be loaded at the same time.
+    \item[\texttt{pdf\_representation},] where the calculation of the bin each pixel belongs to, depending on its BGR values, is calculated using NEON.
+    Although this is hardly computationally intensive, being a division of each channel value by the amount of bins, which equals 16 (and therefore bin = value >> 4), the memory access pattern is a prime example of why one would like to use NEON, as it allows for loading the interleaved BGR channels to three separate arrays for further processing, with a single function call.
+    Since each channel is represented by a single byte, 16 pixels of three channels each can be loaded at the same time.
     Note that the subsequent calculation of \texttt{pdf\_model} itself cannot be performed using NEON as its memory access pattern is highly irregular due to the use of bin values as an index.
 
-    \item[\texttt{CalWeightNEON},] where pre-calculating the multiplier for each bin, as previously discussed, is done for four values at once. As NEON only supports calculation of reciprocals and reciprocal square roots, the operation $c = \sqrt{a \mathbin{/} b}$ was rewritten to $c = 1 \mathbin{/} \sqrt{b \cdot 1 \mathbin{/} a}$ to obtain NEON-implementable code. Like in \texttt{pdf\_representation}, calculating weights could not be performed using NEON due to its irregular indexing of the multiplier array.
+    \item[\texttt{CalWeightNEON},] where pre-calculating the multiplier for each bin, as previously discussed, is done for four values at once.
+    As NEON only supports calculation of reciprocals and reciprocal square roots, the operation $c = \sqrt{a \mathbin{/} b}$ was rewritten to $c = 1 \mathbin{/} \sqrt{b \cdot 1 \mathbin{/} a}$ to obtain NEON-implementable code.
+    Like in \texttt{pdf\_representation}, calculating weights could not be performed using NEON due to its irregular indexing of the multiplier array.
 
-    \item[\texttt{track},] in which the loop is completely vectorised. The set-on-greater-than and multiply operations in the original implementation were replaced by NEON's greater-than (resulting in a bitmask of all ones/all zeros) and bit select operation, causing significant speedup.
+    \item[\texttt{track},] in which the loop is completely vectorised.
+    The set-on-greater-than and multiply operations in the original implementation were replaced by NEON's greater-than (resulting in a bitmask of all ones/all zeros) and bit select operation, causing significant speedup.
 \end{description}
 
 As expected, the various utilisations of NEON to vectorise operations did cause another jump in performance, yielding $t_k = \SI{0.508}{\second}$ and $t = \SI{2.600}{\second}$. Since only a small part of the total program could be vectorized, mostly due to the irregular access patterns inherent to the algorithm, performance increase over the optimised implementation might be slower than expected.
@@ -84,11 +101,18 @@ In this section, the shared pool memory management and compiler optimizations ar
 \subsubsection{Compiler options}
 For optimizing the compiler, the hand-tuning manual provided by Texas Instruments was used \cite{handtuning}.
 Apart from the standard \texttt{-O3} flag the only other flag that provided a slight (though barely noticeable) speed-up was the \texttt{-mt} flag that allows the compiler to assume that in one function there won't be ``pointer-based parameter writes to a memory location that is read by any other pointer-based parameter to the same function'' \cite{handtuning}.
-This flag was safe to use because it was made sure that the parameters in both \texttt{pdf\_representation} and \texttt{CalWeight} were write or read-only. Flags that were suggested by the hand-tuning manual but were not used were \texttt{-mh} and \texttt{-mo}. The \texttt{-mh} flag could not be used because there was no padding on both sides of the buffers to allow for speculative loads. The \texttt{-mo} flag was tested but seemed to significantly slow down the code and was therefore not used.
+This flag was safe to use because it was made sure that the parameters in both \texttt{pdf\_representation} and \texttt{CalWeight} were write or read-only.
+Flags that were suggested by the hand-tuning manual but were not used were \texttt{-mh} and \texttt{-mo}.
+The \texttt{-mh} flag could not be used because there was no padding on both sides of the buffers to allow for speculative loads.
+The \texttt{-mo} flag was tested but seemed to significantly slow down the code and was therefore not used.
 
 In order to find possible low-level optimizations the code was compiled with the \texttt{–s –mw –mv6400} flags after which the resulting assembly with compiler comments was inspected. The compiler was mostly sophisticated enough to optimize most loops by itself as the number of loop iterations for all loops in the functions was already set at compile time. For clarity, the \texttt{MUST\_ITERATE} pragmas were still included in the DSP code wherever applicable. For the same clarity reasons the function parameters in \texttt{pdf\_representation} and \texttt{CalWeight} were supplied with a restrict qualifier even though the \texttt{-mt} compiler flag should already take care of that.
 
-An attempt was also made at optimally utilising the software pipelining functions of the DSP. During inspection of the assembly it was found that most loops were disqualified for software pipelining due to containing function calls or control-code. After some experimentation the loop in \texttt{CalWeight} that was disqualified for containing control code was able to qualify for software pipelining by coalescing the loop as found in \cref{lst:coalesced}. The resulting software pipelining had both a partitioned and unpartitioned of 3 and a loop carried dependency bound of 3.
+An attempt was also made at optimally utilising the software pipelining functions of the DSP.
+During inspection of the assembly it was found that most loops were disqualified for software pipelining due to containing function calls or control-code.
+After some experimentation the loop in \texttt{CalWeight} that was disqualified for containing control code was able to qualify for software pipelining by coalescing the loop as found in \cref{lst:coalesced}.
+%TODO[e] next sentence is weird. "a partitioned of 3" ?
+The resulting software pipelining had both a partitioned and unpartitioned of 3 and a loop carried dependency bound of 3.
 
 \begin{lstlisting}[style=c, caption=Coalesced loop for weight calculation, label=lst:coalesced]
 for (xy = 0; xy < RECT_SIZE; xy++) {
@@ -112,6 +136,7 @@ To implement fixed-point arithmetic, we first need to know the dynamic range of 
 As shown in \cref{fig:value-distributions} the values for the weight are mostly in the sub \num{500} range, while a couple of values reach \num{2000}.
 The other values sets are more evenly distributed.
 The final ranges are shown in \cref{tab:final-ranges}, the kernel values do not line up with the histogram because we only have to store the normalized values from the histogram, the kernel calculation itself can be done using floats as it is only done once.
+The normalized values are very small.
 
 \begin{figure}[H]
 \centering
@@ -132,32 +157,33 @@ The final ranges are shown in \cref{tab:final-ranges}, the kernel values do not 
         \includegraphics[width=\textwidth]{resources/histogramE}
         \caption{Histogram of E. kernel values distribution.}
     \end{subfigure}
-    \caption{Value distributions}
+    \caption{Value distributions made using \texttt{src/RunSystem/ProcessDynRangeFile.py}}
     \label{fig:value-distributions}
 \end{figure}
 
 \begin{table}[H]
     \centering
-    \caption{The final ranges}
+    \caption{The final ranges for the used \texttt{int16\_t} data representation.}
     \label{tab:final-ranges}
     \begin{tabular}{lll}
         \toprule
         \textbf{Value set} & \textbf{Range Min} & \textbf{Range Max} \\
         \midrule
         Weight      &  \num{-2048}  &  \num{2048}     \\
-        PDF model   &  \num{-1/8}   &  \num{1/8}      \\
+        PDF model   &  \num{-2}   &  \num{2}      \\
         Kernel      &  \num{-1/512} &  \num{1/512}    \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-The speed-up that was measured with a fixed-point implementation based on the \texttt{int32\_t} type, and all values using the largest range (\num{2048}) was about \num{18} to \num{18.6} times kernel speed-up.
-The problem is getting a faster conversion from the different ranges and a quick division that respects the fixed point nature of the values in the \texttt{int32\_t} datatype.
-Instead of doing a normal integer division, although adding a shift to the nominator should give correct results.
+The speed-up that was measured with a fixed-point implementation based on the \texttt{int16\_t} type, and all values using the largest range (\num{2048}) was about \SIrange{31.5}{32}{\speedup} times kernel speed-up.
+The next bottleneck is getting a faster conversion from the different ranges and a quick division that respects the fixed point nature of the values in the \texttt{int16\_t} datatype.
+Instead of doing a normal integer division, one needs to shift the nominator to keep the results in the correct fixed-point format.
 To implement fixed-point math properly the project would need parts of boost for the operator overloads to create a good class, so all the errors and other debugging issues go away.
 But linking boost just for that is a step too far for this project.
-It was decided to drop the fixed point implementation.
 
-After some benchmarking we found that a 4 way f32 mult takes about 9 cycles, a 4 way 32 mult takes about 5 cycles, and 8 way 16 bit mult takes 3 cycles.
+Fixed point for NEON should also provide a speedup.
+After some benchmarking we found that a 4 way f32 mult takes about \SI{9}{\cycles}, a 4 way 32 mult takes about \SI{5}{\cycles}, and 8 way 16 bit mult takes \SI{3}{\cycles}.
+These cycle counts are from the measured time of millions of iterations and an assumed clock speed of \SI{740}{\mega\hertz}.
 
 \end{document}
