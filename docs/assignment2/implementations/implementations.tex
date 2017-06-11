@@ -30,7 +30,7 @@ The optimised implementation contains two major improvements:
     \item During \texttt{CalWeight}, the weight for every pixel in the rectangle is multiplied by a value based on an expression containing values from \texttt{target\_model} and \texttt{target\_candidate}.
     These values in turn depend on the \emph{bin} the current pixel falls in.
     Since the amount of bins is defined to be 16, there exist a total of 16 unique values resulting from the mentioned expression.
-    The naive implementation, however, calculates a value for every pixel individually, resulting in a total of 58 x 86 x 3 = 14964 evaluations of an expression that contains the 'difficult' operations division and square root.
+    The naive implementation, however, calculates a value for every pixel individually, resulting in a total of 58 x 86 x 3 = 14964 evaluations of an expression that contains the `difficult' operations division and square root.
     The optimised implementation pre-calculates all 16 unique multiplier values, resulting in a large reduction in computational overhead.
 \end{enumerate}
 
@@ -78,21 +78,19 @@ Two of the most performance critical functions (\texttt{pdf\_representation} and
 In this section, the shared pool memory management and compiler optimizations are discussed.
 
 \subsubsection{Shared memory}
+The main challenge when using a DSP to speed-up computations is transferring the data efficiently.
+This is done by creating a pool and then send its location and size to the DSP, that way both the GPP and the DSP are able to write data into a shared memory section.
+Because of the pre-compiled DSPLink library from TI, the maximum sizes of such a shared pool are fixed, so it is impossible to put everything (i.e. a whole frame) into this pool at once, but all the information of one channel/color does fit.
+There are of course multiple layout methods for this shared memory pool, both with their own (dis)advantages (see \autoref{fig:memory}).
+The first method we implemented allocates a single shared memory pool, in this memory pool it stores 1 \texttt{struct}, containing all the data (\texttt{DataStruct}).
+The main advantage of this is that only one pool is needed (and thus only 1 set-up message to the DSP to indicate the \texttt{DataStruct} address) because of this it is rather easy to implement and to extend in the future (note that these are not the main optimization goals for now, but show good software design).
+However the drawback from this method is the declaration of the size of the struct, the struct contains data arrays whose sizes must be known at compile time and are thus hardcoded into the software (which is fine for this application).
+The other memory sharing method is to allocate a single pool for each array, this way the size of the pools that are allocated can be calculated during runtime.
+However this requires multiple pointers to be send to the DSP at initialization, but all this takes place outside the timing, so it does not affect the timed performance.
+As seen in Assignment 1, the dynamically allocated matrix multiplication implementation was significantly faster, however the performance difference between these `static' and `dynamic' implementations was really neglectable, but still in favour of the `dynamic' method that used the multiple pools, so this method will be used.
 
 \begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.45\linewidth}
-        \centering
-        \subimport{resources/}{memory_static.tikz}
-        \caption{Struct, size fixed at compile time}
-        \label{fig:memory-static}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.45\linewidth}
-        \centering
-        \subimport{resources/}{memory_dynamic.tikz}
-        \caption{Different shared Pools, size fixed at run time}
-        \label{fig:memory-dynamic}
-    \end{subfigure}
+    \subimport{resources/}{memory_static.tikz}
     \caption{Different Shared Memory Implementations}
     \label{fig:memory}
 \end{figure}
