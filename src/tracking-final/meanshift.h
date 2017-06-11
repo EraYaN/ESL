@@ -30,12 +30,12 @@ public:
     void Init_target_frame(const cv::Mat &frame, const cv::Rect &rect);
     float Epanechnikov_kernel();
     cv::Mat pdf_representation(const cv::Mat &frame, const cv::Rect &rect);
-    cv::Mat PDFCalWeight(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
+    cv::Mat Execute(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec);
 
 #if defined DSP_ONLY || defined DSP
     void split(const cv::Mat &frame, cv::Rect &rect, uchar bgr[3][RECT_SIZE]);
     void mulWeights(cv::Mat &weight, float *poolWeight);
-    void PDFCalWeightDSP(const uchar bgr[3][RECT_SIZE], const int k);
+    void ExecuteDSP(const uchar bgr[3][RECT_SIZE], const int k);
 #endif
 
 #ifdef DSP
@@ -48,7 +48,7 @@ public:
 #elif !defined DSP_ONLY
     void CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
 
-#ifdef NEON
+#if defined NEON && !defined FIXEDPOINT
     void CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
 #endif
 

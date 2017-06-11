@@ -81,3 +81,22 @@ void neon_print(uint8x16_t vector)
 {
     neon_print(vector, "uint8x16_t vector");
 }
+
+void neon_print(int16x4_t vector, std::string label)
+{
+    int16_t data[4];
+    vst1_s16(data, vector);
+
+    std::cout << "Data from " << label << ":" << std::endl;
+
+    for (int i = 0; i < 4; i++)
+    {
+        std::cout << data[i] << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+void neon_print(int16x4_t vector)
+{
+    neon_print(vector, "int16x4_t vector");
+}

@@ -82,15 +82,8 @@
 
 #include <stdint.h>
 #ifdef FIXEDPOINT
-
-#ifdef NEON
-typedef int16x8_t basetype_vec_t;
-typedef int32x4_t longbasetype_vec_t;
-#endif
-
 typedef int16_t basetype_t;
 typedef int32_t longbasetype_t;
-
 #else
 typedef float basetype_t;
 typedef double longbasetype_t;

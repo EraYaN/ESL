@@ -35,24 +35,11 @@ inline float to_float(T value, float range) {
 }
 
 #ifdef NEON
-inline float32x4_t clamp_vec(float32x4_t value, float lower, float upper) {
-    return vmaxq_f32(vdupq_n_f32(lower), vminq_f32(value, vdupq_n_f32(upper)));
-}
-
-inline int16x4_t to_fixed(float32x4_t value, float range) {
-    // Rescale
-    float a = std::numeric_limits<basetype_t>::max() / range;
-    float32x4_t b = { 0.5f, 0.5f, 0.5f, 0.5f };
-
-    // Convert to signed int and truncate
-    return vmovn_s32(vcvtq_s32_f32(vaddq_f32(vmulq_n_f32(clamp_vec(value, -range, range), a), b)));
-}
-
 inline float32x4_t to_float(int16x4_t value, float range) {
     int16x4_t zero_vec = { 0, 0, 0, 0 };
     uint32x4_t mask_vec = vmovl_u16(vclt_s16(value, zero_vec));
-    float a = 1 / std::numeric_limits<basetype_t>::min() * range;
-    float b = 1 / std::numeric_limits<basetype_t>::max() * range;
+    float a = -1.f / std::numeric_limits<basetype_t>::min() * range;
+    float b = 1.f / std::numeric_limits<basetype_t>::max() * range;
     float32x4_t value_f = vcvtq_f32_s32(vmovl_s16(value));
 
     return vbslq_f32(mask_vec, vmulq_n_f32(value_f, a), vmulq_n_f32(value_f, b));
