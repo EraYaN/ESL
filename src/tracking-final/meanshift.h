@@ -57,9 +57,9 @@ public:
     cv::Rect track(const cv::Mat &next_frame);
 
 #if defined(TIMING) || defined(TIMING2)
-    double pdfTime;
-    double calWeightTime;
-    double nextRectTime;
+    double timerOne;
+    double timerTwo;
+    double timerThree;
 #endif
 };
 

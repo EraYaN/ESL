@@ -1,6 +1,7 @@
 #include "meanshift.h"
 #include <timing.h>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include "util.h"
 
@@ -117,7 +118,11 @@ int main(int argc, char ** argv)
     totalTime = diffToNanoseconds(startTime, endTime, freq);
 
     std::cout << "Processed " << fcount << " frames" << std::endl;
-    std::cout << "Time: " << totalTime / 1e9 << " sec\nFPS : " << fcount / (totalTime / 1e9) << std::endl;
+    std::cout << "Init Time:   " << std::setw(8) << initTime / 1e6 << " msec" << std::endl;
+    std::cout << "Kernel Time: " << std::setw(8) << kernelTime / 1e6 << " msec" << std::endl;
+    std::cout << "Write Time:  " << std::setw(8) << cleanupTime / 1e6 << " msec" << std::endl;
+    std::cout << "Total Time:  " << std::setw(8) << totalTime / 1e6 << " msec" << std::endl;
+    std::cout << "FPS:         " << std::setw(8) << fcount / (totalTime / 1e9) << std::endl;
     std::cout << LINE_MARKER << VARIANT << CSV_SEPARATOR << initTime / 1e9 << CSV_SEPARATOR << kernelTime / 1e9 << CSV_SEPARATOR << cleanupTime / 1e9 << CSV_SEPARATOR << totalTime / 1e9 << CSV_SEPARATOR << fcount / (totalTime / 1e9) << std::endl;
 #if !defined(ARMCC)
     std::cout << "Press enter to quit." << std::endl;

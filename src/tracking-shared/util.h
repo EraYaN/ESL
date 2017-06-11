@@ -40,7 +40,6 @@
 #define RECT_CENTRE_REC 0.0350877193f
 #define RECT_NEXTCOL_OFFSET 1662 //((next_frame.cols - RECT_COLS) * 3);
 
-//TODO verify if allowed to change, default: 8
 #define CFG_MAX_ITER 8
 #define CFG_NUM_BINS 16
 #define CFG_2LOG_NUM_BINS 4
@@ -50,15 +49,8 @@
 
 #ifdef FIXEDPOINT
 #define CFG_PDF_SCALAR_OFFSET cv::Scalar(1) //for fixed point 0/0.1*(2^16-1)
-//#define CFG_WEIGHT_ONE 1048576 //for fixed point 1/2048*((2^32)-1)
-//#define CFG_WEIGHT_ONE 4194304 //for fixed point 1/512*((2^32)-1)
-//#define CFG_WEIGHT_ONE 8388608 //for fixed point 1/256*((2^32)-1)
 
 #define CFG_WEIGHT_ONE 16 //for fixed point 1/2048*((2^16)-1)
-//#define CFG_WEIGHT_ONE 64 //for fixed point 1/512*((2^16)-1)
-//#define CFG_WEIGHT_ONE 128 //for fixed point 1/256*((2^16)-1)
-//#define CFG_WEIGHT_ONE 256 //for fixed point 1/128*((2^16)-1)
-//#define CFG_WEIGHT_ONE 512 //for fixed point 1/64*((2^16)-1)
 
 #define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(CFG_WEIGHT_ONE)
 
@@ -126,9 +118,9 @@ typedef double longbasetype_t;
 #ifdef ARMCC
 #include <opencv2/core/core.hpp>
 #ifdef FIXEDPOINT
-#define CV_BASETYPE CV_16SC1
+#define CV_BASETYPE CV_16SC1 //Internal OpenCV datatype (single column short)
 #else
-#define CV_BASETYPE CV_32F
+#define CV_BASETYPE CV_32F //Internal OpenCV datatype (single column float)
 #endif
 #endif
 

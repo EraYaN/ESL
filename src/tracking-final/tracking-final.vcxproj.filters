@@ -28,6 +28,17 @@
   <ItemGroup>
     <None Include="arm.mk" />
     <None Include="pc.mk" />
+    <None Include="arm.base.setup.mk" />
+    <None Include="arm.base.targets.mk" />
+    <None Include="arm.final-neon-fp-e-9p1c11.mk" />
+    <None Include="arm.final.mk" />
+    <None Include="arm.final-autoneon.mk" />
+    <None Include="arm.final-autoneon-fp-e-9p1c11.mk" />
+    <None Include="arm.final-dsp.mk" />
+    <None Include="arm.final-dsp-neon.mk" />
+    <None Include="arm.final-dsponly.mk" />
+    <None Include="arm.final-fp-e-9p1c11.mk" />
+    <None Include="arm.final-neon.mk" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

@@ -1,6 +1,7 @@
 #include "meanshift.h"
 #include <timing.h>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 
 #ifndef ARMCC
@@ -37,7 +38,6 @@
 #include <util_global_dsp.h>
 #endif
 #include <util.h>
-//#include <cstdio>
 
 
 #if defined DSP_ONLY || defined DSP
@@ -50,7 +50,6 @@ inline bufferInit::bufferInit(cv::Mat initframe, cv::Rect rect)
     region = frame * sizeof(float);
     frameAligned = DSPLINK_ALIGN(frame, DSPLINK_BUF_ALIGN);
     regionAligned = DSPLINK_ALIGN(region, DSPLINK_BUF_ALIGN);
-    //TODO[c] \#magicnumber 48
     modelAligned = DSPLINK_ALIGN(48 * sizeof(float), DSPLINK_BUF_ALIGN);
 }
 #endif
@@ -107,9 +106,7 @@ int main(int argc, char ** argv)
 
     // this is used for testing the car video
     // instead of selection of object of interest using mouse
-
-    cv::Rect rect(228, 367, RECT_COLS, RECT_ROWS);
-    //cv::Rect rect(1300, 300, 900, 700);
+    cv::Rect rect(228, 367, RECT_COLS, RECT_ROWS);    
     DEBUGP("Reading frist frame...");
     cv::Mat frame;
     frame_capture.read(frame);
@@ -225,18 +222,23 @@ int main(int argc, char ** argv)
     totalTime = diffToNanoseconds(startTime, endTime, freq);
 
     std::cout << "Processed " << fcount << " frames" << std::endl;
-    std::cout << "Time: " << totalTime / 1e9 << " sec\nFPS : " << fcount / (totalTime / 1e9) << std::endl;
+    std::cout << "Init Time:   " << std::setw(8) << initTime / 1e6 << " msec" << std::endl;
+    std::cout << "Kernel Time: " << std::setw(8) << kernelTime / 1e6 << " msec" << std::endl;
+    std::cout << "Write Time:  " << std::setw(8) << cleanupTime / 1e6 << " msec" << std::endl;
+    std::cout << "Total Time:  " << std::setw(8) << totalTime / 1e6 << " msec" << std::endl;
+    std::cout << "FPS:         " << std::setw(8) << fcount / (totalTime / 1e9) << std::endl;
+    // Output times for script.
     std::cout << LINE_MARKER << VARIANT << CSV_SEPARATOR << initTime / 1e9 << CSV_SEPARATOR << kernelTime / 1e9 << CSV_SEPARATOR << cleanupTime / 1e9 << CSV_SEPARATOR << totalTime / 1e9 << CSV_SEPARATOR << fcount / (totalTime / 1e9) << std::endl;
 
 #ifdef TIMING
-    std::cout << "PDF time: " << ms.pdfTime / 1e9 << std::endl;
-    std::cout << "CalWeight time: " << ms.calWeightTime / 1e9 << std::endl;
-    std::cout << "Next Rect time: " << ms.nextRectTime / 1e9 << std::endl;
+    std::cout << "PDF time: " << ms.timerOne / 1e9 << std::endl;
+    std::cout << "CalWeight time: " << ms.timerTwo / 1e9 << std::endl;
+    std::cout << "Next Rect time: " << ms.timerThree / 1e9 << std::endl;
 #endif
 #ifdef TIMING2
-    std::cout << "DSP time (ms): " << ms.pdfTime / 1e6 << std::endl;
-    std::cout << "NEON time (ms): " << ms.calWeightTime / 1e6 << std::endl;
-    std::cout << "FINAL time (ms): " << ms.nextRectTime / 1e6 << std::endl;
+    std::cout << "DSP time (ms): " << ms.timerOne / 1e6 << std::endl;
+    std::cout << "NEON time (ms): " << ms.timerTwo / 1e6 << std::endl;
+    std::cout << "FINAL time (ms): " << ms.timerThree / 1e6 << std::endl;
 #endif
 
 #if !defined(ARMCC)

@@ -3,6 +3,10 @@
 #include <limits>
 #include <algorithm>
 
+#ifdef NEON
+#include <arm_neon.h>
+#endif
+
 #define CLAMP(v,lower,upper) std::max(lower, std::min(v, upper))
 
 #define F_C_MULT(x,y) static_cast<basetype_t>((static_cast<longbasetype_t>(x)*static_cast<longbasetype_t>(y)) >> F_C_FRAC)
@@ -13,9 +17,14 @@
 #define F_E_DIVD(x,y) static_cast<basetype_t>((static_cast<longbasetype_t>(x) << F_E_FRAC) / (static_cast<longbasetype_t>(y)))
 #define F_P_DIVD(x,y) static_cast<basetype_t>((static_cast<longbasetype_t>(x) << F_P_FRAC) / (static_cast<longbasetype_t>(y)))
 
-#define F_C_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_C_BITS+1), F_C_BITS+1) )
-#define F_E_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_E_BITS+1), 0) >> (F_E_BITS + 1))
-#define F_P_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_P_BITS+1), 0) >> (F_P_BITS + 1))
+#define F_C_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_C_BITS+1)) >> (F_C_BITS + 1))
+#define F_E_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_E_BITS+1)) >> (F_E_BITS + 1))
+#define F_P_SQRT(x) static_cast<basetype_t>(sqrtF2F(static_cast<longbasetype_t>(x) << (F_P_BITS+1)) >> (F_P_BITS + 1))
+
+//template <typename T>
+inline basetype_t to_fixed(float value, float range) {
+    return static_cast<basetype_t>(CLAMP(value, -range, range) / range * std::numeric_limits<basetype_t>::max() + 0.5f); // +0.5f is te proberen of std::floor ipv static_cast
+}
 
 template <typename T>
 inline float to_float(T value, float range) {
@@ -25,12 +34,19 @@ inline float to_float(T value, float range) {
         ;
 }
 
-//template <typename T>
-inline basetype_t to_fixed(float value, float range) {
-    return static_cast<basetype_t>(CLAMP(value, -range, range) / range * std::numeric_limits<basetype_t>::max() + 0.5f); // +0.5f is te proberen of std::floor ipv static_cast
-}
+#ifdef NEON
+inline float32x4_t to_float(int16x4_t value, float range) {
+    int16x4_t zero_vec = { 0, 0, 0, 0 };
+    uint32x4_t mask_vec = vmovl_u16(vclt_s16(value, zero_vec));
+    float a = -1.f / std::numeric_limits<basetype_t>::min() * range;
+    float b = 1.f / std::numeric_limits<basetype_t>::max() * range;
+    float32x4_t value_f = vcvtq_f32_s32(vmovl_s16(value));
 
-inline longbasetype_t sqrtF2F(longbasetype_t x,int shift)
+    return vbslq_f32(mask_vec, vmulq_n_f32(value_f, a), vmulq_n_f32(value_f, b));
+}
+#endif
+
+inline longbasetype_t sqrtF2F(longbasetype_t x)
 {
     uint32_t t, q, b, r;
     r = x;
@@ -47,7 +63,7 @@ inline longbasetype_t sqrtF2F(longbasetype_t x,int shift)
         r <<= 1;
         b >>= 1;
     }
-    q >>= (8 + shift);
+    q >>= 8;
     return q;
 }
 
