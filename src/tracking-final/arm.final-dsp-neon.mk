@@ -3,7 +3,7 @@ include arm.base.setup.mk
 #   ----------------------------------------------------------------------------
 #   Variant configuration
 #   ----------------------------------------------------------------------------
-#CFLAGS += -mfpu=neon         # Enable compile NEON support (Required for NEON intrinsics)
+CFLAGS += -mfpu=neon         # Enable compile NEON support (Required for NEON intrinsics)
 DEFS += -DNEON               # Enable NEON intrinsics
 #DEFS += -DFIXEDPOINT         # Enable Fixed-point math
 DEFS += -DDSP                # Enable DSP (mutually exclusive with DSP_ONLY)
