@@ -41,7 +41,7 @@
 
 Results are shown in \cref{tab:comparison} and \cref{fig:comparison}, averaged over five runs. Note that the initial optimisation step, without using any additional features of the Beagleboard, already yielded a significant performance upgrade.
 Incrementally adding to this is NEON, although maybe less than expected, due to the less than optimal memory access patterns, meaning that only part of the algorithm can in fact be implemented to be executed in four steps at once.
-Note that simply instructing the compilerr to make use of NEON instructions has no effect.
+Note that simply instructing the compiler to make use of NEON instructions has no effect.
 The most significant leap is made by making use of fixed point arithmetic, which means most arithmetic in the algorithm is now done on 16-bit integers in stead of 32-bit floating point values.
 This does mean trading away some accuracy for speed, but the error stayed within a margin of roughly a total of forty pixels amongst all frames, giving excellent visual results, undistinguishable from the original implementation.
 Finally, note that the DSP cannot keep up with the rest of the implementations, being slower even than the basic optimised version. This was expected due to the increased overhead in de-interleaving and copying frame data, plus the fact that the DSP underperforms at floating point arithmetic and fixed point was unfortunately not implemented for it.
