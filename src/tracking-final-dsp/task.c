@@ -166,9 +166,8 @@ Int Task_execute(Task_TransferInfo * info)
         BCACHE_inv((Ptr)weight, weightsize, TRUE);
         BCACHE_inv((Ptr)kernel, weightsize, TRUE);
 
-        pdf_representation(frame, kernel);
-
         // call the functionality to be performed by dsp
+        pdf_representation(frame, kernel);
         CalWeight(frame, weight, candidate, model);
 
         // Writeback to shared memory

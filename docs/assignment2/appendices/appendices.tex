@@ -18,7 +18,8 @@
 \section{Personal Analysis}\label{app:appendix-personal-analysis}
 
 \subsection{Casper}
-
+I worked on the basic DSP implementation where one shared \texttt{struct} was used to provide all the data for the DSP, so the calculations could be done there and the results where afterwards accepted by the GPP.
+Afterwards the shared memory pool was a bit differently arranged but the communication protocol was extended so it could handle different scenarios.
 
 \subsection{Erwin}
 I focussed on small optimisations and helping the somewhat stupid old compiler along, mostly indexing changes, constants in loop limits, minimizing memory accesses.
