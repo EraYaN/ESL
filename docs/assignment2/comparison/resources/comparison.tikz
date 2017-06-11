@@ -11,51 +11,57 @@
 
 \begin{axis}[%
 width=\figurewidth,
-height=0.994\figureheight,
+height=0.796\figureheight,
 at={(0\figurewidth,0\figureheight)},
 scale only axis,
 bar shift auto,
 xmin=0,
-xmax=8,
-xtick={1,2,3,4,5,6,7},
-xticklabels={{Naive},{Optimised},{Optimised (fixp.)},{NEON},{DSP},{DSP + Optimised},{DSP + NEON}},
+xmax=12,
+xtick={1,2,3,4,5,6,7,8,9,10},
+xticklabels={{Naive},{Optimised},{Optimised (fixp.)},{NEON (compiler only)},{NEON (compiler only, fixp.)},{NEON},{NEON (fixp.)},{DSP},{DSP + Optimised},{DSP + NEON}},
 xticklabel style={rotate=45},
 ymin=0,
-ymax=32,
+ymax=50,
 ylabel style={font=\color{white!15!black}},
 ylabel={Speed-up [x]},
 axis background/.style={fill=white}
 ]
 \addplot[ybar, bar width=0.229, fill=mycolor1, draw=black, area legend] table[row sep=crcr] {%
 1	1\\
-2	14.3\\
-3	0\\
-4	20\\
-5	0\\
-6	0\\
-7	0\\
+2	20.3\\
+3	31.8\\
+4	20.3\\
+5	31.9\\
+6	25.2\\
+7	48.1\\
+8	11.4\\
+9	14\\
+10	20.3\\
 };
 \addplot[forget plot, color=white!15!black] table[row sep=crcr] {%
 0	0\\
-8	0\\
+12	0\\
 };
 \addplot[ybar, bar width=0.229, fill=mycolor2, draw=black, area legend] table[row sep=crcr] {%
 1	1\\
-2	4.4\\
-3	0\\
-4	4.7\\
-5	0\\
-6	0\\
-7	0\\
+2	4.8\\
+3	5.1\\
+4	4.8\\
+5	5.1\\
+6	4.9\\
+7	5.3\\
+8	4.1\\
+9	4.3\\
+10	4.6\\
 };
 \addplot[forget plot, color=white!15!black] table[row sep=crcr] {%
 0	0\\
-8	0\\
+12	0\\
 };
 \addplot [color=white!20!black, dashed, forget plot]
   table[row sep=crcr]{%
 0	1\\
-8	1\\
+12	1\\
 };
 \end{axis}
 \end{tikzpicture}%
