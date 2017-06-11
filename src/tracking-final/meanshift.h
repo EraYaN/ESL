@@ -10,7 +10,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#ifdef __ARM_NEON__
+#ifdef NEON
 #include <arm_neon.h>
 #endif
 
@@ -41,14 +41,14 @@ public:
 #ifdef DSP
     void CalWeightGPP(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
 
-#ifdef __ARM_NEON__
+#ifdef NEON
     void CalWeightNEON(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
 #endif
 
 #elif !defined DSP_ONLY
     void CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
 
-#ifdef __ARM_NEON__
+#ifdef NEON
     void CalWeightNEON(const cv::Mat &next_frame, cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k);
 #endif
 

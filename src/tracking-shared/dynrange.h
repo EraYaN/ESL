@@ -2,7 +2,7 @@
 //#define WRITE_DYN_RANGE 1
 //Helper to find dynamic range
 #ifdef WRITE_DYN_RANGE 
-#ifdef __ARM_NEON__
+#ifdef NEON
 #include <arm_neon.h>
 #endif
 #include <string>
@@ -12,7 +12,7 @@
 
 void dynrange(std::ostream& stream, std::string caller, int value);
 void dynrange(std::ostream& stream, std::string caller, float value);
-#ifdef __ARM_NEON__
+#ifdef NEON
 void dynrange(std::ostream& stream, std::string caller, float32x4_t value);
 #endif
 

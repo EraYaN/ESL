@@ -3,7 +3,7 @@
 #include <limits>
 #include <algorithm>
 
-#ifdef __ARM_NEON__
+#ifdef NEON
 #include <arm_neon.h>
 #endif
 
@@ -34,7 +34,7 @@ inline float to_float(T value, float range) {
         ;
 }
 
-#ifdef __ARM_NEON__
+#ifdef NEON
 inline float32x4_t clamp_vec(float32x4_t value, float lower, float upper) {
     return vmaxq_f32(vdupq_n_f32(lower), vminq_f32(value, vdupq_n_f32(upper)));
 }

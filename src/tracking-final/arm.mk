@@ -21,6 +21,7 @@ LIBS=-lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video 
 #   ----------------------------------------------------------------------------
 DEFS :=        -DARMCC               \
                -DFIXEDPOINT          \
+               -DNEON2                \
                -DDSP2                 \
                -DDSP_ONLY2            \
                -DDEBUGPRINT2          \
@@ -97,7 +98,7 @@ CFLAGS= -Wall -O3 -Wfatal-errors 	\
 	--sysroot=$(SYSROOT)
 
 # Set NEON enabled here.
-#CFLAGS += -mfpu=neon
+CFLAGS += -mfpu=neon
 
 all: checkdirs $(EXEC)
 

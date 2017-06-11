@@ -10,7 +10,7 @@ void dynrange(std::ostream& stream, std::string caller, float value) {
     //std::cout << "" << caller << CSV_SEPARATOR << "float" << std::endl;
     stream << caller.substr(0, 2) << CSV_SEPARATOR << "f" << CSV_SEPARATOR << (float)value << std::endl;
 }
-#ifdef __ARM_NEON__
+#ifdef NEON
 void dynrange(std::ostream& stream, std::string caller, float32x4_t value) {
     //std::cout << "" << caller << CSV_SEPARATOR << "floatvec" << std::endl;
     float32_t data[4];

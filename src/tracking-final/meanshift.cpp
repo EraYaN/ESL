@@ -7,7 +7,7 @@
 
 #include <util.h>
 
-#if defined __ARM_NEON__
+#if defined NEON
 #include "neon_util.h"
 #endif
 
@@ -52,7 +52,7 @@ void MeanShift::Init_target_frame(const cv::Mat &frame, const cv::Rect &rect)
 
     float normalized_C = 1 / Epanechnikov_kernel();
     DEBUGP("normalized_C: " << normalized_C);
-#ifdef __ARM_NEON__
+#ifdef NEON
     float32x4_t kernel_vec;
     for (int i = 0; i < RECT_ROWS; i++) {
         for (int j = 0; j < RECT_COLS_PADDED; j += 4) {
@@ -110,7 +110,7 @@ float MeanShift::Epanechnikov_kernel()
 }
 
 
-#if defined __ARM_NEON__
+#if defined NEON
 // NEON implementation of pdf_representation
 // If the DSP is used, blue (index 0) will not be processed.
 cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect)
@@ -197,10 +197,10 @@ cv::Mat MeanShift::pdf_representation(const cv::Mat &frame, const cv::Rect &rect
             basetype_t kernel_value = kernel.at<basetype_t>(i, j);
 #endif
 #ifndef DSP
-            pdf_model.at<basetype_t>(0, bin_value[0]) += kernel.at<basetype_t>(i, j);
+            pdf_model.at<basetype_t>(0, bin_value[0]) += kernel_value;
 #endif
-            pdf_model.at<basetype_t>(1, bin_value[1]) += kernel.at<basetype_t>(i, j);
-            pdf_model.at<basetype_t>(2, bin_value[2]) += kernel.at<basetype_t>(i, j);
+            pdf_model.at<basetype_t>(1, bin_value[1]) += kernel_value;
+            pdf_model.at<basetype_t>(2, bin_value[2]) += kernel_value;
 
 #ifndef DSP
             dynrange(dynrangefile, __FUNCTION__, pdf_model.at<basetype_t>(0, bin_value[0]));
@@ -223,7 +223,7 @@ void MeanShift::split(const cv::Mat &frame, cv::Rect &rect, uchar bgr[3][RECT_SI
 {
     int col_index, row_index;
 
-#ifdef __ARM_NEON__
+#ifdef NEON
     uint8x16x3_t pixels;
 
     row_index = rect.y;
@@ -262,7 +262,7 @@ void MeanShift::mulWeights(cv::Mat &weight, float *poolWeight)
 {
     pool_notify_Wait();
 
-#ifdef __ARM_NEON__
+#ifdef NEON
     float32_t* weight_ptr;
     float32x4_t weight_vec, poolWeight_vec;
     for (int i = 0; i < RECT_SIZE; i += 4) {
@@ -329,7 +329,14 @@ void MeanShift::CalWeightGPP(const cv::Mat &next_frame, cv::Mat &target_candidat
         for (int j = 0; j < RECT_COLS; j++) {
             int curr_pixel = (next_frame.at<cv::Vec3b>(row_index, col_index))[k];
 #ifdef FIXEDPOINT
-            weight.at<basetype_t>(i, j) = F_C_MULT(weight.at<basetype_t>(i, j), multipliers[curr_pixel >> CFG_2LOG_NUM_BINS]);
+            /*if (to_float(weight.at<basetype_t>(i, j), F_C_RANGE) * to_float(multipliers[curr_pixel >> CFG_2LOG_NUM_BINS], F_C_RANGE) > F_C_RANGE) {
+                std::cout << "CalWeight overflow of " << to_float(weight.at<basetype_t>(i, j), F_C_RANGE) * to_float(multipliers[curr_pixel >> CFG_2LOG_NUM_BINS], F_C_RANGE) << " resulting in " << to_float(F_C_MULT(weight.at<basetype_t>(i, j), multipliers[curr_pixel >> CFG_2LOG_NUM_BINS]), F_C_RANGE) << std::endl;     
+
+                weight.at<basetype_t>(i, j) = F_C_RANGE;
+            }
+            else {*/
+                weight.at<basetype_t>(i, j) = F_C_MULT(weight.at<basetype_t>(i, j), multipliers[curr_pixel >> CFG_2LOG_NUM_BINS]);
+            //}
 #else
             weight.at<basetype_t>(i, j) *= multipliers[curr_pixel >> CFG_2LOG_NUM_BINS];
 #endif
@@ -359,7 +366,7 @@ void MeanShift::PDFCalWeightDSP(const uchar bgr[3][RECT_SIZE], const int k)
 #endif
 
 
-#ifdef __ARM_NEON__
+#ifdef NEON
 #ifdef DSP
 // GPP + NEON implementation of CalWeight, when using the DSP
 void MeanShift::CalWeightNEON(const uchar bgr[3][RECT_SIZE], cv::Mat &target_candidate, cv::Rect &rec, cv::Mat &weight, const int k)
@@ -480,7 +487,7 @@ cv::Mat MeanShift::PDFCalWeight(const cv::Mat &frame, cv::Mat &target_candidate,
 #elif defined DSP
     // Blue to be processed by DSP
     PDFCalWeightDSP(bgr, 0);
-#ifdef __ARM_NEON__
+#ifdef NEON
     // Process green and red using NEON
     CalWeightNEON(bgr, target_candidate, rec, weight, 1);
     CalWeightNEON(bgr, target_candidate, rec, weight, 2);
@@ -490,7 +497,7 @@ cv::Mat MeanShift::PDFCalWeight(const cv::Mat &frame, cv::Mat &target_candidate,
     CalWeightGPP(bgr, target_candidate, rec, weight, 2);
 #endif
 
-#elif defined __ARM_NEON__
+#elif defined NEON
     // All colours to be processed by NEON
     CalWeightNEON(frame, target_candidate, rec, weight, 0);
     CalWeightNEON(frame, target_candidate, rec, weight, 1);
@@ -560,7 +567,7 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         next_rect.width = RECT_COLS;
         next_rect.height = RECT_ROWS;
 
-#ifdef __ARM_NEON__
+#ifdef NEON
         float32x4_t norm_j_vec, temp_vec, weight_vec;
         float32x4_t zero_vec = { 0, 0, 0, 0 };
         float32x4_t delta_x_vec = { 0, 0, 0, 0 };
@@ -570,18 +577,19 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
 #endif
 
 #ifdef FIXEDPOINT
-        basetype_t norm_i = -CFG_WEIGHT_ONE;//to_fixed(-1, F_C_RANGE);
+       /* basetype_t norm_i = -CFG_WEIGHT_ONE;//to_fixed(-1, F_C_RANGE);
+        //std::cout << "Start norm_i " << to_float(norm_i, F_C_RANGE) << "; Fixed: " << norm_i << std::endl;
         basetype_t norm_i_sq;
-        basetype_t norm_step = 9;//to_fixed(1 / RECT_CENTRE, F_C_RANGE);
+        basetype_t norm_step = to_fixed(RECT_CENTRE_REC, F_C_RANGE);//to_fixed(1 / RECT_CENTRE, F_C_RANGE);
         basetype_t delta_x = 0;// to_fixed(0, F_C_RANGE);
         basetype_t sum_wij = 0;// to_fixed(0, F_C_RANGE);
-        basetype_t delta_y = 0;// to_fixed(0, F_C_RANGE);
-        /*float norm_i = -1;
+        basetype_t delta_y = 0;// to_fixed(0, F_C_RANGE);*/
+        float norm_i = -1;
         float norm_i_sq = 1;
-        float norm_step = 1 / RECT_CENTRE;
+        float norm_step = RECT_CENTRE_REC;
         float delta_x = 0;
         float sum_wij = 0;
-        float delta_y = 0;*/
+        float delta_y = 0;
 #else
         float norm_i = -1;
         float norm_i_sq;
@@ -593,7 +601,7 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
 
         for (int i = 0; i < RECT_ROWS; i++) {           
 
-#ifdef __ARM_NEON__
+#ifdef NEON
             norm_i = static_cast<float>(i - RECT_CENTRE) / RECT_CENTRE;
             norm_i_sq = norm_i * norm_i;
             float32x4_t norm_i_sq_vec = vdupq_n_f32(norm_i_sq);
@@ -614,21 +622,19 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
 #else
 #ifdef FIXEDPOINT
             
-            norm_i_sq = F_C_MULT(norm_i,norm_i);
+            /*norm_i_sq = F_C_MULT(norm_i,norm_i);
             basetype_t norm_j = -CFG_WEIGHT_ONE;
             for (int j = 0; j < RECT_COLS; j++) {                
-                basetype_t mult = norm_i_sq + F_C_MULT(norm_j, norm_j) > CFG_WEIGHT_ONE ? 0x00000000 : 0xFFFFFFFF;
+                uint32_t mult = norm_i_sq + F_C_MULT(norm_j, norm_j) > CFG_WEIGHT_ONE ? 0x00000000 : 0xFFFFFFFF;
                 basetype_t w = weight.at<basetype_t>(i, j);
                 //DEBUGP("Selected Weight: " << w);
-                basetype_t wm = w & mult;  
+                basetype_t wm = w & mult;                  
                 delta_x += F_C_MULT(norm_j, wm);
                 delta_y += F_C_MULT(norm_i, wm);
                 sum_wij += wm;
                 norm_j += norm_step;
-            }
-            norm_i += norm_step;
-
-            /*norm_i_sq = norm_i*norm_i;
+            }*/
+            norm_i_sq = norm_i*norm_i;
             float norm_j = -1;
             for (int j = 0; j < RECT_COLS; j++) {
                 float mult = norm_i_sq + pow(norm_j, 2) > 1.0 ? 0.f : 1.f;
@@ -640,7 +646,8 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
                 sum_wij += wm;
                 norm_j += norm_step;
             }
-            norm_i += norm_step;*/
+
+            norm_i += norm_step;
 
 #else
             norm_i = static_cast<float>(i - RECT_CENTRE) / RECT_CENTRE;
@@ -658,8 +665,10 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
 #endif        
 #endif
         }
+        //std::cout << "Final norm_i " << to_float(norm_i, F_C_RANGE) << "; Fixed: " << norm_i << std::endl;
+        //std::cout << "Final norm_step " << to_float(norm_step, F_C_RANGE) << "; Fixed: " << norm_step << std::endl;
 
-#ifdef __ARM_NEON__
+#ifdef NEON
         for (int k = 0; k < 4; k++)
         {
             delta_x += vgetq_lane_f32(delta_x_vec, k);
@@ -668,12 +677,12 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         }
 #endif
 #ifdef FIXEDPOINT
-        if (sum_wij != 0) {
-            next_rect.x += F_C_MULT(F_C_DIVD(delta_x, sum_wij), 7296) >> F_C_FRAC;
-            next_rect.y += F_C_MULT(F_C_DIVD(delta_y, sum_wij), 7296) >> F_C_FRAC;
+        /*if (sum_wij != 0) {
+            next_rect.x += F_C_MULT(F_C_DIVD(delta_x, sum_wij), 14591) >> F_C_FRAC;
+            next_rect.y += F_C_MULT(F_C_DIVD(delta_y, sum_wij), 14591) >> F_C_FRAC;
         } else {
             std::cout << "." << std::endl;
-        }
+        }*/
         /*if (sum_wij != 0) {
             next_rect.x += static_cast<int>((to_float(delta_x, F_C_RANGE)/to_float(sum_wij, F_C_RANGE))*RECT_CENTRE);
             next_rect.y += static_cast<int>((to_float(delta_y, F_C_RANGE)/to_float(sum_wij, F_C_RANGE))*RECT_CENTRE);
@@ -681,8 +690,13 @@ cv::Rect MeanShift::track(const cv::Mat &next_frame)
         else {
             std::cout << "." << std::endl;
         }*/
-        /*next_rect.x += static_cast<int>((delta_x/sum_wij)*RECT_CENTRE);
-        next_rect.y += static_cast<int>((delta_y/sum_wij)*RECT_CENTRE);*/
+        if (sum_wij != 0) {
+            next_rect.x += static_cast<int>((delta_x / sum_wij)*RECT_CENTRE);
+            next_rect.y += static_cast<int>((delta_y / sum_wij)*RECT_CENTRE);
+        }
+        else {
+            std::cout << "." << std::endl;
+        }
         
 #else
         next_rect.x += static_cast<int>((delta_x / sum_wij)*RECT_CENTRE);

@@ -6,8 +6,31 @@
 #ifndef ARMCC
 #include "markers.h"
 #endif
-
+#if defined DSP_ONLY && defined FIXEDPOINT
+#define VARIANT "final-dsponly-fp"F_IDENT
+#elif defined DSP_ONLY
+#define VARIANT "final-dsponly"
+#elif defined DSP && defined FIXEDPOINT
+#define VARIANT "final-dsp-fp"F_IDENT
+#elif defined DSP
+#define VARIANT "final-dsp"
+#elif defined DSP && defined NEON && defined FIXEDPOINT
+#define VARIANT "final-dsp-neon-fp"F_IDENT
+#elif defined DSP && defined NEON
+#define VARIANT "final-dsp-neon"
+#elif defined NEON && defined FIXEDPOINT
+#define VARIANT "final-neon-fp"F_IDENT
+#elif defined NEON
+#define VARIANT "final-neon"
+#elif defined __ARM_NEON__ && defined FIXEDPOINT
+#define VARIANT "final-autoneon-fp"F_IDENT
+#elif defined __ARM_NEON__
+#define VARIANT "final-autoneon"
+#elif defined FIXEDPOINT
+#define VARIANT "final-fp"F_IDENT
+#else
 #define VARIANT "final"
+#endif
 
 #if defined DSP_ONLY || defined DSP
 #include "pool_notify.h"
@@ -38,8 +61,16 @@ int main(int argc, char ** argv)
 #if defined DSP_ONLY || defined DSP
     std::cout << "DSP support enabled." << std::endl;
 #endif
-#ifdef __ARM_NEON__
+#ifdef NEON
     std::cout << "NEON support enabled." << std::endl;
+#elif defined __ARM_NEON__
+    std::cout << "Auto-NEON compiler support enabled." << std::endl;
+#endif
+#if defined FIXEDPOINT
+    std::cout << "Fixed-point math enabled with " << F_IDENT << "." << std::endl;
+#endif
+#if defined DSP_ONLY
+    std::cout << "DSP CPU support disabled." << std::endl;
 #endif
 
 #ifdef ARMCC

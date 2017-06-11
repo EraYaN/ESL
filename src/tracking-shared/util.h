@@ -1,9 +1,15 @@
 #if !defined (UTIL_H_)
 #define UTIL_H_
+#ifndef __ARM_NEON__
+#undef NEON
+#endif
 
-#ifdef __ARM_NEON__
+#ifdef NEON
 #include <arm_neon.h>
 #endif
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
 
 #define CSV_SEPARATOR ","
 #define LINE_MARKER "@"
@@ -48,17 +54,17 @@
 //#define CFG_WEIGHT_ONE 4194304 //for fixed point 1/512*((2^32)-1)
 //#define CFG_WEIGHT_ONE 8388608 //for fixed point 1/256*((2^32)-1)
 
-//#define CFG_WEIGHT_ONE 16 //for fixed point 1/2048*((2^16)-1)
+#define CFG_WEIGHT_ONE 16 //for fixed point 1/2048*((2^16)-1)
 //#define CFG_WEIGHT_ONE 64 //for fixed point 1/512*((2^16)-1)
 //#define CFG_WEIGHT_ONE 128 //for fixed point 1/256*((2^16)-1)
-#define CFG_WEIGHT_ONE 256 //for fixed point 1/128*((2^16)-1)
+//#define CFG_WEIGHT_ONE 256 //for fixed point 1/128*((2^16)-1)
 //#define CFG_WEIGHT_ONE 512 //for fixed point 1/64*((2^16)-1)
 
 #define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(CFG_WEIGHT_ONE)
 
 
 #else
-#if defined DSP && defined __ARM_NEON__
+#if defined DSP && defined NEON
 #define CFG_PDF_SCALAR_OFFSET  cv::Scalar(1e-10f)
 #define CFG_WEIGHT_SCALAR_OFFSET cv::Scalar(1.0000) //cv::Scalar(1.0000)
 #else
@@ -77,7 +83,7 @@
 #include <stdint.h>
 #ifdef FIXEDPOINT
 
-#ifdef __ARM_NEON__
+#ifdef NEON
 typedef int16x8_t basetype_vec_t;
 typedef int32x4_t longbasetype_vec_t;
 #endif
@@ -97,7 +103,7 @@ typedef double longbasetype_t;
 #define F_E_RANGE (F_E_UPPER)
 
 //CalWeight
-#define F_C_BITS 7
+#define F_C_BITS 11
 #define F_C_UPPER std::pow(2,F_C_BITS) // 32-11=21 bit for fractional part, 11 for the integer value.
 #define F_C_LOWER (-F_C_UPPER) // -8
 #define F_C_RANGE (F_C_UPPER)
@@ -119,6 +125,10 @@ typedef double longbasetype_t;
 
 //all
 #define F_RANGE std::pow(2,F_C_BITS) //Everything clipped to this. (barring overflows)
+
+//identity
+
+#define F_IDENT "e" TOSTRING(F_E_BITS) "p" TOSTRING(F_P_BITS) "c" TOSTRING(F_C_BITS)
 
 #ifdef ARMCC
 #include <opencv2/core/core.hpp>
